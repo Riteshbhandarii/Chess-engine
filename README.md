@@ -40,12 +40,10 @@ The core idea is to create a chess bot that *plays like me*, by leveraging data 
 
 ## 🏗️ Architecture Overview
 
-![Architecture Diagram]()
-
 > This diagram shows the flow between Unity frontend, backend game manager, AI components, and optional multiplayer support.
 
 
-![Architecture Diagram](![Editor | Mermaid Chart-2025-04-11-095139](https://github.com/user-attachments/assets/3ac219eb-3133-477b-b361-95ba741c5bfa)
+(![Editor | Mermaid Chart-2025-04-11-095139](https://github.com/user-attachments/assets/3ac219eb-3133-477b-b361-95ba741c5bfa)
 
 
 
