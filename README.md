@@ -5,7 +5,7 @@
 - [Introduction](#-introduction)
 - [Features](#-features)
 - [Tech Stack](#-tech-stack)
-- [Getting Started](#-getting-started)
+- [Arcitecture Overview][#-arcitecture-overview]
 - [How It Works](#-how-it-works)
 - [Game Development with Unity](#-game-development-with-unity)
 - [Future Roadmap](#-future-roadmap)
@@ -38,10 +38,11 @@ The core idea is to create a chess bot that *plays like me*, by leveraging data 
 | **Frontend**        | Unity 3D (for game UI) |
 | **Messaging Queue** | Redis (optional for multiplayer mode) |
 
-## 🚀 Getting Started
+## Arcitecture Overview
 
-1. **Clone the Repository**:
-   Clone this repository to your local machine to get started.
-   ```bash
-   git clone https://github.com/yourusername/chess-bot.git
+
+## 🏗️ Architecture Overview
+
+![Architecture Diagram](assets/architecture.png)
+
 
