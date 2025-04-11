@@ -5,7 +5,7 @@
 - [Introduction](#-introduction)
 - [Features](#-features)
 - [Tech Stack](#-tech-stack)
-- [Arcitecture Overview][#-arcitecture-overview]
+- [Architecture Overview](#-architecture-overview)
 - [How It Works](#-how-it-works)
 - [Game Development with Unity](#-game-development-with-unity)
 - [Future Roadmap](#-future-roadmap)
@@ -29,20 +29,23 @@ The core idea is to create a chess bot that *plays like me*, by leveraging data 
 
 ## 🧰 Tech Stack
 
-| Component           | Technology            |
-|---------------------|-----------------------|
-| **Backend**         | Python, Chess.com API |
+| Component           | Technology                         |
+|---------------------|-------------------------------------|
+| **Backend**         | Python, Chess.com API              |
 | **AI/Model**        | Custom AI Model (TensorFlow, PyTorch) |
-| **Game Engine**     | Unity                 |
+| **Game Engine**     | Unity                              |
 | **Protocol**        | WebSockets (for potential online play) |
-| **Frontend**        | Unity 3D (for game UI) |
+| **Frontend**        | Unity 3D (for game UI)             |
 | **Messaging Queue** | Redis (optional for multiplayer mode) |
-
-## Arcitecture Overview
-
 
 ## 🏗️ Architecture Overview
 
-![Architecture Diagram](assets/architecture.png)
+![Architecture Diagram]()
+
+> This diagram shows the flow between Unity frontend, backend game manager, AI components, and optional multiplayer support.
+
+
+![Architecture Diagram](![Editor | Mermaid Chart-2025-04-11-095139](https://github.com/user-attachments/assets/3ac219eb-3133-477b-b361-95ba741c5bfa)
+
 
 
