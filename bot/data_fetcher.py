@@ -1,5 +1,6 @@
 import requests
-import time
+import json
+import os
 
 # List of archive URLs provided
 archives = [
@@ -33,4 +34,3 @@ archives = [
     "https://api.chess.com/pub/player/teoriat/games/2025/04",
     "https://api.chess.com/pub/player/teoriat/games/2025/05"
 ]
-
