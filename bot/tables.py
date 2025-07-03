@@ -15,6 +15,28 @@ conn = psycopg2.connect(
 )
 cursor = conn.cursor()
 
+table_query = """
+CREATE TABLE IF NOT EXISTS chess_games (
+    game_id TEXT PRIMARY KEY,
+    player_white TEXT NOT NULL,
+    rating_white INT,
+    player_black TEXT NOT NULL,
+    rating_black INT,
+    pgn TEXT,
+    end_time TIMESTAMP,
+    time_class TEXT,
+    time_control TEXT,
+    rated BOOLEAN,
+    winner TEXT,
+    url TEXT
+);
+
+"""
+cursor.execute(table_query)
+conn.commit()
+
+print("Table 'chess_games' is ready.")
+
 for url in archives:
     print(f"Fetching {url}")
     response = requests.get(url, headers=headers)
