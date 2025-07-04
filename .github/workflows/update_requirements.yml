@@ -2,41 +2,46 @@ name: Update Requirements
 
 on:
   push:
-    branches: [ main ]  # Specify branch(es) to trigger on
+    branches: [ main ]  # Only trigger on main branch
 
 jobs:
   update:
     runs-on: ubuntu-latest
     
-    # Grant permission to write to repo
     permissions:
-      contents: write
+      contents: write  # Required to push changes
       
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Needed to allow git commit
+          fetch-depth: 0  # Needed for git history operations
         
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.x"  # Specify your Python version
+          python-version: "3.10"  # Specify exact version (recommended)
           
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -e .
+          # Clean up any existing build artifacts
+          find . -name '*.egg-info' -exec rm -rf {} +
+          # Install package normally instead of editable mode
+          pip install .
           
       - name: Freeze requirements
-        run: pip freeze > requirements.txt
-        
+        run: |
+          pip freeze > requirements.txt
+          # Remove the package itself from requirements.txt to avoid local path references
+          sed -i "/^Chess-engine/d" requirements.txt
+          
       - name: Commit and push changes
         run: |
-          # Only proceed if requirements.txt changed
-          git diff --quiet requirements.txt && exit 0 || echo "Changes detected"
+          # Skip if no changes to requirements.txt
+          git diff --exit-code requirements.txt && exit 0
           
           git config --global user.name "GitHub Actions"
           git config --global user.email "actions@github.com"
           git add requirements.txt
-          git commit -m "Auto-update requirements.txt"
+          git commit -m "Auto-update requirements.txt [skip ci]"
           git push
