@@ -1,0 +1,57 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints
+
+# Environment and dependency folders
+venv/
+env/
+.venv/
+.env/
+
+# pip cache
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Python egg files
+*.egg
+*.egg-info/
+.eggs/
+
+# Pytest cache
+.pytest_cache/
+
+# VS Code settings folder
+.vscode/
+
+# Database files (if you store any locally)
+*.sqlite3
+*.db
+
+# Logs and temporary files
+*.log
+*.out
+*.err
+
+# Mac system files
+.DS_Store
+
+# Jupyter notebook checkpoints
+.ipynb_checkpoints/
+
+# Ignore Python virtual environments
+env/
+venv/
+
+# Ignore local config files
+*.local
+.pytest_cache/
