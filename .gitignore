@@ -33,8 +33,7 @@ dist/
 # VS Code settings folder
 .vscode/
 
-# Database files (if you store any locally)
-*.sqlite3
+# Database files 
 *.db
 
 # Logs and temporary files
