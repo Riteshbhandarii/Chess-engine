@@ -1,0 +1,28 @@
+game_id,player_white,rating_white,player_black,rating_black,pgn,end_time,time_class,time_control,rated,winner,url,pgn_valid,winner_extracted,winner_cleaned,game_duration_moves,rating_difference,average_rating,main_player_color,main_player_result,opening,time_category,game_date,game_year,game_month
+120636157526,teoriat,903,elolear,938,"[Event ""Live Chess""]
+[Site ""Chess.com""]
+[Date ""2024.11.01""]
+[Round ""?""]
+[White ""teoriat""]
+[Black ""EloLear""]
+[Result ""1-0""]
+
+1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3 O-O 9. h3 1-0",2024-11-01 20:44:18,rapid,600+0,True,,https://www.chess.com/game/live/120636157526,True,white,white,17,-35,920.5,white,win,,rapid,2024-11-01,2024,11
+120636207488,teoriat,911,winnerarmenian,901,"[Event ""Live Chess""]
+[Site ""Chess.com""]
+[Date ""2024.11.01""]
+[Round ""?""]
+[White ""teoriat""]
+[Black ""winnerArmenian""]
+[Result ""0-1""]
+
+1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3 O-O 9. h3 0-1",2024-11-01 20:44:57,rapid,600+0,True,,https://www.chess.com/game/live/120636207488,True,black,black,17,10,906.0,white,loss,,rapid,2024-11-01,2024,11
+120636220324,marvelousluck,921,teoriat,919,"[Event ""Live Chess""]
+[Site ""Chess.com""]
+[Date ""2024.11.01""]
+[Round ""?""]
+[White ""MarvelousLuck""]
+[Black ""teoriat""]
+[Result ""1/2-1/2""]
+
+1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 4. Ba4 Nf6 5. O-O Be7 6. Re1 b5 7. Bb3 d6 8. c3 O-O 9. h3 1/2-1/2",2024-11-01 20:45:47,rapid,600+0,True,,https://www.chess.com/game/live/120636220324,True,draw,draw,17,2,920.0,black,draw,,rapid,2024-11-01,2024,11

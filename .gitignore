@@ -55,3 +55,9 @@ venv/
 # Ignore local config files
 *.local
 .pytest_cache/
+
+# Data files (keep structure but not large datasets)
+bot/data/chess_games_raw.csv
+bot/data/chess_games_*.csv
+# But keep cleaned sample data for demonstration
+!bot/data/chess_games_cleaned.csv
