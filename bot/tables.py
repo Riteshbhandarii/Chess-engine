@@ -27,7 +27,9 @@ CREATE TABLE IF NOT EXISTS chess_games (
     time_class TEXT,
     time_control TEXT,
     rated BOOLEAN,
-    winner TEXT,
+    win TEXT,
+    lose TEXT,
+    result TEXT,
     url TEXT
 );
 
@@ -59,20 +61,34 @@ for url in archives:
                 rated = game.get('rated')
                 winner = game.get('winner')  # no fallback inference
                 game_url = game.get('url')
+                
+                # Determine win, lose, and result based on winner
+                if winner == 'white':
+                    win = player_white
+                    lose = player_black
+                    result = 'win'
+                elif winner == 'black':
+                    win = player_black
+                    lose = player_white
+                    result = 'win'
+                else:
+                    win = None
+                    lose = None
+                    result = 'draw'
 
                 cursor.execute("""
                     INSERT INTO chess_games (
                         game_id, player_white, rating_white,
                         player_black, rating_black, pgn,
                         end_time, time_class, time_control,
-                        rated, winner, url
-                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        rated, win, lose, result, url
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                     ON CONFLICT (game_id) DO NOTHING;
                 """, (
                     game_id, player_white, rating_white,
                     player_black, rating_black, pgn,
                     end_time, time_class, time_control,
-                    rated, winner, game_url
+                    rated, win, lose, result, game_url
                 ))
 
             except Exception as e:
