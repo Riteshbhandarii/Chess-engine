@@ -15,8 +15,14 @@ conn = psycopg2.connect(
 )
 cursor = conn.cursor()
 
+# Drop existing table to ensure we get the new schema
+print("Dropping existing table to update schema...")
+cursor.execute("DROP TABLE IF EXISTS chess_games")
+conn.commit()
+print("✅ Table dropped successfully")
+
 table_query = """
-CREATE TABLE IF NOT EXISTS chess_games (
+CREATE TABLE chess_games (
     game_id TEXT PRIMARY KEY,
     player_white TEXT NOT NULL,
     rating_white INT,
@@ -28,6 +34,9 @@ CREATE TABLE IF NOT EXISTS chess_games (
     time_control TEXT,
     rated BOOLEAN,
     winner TEXT,
+    loser TEXT,
+    result_type TEXT,
+    game_result TEXT,
     url TEXT
 );
 
@@ -57,22 +66,57 @@ for url in archives:
                 time_class = game.get('time_class')
                 time_control = game.get('time_control')
                 rated = game.get('rated')
-                winner = game.get('winner')  # no fallback inference
+                game_result = game.get('result')  # 'white', 'black', 'draw', 'abort', etc.
+                result_type = game.get('result_type')  # 'checkmate', 'resign', 'timeout', etc.
+                
+                # Determine winner, loser, and game outcome
+                winner = None
+                loser = None
+                
+                if game_result == 'white':
+                    winner = player_white
+                    loser = player_black
+                elif game_result == 'black':
+                    winner = player_black
+                    loser = player_white
+                elif game_result == 'draw':
+                    winner = 'draw'
+                    loser = 'draw'
+                elif game_result in ['abort', 'timeout', 'resign']:
+                    # Handle special cases
+                    if 'winner' in game and game['winner']:
+                        winner = game['winner']
+                        loser = player_black if winner == player_white else player_white
+                    else:
+                        winner = 'aborted'
+                        loser = 'aborted'
+                else:
+                    # Fallback to API winner field if available
+                    api_winner = game.get('winner')
+                    if api_winner:
+                        winner = api_winner
+                        loser = player_black if winner == player_white else player_white
+                
                 game_url = game.get('url')
+
+                # Debug: Print detailed game outcome information
+                print(f"Game {game_id}: {player_white} vs {player_black}")
+                print(f"  Result: {game_result}, Type: {result_type}")
+                print(f"  Winner: {winner}, Loser: {loser}")
 
                 cursor.execute("""
                     INSERT INTO chess_games (
                         game_id, player_white, rating_white,
                         player_black, rating_black, pgn,
                         end_time, time_class, time_control,
-                        rated, winner, url
-                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                        rated, winner, loser, result_type, game_result, url
+                    ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                     ON CONFLICT (game_id) DO NOTHING;
                 """, (
                     game_id, player_white, rating_white,
                     player_black, rating_black, pgn,
                     end_time, time_class, time_control,
-                    rated, winner, game_url
+                    rated, winner, loser, result_type, game_result, game_url
                 ))
 
             except Exception as e:
