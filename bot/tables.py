@@ -15,8 +15,14 @@ conn = psycopg2.connect(
 )
 cursor = conn.cursor()
 
+# Drop existing table to ensure we get the new schema
+print("Dropping existing table to update schema...")
+cursor.execute("DROP TABLE IF EXISTS chess_games")
+conn.commit()
+print("✅ Table dropped successfully")
+
 table_query = """
-CREATE TABLE IF NOT EXISTS chess_games (
+CREATE TABLE chess_games (
     game_id TEXT PRIMARY KEY,
     player_white TEXT NOT NULL,
     rating_white INT,
