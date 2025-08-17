@@ -1,12 +1,12 @@
 # TEORIAT Chess Engine
 
-Build a personalized chess engine that plays like you, based on your Chess.com game history.
+Building a personalized chess engine that plays like me, based on my Chess.com game history.
 
 ## What It Does
 
-- Fetches all your Chess.com games
-- Analyzes your moves and opening preferences  
-- Creates an engine that mimics your playing style
+- Fetches all my Chess.com games
+- Analyzes my moves and opening preferences  
+- Creates an engine that mimics my playing style
 - Stores everything in PostgreSQL for fast analysis
 
 ## Quick Start
