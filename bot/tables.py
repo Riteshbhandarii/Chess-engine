@@ -173,15 +173,20 @@ def parse_pgn_and_store_moves(pgn_text, game_id, player_name="teoriat"):
     try:
         game = chess.pgn.read_game(io.StringIO(pgn_text))
         if not game:
+            print(f"[parse] Could not parse PGN for game {game_id}")
             return False
             
-        # Determine teoriat's color
-        if game.headers.get('White') == player_name:
+        # Case-insensitive username comparison
+        white_hdr = (game.headers.get('White') or "").lower()
+        black_hdr = (game.headers.get('Black') or "").lower()
+        pname = (player_name or "").lower()
+
+        if white_hdr == pname:
             teoriat_color = 'white'
-        elif game.headers.get('Black') == player_name:
+        elif black_hdr == pname:
             teoriat_color = 'black'
         else:
-            return False  # Teoriat didn't play
+            return False  # game doesn’t belong to teoriat 
             
         conn = psycopg2.connect(**DB_CONFIG)
         cursor = conn.cursor()
@@ -200,6 +205,16 @@ def parse_pgn_and_store_moves(pgn_text, game_id, player_name="teoriat"):
             current_color = 'white' if board.turn else 'black'
             is_teoriat_move = (current_color == teoriat_color)
             
+            # SAN must be generated before pushing
+            move_san = board.san(move)
+            position_before = board.fen()
+
+            # OLD BUG: board.copy().push(move).fen() -> push() returns None
+            # FIX: copy board, push, then call fen()
+            tmp_board = board.copy()
+            tmp_board.push(move)
+            position_after = tmp_board.fen()
+
             # Store move
             cursor.execute("""
                 INSERT INTO game_moves (
@@ -210,9 +225,9 @@ def parse_pgn_and_store_moves(pgn_text, game_id, player_name="teoriat"):
                 game_id,
                 (i // 2) + 1,  # Move number
                 current_color,
-                board.san(move),
-                board.fen(),
-                board.copy().push(move).fen(),
+                move_san,
+                position_before,
+                position_after,
                 is_teoriat_move,
                 teoriat_color
             ))
@@ -304,15 +319,14 @@ def process_all_games():
     cursor.execute("""
         SELECT game_id, pgn, player_white, player_black
         FROM chess_games 
-        WHERE (player_white = 'teoriat' OR player_black = 'teoriat')
+        WHERE (LOWER(player_white) = %s OR LOWER(player_black) = %s) -- lower case for case-insensitive match
         AND pgn IS NOT NULL 
         AND LENGTH(pgn) > 100
         AND game_id NOT IN (SELECT DISTINCT game_id FROM game_moves WHERE game_id IS NOT NULL)
-    """)
+    """, ('teoriat', 'teoriat')) # Adjusted to match teoriat's games
     
     games_to_process = cursor.fetchall()
-    cursor.close()
-    conn.close()
+
     
     if not games_to_process:
         print("No games to process")
@@ -326,6 +340,9 @@ def process_all_games():
             processed += 1
             if processed % 50 == 0:
                 print(f"Processed {processed}/{len(games_to_process)} games")
+    
+    cursor.close()
+    conn.close()
     
     print(f"Processed {processed} games successfully")
     
