@@ -1,56 +1,25 @@
-# Byte-compiled / optimized / DLL files
+# Python
 __pycache__/
 *.py[cod]
-*$py.class
+*.pyc
+*.pyo
 
-# Jupyter Notebook checkpoints
-.ipynb_checkpoints
-
-# Environment and dependency folders
+# Virtual environments
+chess_venv/
 venv/
 env/
-.venv/
-.env/
 
-# pip cache
-pip-log.txt
-pip-delete-this-directory.txt
-
-# Distribution / packaging
-build/
-dist/
-*.egg-info/
-.eggs/
-
-# Python egg files
-*.egg
-*.egg-info/
-.eggs/
-
-# Pytest cache
-.pytest_cache/
-
-# VS Code settings folder
-.vscode/
-
-# Database files 
-*.db
-
-# Logs and temporary files
-*.log
-*.out
-*.err
-
-# Mac system files
-.DS_Store
-
-# Jupyter notebook checkpoints
+# Jupyter
 .ipynb_checkpoints/
 
-# Ignore Python virtual environments
-env/
-venv/
+# Mac
+.DS_Store
 
-# Ignore local config files
-*.local
-.pytest_cache/
+# IDE
+.vscode/
+
+# Logs
+*.log
+
+# Database
+*.db
