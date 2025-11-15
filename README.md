@@ -114,4 +114,7 @@ Instead of building a "perfect" chess engine, we're building an AI that **learns
 - Add positional encoding for board state context
 - Implement beam search for move generation
 - Fine-tune on recent games to adapt to style changes
+<<<<<<< HEAD
+=======
 
+>>>>>>> f04071bae45c6b45d72adc2bc14158817d9f33e6
