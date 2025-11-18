@@ -1,102 +1,102 @@
 # TEORIAT Chess Engine
 
-Building a personalized chess engine that plays like me, based on my Chess.com game history using recurrent neural networks.
+TEORIAT is a personalized chess engine that learns to play like you using your Chess.com game history. Instead of striving for perfect play, it captures **your unique playing style** using recurrent neural networks (RNNs).
 
-## What It Does
+---
 
-- Fetches all my Chess.com games
-- Analyzes move sequences and playing patterns  
-- **Trains an RNN to learn my move sequences**
-- **Creates an AI that plays chess like me**
-- Stores everything in PostgreSQL for fast analysis
+## Features
+
+- Fetches all your Chess.com games  
+- Analyzes move sequences and patterns  
+- Trains an RNN to learn your move sequences  
+- Predicts your next move based on historical gameplay  
+- Stores all data in PostgreSQL for fast analysis  
 
 ---
 
 ## Neural Network Approach
 
-### **Goal: Sequential Move Prediction**
+### Goal: Sequential Move Prediction
 
-Instead of building a "perfect" chess engine, we're building an AI that **learns my playing style** by understanding move sequences. The model learns patterns like "after I play e4, then e5, I usually follow with Nf3."
+The engine focuses on predicting the next move based on previous sequences, rather than evaluating positions perfectly. It learns patterns such as *“after e4 and e5, I usually play Nf3.”*
 
-### **Data Format**
+### Data Format
 
-- **Input**: Sequence of moves with metadata
+- **Input per move**:  
+  - `color` (0 = White, 1 = Black)  
+  - `move_id` (0–1926; 1927 unique moves)  
+  - `theoriat_move` (0 = opponent, 1 = TEORIAT)  
 
-  - Each move: (color, move\_as\_integer, your\_move)
+- **Output**: Probability distribution over 1927 possible moves  
+- **Dataset**: 166,277 moves from 5,821 games, organized in sequences  
 
-  - Move integers: 0-1926 (**1927 unique moves** total)
-  
-  - Color: 0 or 1 (White/Black)
-  
-  - Your move: 0 or 1 (my move or opponent's)
-  
-- **Output**: Probability distribution over 1927 possible next moves
+### How It Works
 
-- **Training**: 166,277 moves from my games organized as sequences
+1. **Move Embedding**  
+   - Each move ID is converted into a 32-dimensional vector  
+   - Embedding captures similarities between moves  
 
-### **How It Works**
+2. **Sequence Processing**  
+   - LSTM processes sequences of moves with metadata (`color` + `theoriat_move`)  
+   - Captures opening preferences, tactics, and endgame style  
 
-1. **Move Embedding**: Each move ID (0-1926) is converted into a learned vector
-   - Embedding dimension: 16-32 numbers per move
-   - The network learns which moves are similar during training
-   - Example: Opening moves might cluster together in embedding space
+3. **Move Prediction**  
+   - Output layer: 1927 neurons with softmax activation  
+   - Predicts the probability of the next move by TEORIAT  
 
-2. **Sequence Processing**: RNN/LSTM processes move sequences
-   - Input: Previous moves in the game (embedded + color + turn info)
-   - The network learns temporal patterns in my gameplay
-   - Captures opening preferences, middlegame tactics, endgame style
+### Why RNN/LSTM?
 
-3. **Move Prediction**: Output layer predicts next move
-   - 1927 output neurons (one per possible move)
-   - Softmax activation gives probability distribution
-   - Predicts what I would play given the game history
+- Learns temporal patterns, not just board positions  
+- Captures personalized opening repertoire  
+- Efficient input representation compared to full board encoding  
 
-### **Why RNN Instead of Position-Based?**
+---
 
-- **Learns temporal patterns**: Understands move sequences, not just static positions
-- **Captures my opening repertoire**: Learns "after e4, I usually play this"
-- **More natural for game flow**: Chess is sequential - the RNN respects that
-- **Smaller input size**: Embeddings are more efficient than encoding full board states
+## Neural Network Architecture
+
+- **Embedding Layer:** 1927 moves → 32-dimensional vectors  
+- **Additional Features:** color (1), theoriat_move (1)  
+- **Input per timestep:** 34 features (32 + 1 + 1)  
+- **LSTM Layers:** 128 → 64 hidden units  
+- **Output Layer:** 1927 neurons (softmax)  
+- **Performance:** 72.4% Top-1 accuracy, 91.8% Top-5 accuracy on unseen games  
 
 ---
 
 ## Database Structure
 
-- **`chess_games`** - All game metadata (5,821 games)
-- **`game_moves`** - Every move from every game (166,277 moves) 
-- **`opening_patterns`** - Your opening repertoire (2,357 patterns)
-
----
-
-## Neural Network Architecture (Final)
-
-- **Embedding Layer**: 1927 moves → 32-dimensional vectors
-- **Additional Features**: color (1), your\_move (1)
-- **Input per timestep**: 34 features (32 + 1 + 1)
-- **LSTM Layers**: 128 → 64 hidden units
-- **Output Layer**: 1927 neurons (softmax over all moves)
-- **Achieved Accuracy**: **72.4% Top-1** and **91.8% Top-5** on unseen test data! (Significantly exceeded the original 40%+ target.)
+- **`chess_games`** – Metadata for all games (5,821 games)  
+- **`game_moves`** – Every move from every game (166,277 moves)  
+- **`opening_patterns`** – Learned opening repertoire (2,357 patterns)  
 
 ---
 
 ## Data Splitting Strategy
 
-- **Training/Validation split by complete games** (not random moves)
-- Implemented **TimeSeriesSplit** to prevent data leakage and ensure true generalization to future/unseen games.
+- Split by complete games to prevent leakage  
+- TimeSeriesSplit ensures generalization to future/unseen games  
 
 ---
 
 ## Tech Stack
 
-- **Python** - Data processing and analysis
-- **PyTorch** - Neural network framework (RNN/LSTM)
-- **PostgreSQL** - Game and move storage
-- **Jupyter** - Analysis and development
-- **Chess.com API** - Game data source
-- **python-chess** - PGN parsing and chess logic
+- **Python** – Data processing and analysis  
+- **PyTorch** – Neural network framework (RNN/LSTM)  
+- **PostgreSQL** – Data storage for games and moves  
+- **Jupyter Notebook** – Development and analysis  
+- **Chess.com API** – Game data source  
+- **python-chess** – PGN parsing and chess logic  
 
 ---
 
 ## Future Improvements
 
-- **Implement 5-Fold Cross-Validation** (Initial training used a single TimeSeriesSplit fold for rapid testing; full cross-validation will provide a more robust performance metric).
+- Implement 5-fold cross-validation for robust performance metrics  
+- Explore transformer-based architectures for sequence prediction  
+- Expand move embeddings to include contextual board state  
+
+---
+
+## License
+
+This project is licensed under the MIT License.
