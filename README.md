@@ -54,34 +54,6 @@ Instead of building a "perfect" chess engine, we're building an AI that **learns
 
 ---
 
-## Quick Start
-
-1. **Setup Database:**
-   ```bash
-   # Make sure PostgreSQL is running with database 'chess_data'
-   python bot/tables.py
-   ```
-
-2. **Preprocess Data for Neural Network:**
-   ```bash
-   # Convert chess moves to sequential format with embeddings
-   python bot/preprocessing.py
-   ```
-
-3. **Train Neural Network:**
-   ```bash
-   # Train RNN move prediction model on your game sequences
-   python bot/train_model.py
-   ```
-
-4. **Play Against Your AI:**
-   ```bash
-   # Play chess against an AI that plays like you
-   python bot/chess_interface.py
-   ```
-
----
-
 ## Database Structure
 
 - **`chess_games`** - All game metadata (5,821 games)
