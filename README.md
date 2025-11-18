@@ -21,11 +21,17 @@ Instead of building a "perfect" chess engine, we're building an AI that **learns
 ### **Data Format**
 
 - **Input**: Sequence of moves with metadata
+
   - Each move: (color, move\_as\_integer, your\_move)
+
   - Move integers: 0-1926 (**1927 unique moves** total)
+  
   - Color: 0 or 1 (White/Black)
+  
   - Your move: 0 or 1 (my move or opponent's)
+  
 - **Output**: Probability distribution over 1927 possible next moves
+
 - **Training**: 166,277 moves from my games organized as sequences
 
 ### **How It Works**
