@@ -6,7 +6,7 @@ __pycache__/
 
 # Virtual environments
 chess_venv/
-venv/
+.venv/
 env/
 
 # Jupyter
