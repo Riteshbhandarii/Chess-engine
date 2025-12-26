@@ -4,9 +4,10 @@ import torch
 import chess
 import json
 from pathlib import Path
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(title="TEORIAT Chess Engine API")
-
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"]) 
 # Device setup
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 

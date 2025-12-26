@@ -23,3 +23,7 @@ env/
 
 # Database
 *.db
+
+#  json files 
+src/notebooks/move_to_number.json
+src/notebooks/number_to_move.json
