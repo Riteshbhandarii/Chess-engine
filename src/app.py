@@ -1,112 +1,197 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import torch
-import chess  # pip install python-chess
-
-from .rnn_model import ChessRNN          # same as in RNN_model.ipynb
-from .encoding import encode_game_sequence   # you extract this from the notebook
-from .move_index import uci_to_index, index_to_uci  # mapping dicts from notebook
-
+import chess
+import json
+from pathlib import Path
 
 app = FastAPI(title="TEORIAT Chess Engine API")
 
+# Device setup
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-# === match notebook hyperparameters exactly ===
-INPUT_DIM = 768
+# Model hyperparameters (match notebook exactly)
+VOCAB_SIZE = 1928
+EMBEDDING_DIM = 128
 HIDDEN_DIM = 256
-LAYER_DIM = 2
-OUTPUT_DIM = 4096
+NUM_LAYERS = 2
+DROPOUT = 0.3
+PAD_TOKEN = 1927
+MAX_SEQ_LEN = 6
 
+
+# Model definition (copy from notebook)
+class ChessRNN(torch.nn.Module):
+    def __init__(self, vocab_size=1928, embedding_dim=128, hidden_dim=256, num_layers=2, dropout=0.3):
+        super(ChessRNN, self).__init__()
+        
+        self.move_embedding = torch.nn.Embedding(vocab_size, embedding_dim, padding_idx=PAD_TOKEN)
+        self.color_embedding = torch.nn.Embedding(2, 32)
+        self.theory_embedding = torch.nn.Embedding(2, 32)
+        
+        input_dim = embedding_dim + 32 + 32
+        self.layer_norm = torch.nn.LayerNorm(input_dim)
+        
+        self.rnn = torch.nn.GRU(
+            input_size=input_dim,
+            hidden_size=hidden_dim,
+            num_layers=num_layers,
+            dropout=dropout if num_layers > 1 else 0,
+            batch_first=True
+        )
+        
+        self.dropout = torch.nn.Dropout(dropout)
+        self.fc_intermediate = torch.nn.Linear(hidden_dim, hidden_dim)
+        self.relu = torch.nn.ReLU()
+        self.fc = torch.nn.Linear(hidden_dim, vocab_size)
+    
+    def forward(self, colors, moves, theory):
+        move_embedded = self.move_embedding(moves)
+        color_embedded = self.color_embedding(colors)
+        theory_embedded = self.theory_embedding(theory)
+        
+        combined = torch.cat([move_embedded, color_embedded, theory_embedded], dim=2)
+        combined = self.layer_norm(combined)
+        
+        rnn_output, hidden_state = self.rnn(combined)
+        last_hidden = hidden_state[-1, :, :]
+        
+        x = self.dropout(last_hidden)
+        x = self.fc_intermediate(x)
+        x = self.relu(x)
+        x = self.dropout(x)
+        logits = self.fc(x)
+        
+        return logits
+
+
+# Load move mappings
+move_to_number = json.load(open("move_to_number.json"))
+number_to_move = {int(v): k for k, v in move_to_number.items()}
+
+# Load model
 model = ChessRNN(
-    input_dim=INPUT_DIM,
+    vocab_size=VOCAB_SIZE,
+    embedding_dim=EMBEDDING_DIM,
     hidden_dim=HIDDEN_DIM,
-    layer_dim=LAYER_DIM,
-    output_dim=OUTPUT_DIM,
+    num_layers=NUM_LAYERS,
+    dropout=DROPOUT
 ).to(device)
 
-model.load_state_dict(torch.load("src/notebooks/best_chess_model.pth",
-                                 map_location=device))
+model.load_state_dict(torch.load("best_chess_model.pth", map_location=device))
 model.eval()
 
 
+# API models
 class MoveRequest(BaseModel):
-    # Full move history in UCI, e.g. ["e2e4", "e7e5", "g1f3"]
-    moves: list[str]
+    moves: list[str]  # UCI format: ["e2e4", "e7e5"]
 
 
 class MoveResponse(BaseModel):
-    # Model's chosen move in UCI, e.g. "g1f3"
-    move: str
+    move: str  # UCI format: "g1f3"
 
 
-def reconstruct_game_data_from_moves(moves: list[str]) -> list[tuple[int, int, int]]:
-    """
-    Rebuild game_data = [(side_to_move, move_index, result_flag), ...]
-    to match the structure used to generate cleaned_data.csv in the notebook.
-    side_to_move: 1 for white, 0 for black (match notebook)
-    move_index: 0..4095 (or your value) from the UCI->index mapping
-    result_flag: 0 during inference (result unknown)
-    """
+def uci_to_san(board: chess.Board, uci_move: str) -> str:
+    """Convert UCI (e2e4) to SAN (e4)"""
+    move = chess.Move.from_uci(uci_move)
+    return board.san(move)
+
+
+def san_to_uci(board: chess.Board, san_move: str) -> str:
+    """Convert SAN (e4) to UCI (e2e4)"""
+    move = board.parse_san(san_move)
+    return move.uci()
+
+
+def prepare_game_data(uci_moves: list[str]) -> tuple[list[int], list[int], list[int]]:
+    """Convert UCI moves to model input format"""
     board = chess.Board()
-    game_data = []
-
-    for uci in moves:
-        try:
-            move = board.parse_uci(uci)
-        except ValueError:
-            raise HTTPException(status_code=400, detail=f"Invalid UCI move: {uci}")
-
-        side_to_move = 1 if board.turn == chess.WHITE else 0
-
-        try:
-            move_idx = uci_to_index(uci)  # same mapping as in training
-        except KeyError:
-            raise HTTPException(status_code=400, detail=f"Move not in index mapping: {uci}")
-
-        result_flag = 0
-        game_data.append((side_to_move, move_idx, result_flag))
-
-        board.push(move)
-
-    return game_data
-
-
-def build_input_from_moves(moves: list[str]) -> torch.Tensor:
-    """
-    Full pipeline: moves -> game_data -> encoded sequence tensor for RNN.
-    Output shape: [1, seq_len, INPUT_DIM]
-    """
-    game_data = reconstruct_game_data_from_moves(moves)
-    seq = encode_game_sequence(game_data)  # [seq_len, 768]; same as notebook
-    return seq.unsqueeze(0)                # [1, seq_len, 768]
-
-
-def decode_move_index(idx: int) -> str:
-    """
-    Convert model output index back to UCI move string.
-    """
-    try:
-        return index_to_uci(idx)
-    except KeyError:
-        raise HTTPException(status_code=500, detail=f"Invalid move index: {idx}")
+    colors = []
+    moves = []
+    theory = []
+    
+    for uci in uci_moves:
+        # Convert UCI to SAN for move lookup
+        san = uci_to_san(board, uci)
+        
+        # Get color (1=white, 0=black)
+        color = 1 if board.turn == chess.WHITE else 0
+        
+        # Get move index
+        if san not in move_to_number:
+            raise HTTPException(400, f"Unknown move: {san}")
+        move_idx = move_to_number[san]
+        
+        # Theory flag (0 for inference)
+        theory_flag = 0
+        
+        colors.append(color)
+        moves.append(move_idx)
+        theory.append(theory_flag)
+        
+        board.push_uci(uci)
+    
+    # Pad sequence to length 6
+    while len(moves) < MAX_SEQ_LEN:
+        colors.insert(0, 0)
+        moves.insert(0, PAD_TOKEN)
+        theory.insert(0, 0)
+    
+    # Take last 6 moves
+    colors = colors[-MAX_SEQ_LEN:]
+    moves = moves[-MAX_SEQ_LEN:]
+    theory = theory[-MAX_SEQ_LEN:]
+    
+    return colors, moves, theory
 
 
 @app.get("/")
 def root():
-    return {"message": "TEORIAT chess engine API is running"}
+    return {"message": "TEORIAT Chess Engine API", "status": "running"}
 
 
 @app.post("/move", response_model=MoveResponse)
 def get_move(req: MoveRequest):
     if not req.moves:
-        raise HTTPException(status_code=400, detail="moves list must not be empty")
-
-    x = build_input_from_moves(req.moves).to(device)  # [1, seq_len, 768]
-
+        raise HTTPException(400, "Moves list cannot be empty")
+    
+    # Prepare input
+    colors, moves, theory = prepare_game_data(req.moves)
+    
+    colors_tensor = torch.tensor([colors]).to(device)
+    moves_tensor = torch.tensor([moves]).to(device)
+    theory_tensor = torch.tensor([theory]).to(device)
+    
+    # Get prediction
     with torch.no_grad():
-        logits = model(x)                             # [1, 4096]
+        logits = model(colors_tensor, moves_tensor, theory_tensor)
         move_idx = int(logits.argmax(dim=-1).item())
+    
+    # Convert back to UCI
+    san_move = number_to_move[move_idx]
+    board = chess.Board()
+    for uci in req.moves:
+        board.push_uci(uci)
+    
+    try:
+        uci_move = san_to_uci(board, san_move)
+        
+        # Validate move is legal
+        if chess.Move.from_uci(uci_move) not in board.legal_moves:
+            raise HTTPException(500, f"Model predicted illegal move: {san_move}")
+        
+        return MoveResponse(move=uci_move)
+    
+    except ValueError:
+        raise HTTPException(500, f"Invalid move predicted: {san_move}")
 
-    uci_move = decode_move_index(move_idx)
-    return MoveResponse(move=uci_move)
+
+@app.get("/legal_moves")
+def get_legal_moves(moves: str = ""):
+    """Get legal moves for current position"""
+    board = chess.Board()
+    if moves:
+        for uci in moves.split(","):
+            board.push_uci(uci)
+    
+    return {"legal_moves": [m.uci() for m in board.legal_moves]}
