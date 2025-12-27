@@ -10,7 +10,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  font-family: 'Segoe UI', system-ui, sans-serif;
+  font-family: "Segoe UI", system-ui, sans-serif;
   position: relative;
   overflow: hidden;
 }
@@ -27,37 +27,38 @@
 
 .stars::before,
 .stars::after {
-  content: '';
+  content: "";
   position: absolute;
   width: 2px;
   height: 2px;
   background: white;
-  box-shadow: 
-    100px 200px white, 300px 100px white, 500px 300px white,
-    700px 150px white, 900px 250px white, 200px 400px white,
-    600px 500px white, 800px 50px white, 400px 350px white,
-    150px 150px white, 650px 200px white, 350px 450px white,
-    1100px 300px white, 250px 100px white, 950px 400px white,
-    450px 200px white, 1000px 150px white, 550px 350px white,
-    50px 250px white, 850px 450px white, 1200px 100px white,
-    750px 300px white, 1300px 250px white, 1150px 450px white;
+  box-shadow: 100px 200px white, 300px 100px white, 500px 300px white,
+    700px 150px white, 900px 250px white, 200px 400px white, 600px 500px white,
+    800px 50px white, 400px 350px white, 150px 150px white, 650px 200px white,
+    350px 450px white, 1100px 300px white, 250px 100px white, 950px 400px white,
+    450px 200px white, 1000px 150px white, 550px 350px white, 50px 250px white,
+    850px 450px white, 1200px 100px white, 750px 300px white, 1300px 250px white,
+    1150px 450px white;
   animation: stars-move 100s linear infinite;
 }
 
 .stars::after {
   width: 1px;
   height: 1px;
-  box-shadow: 
-    1400px 350px white, 200px 500px white, 800px 150px white,
-    1100px 200px white, 500px 100px white, 300px 300px white,
-    1250px 450px white, 650px 250px white, 150px 350px white,
-    950px 100px white, 400px 450px white, 1350px 150px white;
+  box-shadow: 1400px 350px white, 200px 500px white, 800px 150px white,
+    1100px 200px white, 500px 100px white, 300px 300px white, 1250px 450px white,
+    650px 250px white, 150px 350px white, 950px 100px white, 400px 450px white,
+    1350px 150px white;
   animation: stars-move 150s linear infinite;
 }
 
 @keyframes stars-move {
-  from { transform: translateY(0); }
-  to { transform: translateY(-1000px); }
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-1000px);
+  }
 }
 
 /* Floating board container */
@@ -65,10 +66,10 @@
   position: relative;
   z-index: 10;
   background: rgba(25, 30, 40, 0.95);
+  width: min(92vw, 720px);
   padding: 50px;
   border-radius: 16px;
-  box-shadow: 
-    0 25px 80px rgba(0, 0, 0, 0.7),
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.7),
     0 0 100px rgba(100, 150, 255, 0.1);
   backdrop-filter: blur(15px);
   border: 1px solid rgba(255, 255, 255, 0.08);
@@ -76,8 +77,13 @@
 }
 
 @keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-15px); }
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
 }
 
 h1 {
@@ -138,11 +144,30 @@ button:active {
 /* Responsive */
 @media (max-width: 768px) {
   .container {
-    padding: 25px;
+    width: 94vw;
+    padding: 16px;
+    border-radius: 14px;
   }
-  
+
   h1 {
     font-size: 1.8em;
     letter-spacing: 5px;
+    margin-bottom: 16px;
+  }
+
+  .controls {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  button {
+    width: 100%;
+  }
+
+  .status {
+    width: 100%;
+    padding: 12px 14px;
   }
 }

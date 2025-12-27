@@ -18,6 +18,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 VOCAB_SIZE = 1928
@@ -304,10 +305,9 @@ def root():
 
 @app.post("/move", response_model=MoveResponse)
 def get_move(req: MoveRequest):
-    if not req.moves:
-        raise HTTPException(status_code=400, detail="Moves list cannot be empty")
-
-    board = build_board_from_uci(req.moves)
+    # Allow an empty move list so the engine can play the first move
+    # (needed when the user chooses to play Black).
+    board = build_board_from_uci(req.moves) if req.moves else chess.Board()
 
     book_mv = try_book_move(board)
     if book_mv:
