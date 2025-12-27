@@ -26,7 +26,15 @@ export default function App() {
       });
 
       if (!res.ok) {
-        setStatus("Engine error (check API terminal)");
+        let errText = `HTTP ${res.status}`;
+        try {
+          const err = await res.json();
+          console.log("API error:", err);
+          if (err?.detail) errText = err.detail;
+        } catch {
+          // ignore JSON parse errors
+        }
+        setStatus(`Engine error: ${errText}`);
         setBusy(false);
         return;
       }
@@ -34,12 +42,11 @@ export default function App() {
       const data = await res.json();
       console.log("Engine response:", data);
 
-      const uci = data.move; // expected like "e7e5" or "e7e8q"
+      const uci = data.move;
       const from = uci.slice(0, 2);
       const to = uci.slice(2, 4);
       const promotion = uci.length > 4 ? uci[4] : undefined;
 
-      // Only apply engine move if it is actually engine's turn (black)
       if (game.turn() !== "b") {
         console.warn("Engine move received but it's not black's turn.");
         setStatus("State desync (not black's turn). Reset and try again.");
@@ -55,23 +62,16 @@ export default function App() {
         return;
       }
 
-      console.log("Engine moved:", engineMove);
       setPosition(game.fen());
 
-      // IMPORTANT: append engine move to history so backend stays in sync
       const engineUci = `${from}${to}${engineMove.promotion || ""}`;
       setMoveHistory((prev) => [...prev, engineUci]);
 
       if (game.isGameOver()) {
-        if (game.isCheckmate()) {
-          setStatus("Checkmate! Black wins!");
-        } else if (game.isDraw()) {
-          setStatus("Game drawn!");
-        } else if (game.isStalemate()) {
-          setStatus("Stalemate!");
-        } else {
-          setStatus("Game over!");
-        }
+        if (game.isCheckmate()) setStatus("Checkmate! Black wins!");
+        else if (game.isDraw()) setStatus("Game drawn!");
+        else if (game.isStalemate()) setStatus("Stalemate!");
+        else setStatus("Game over!");
       } else {
         setStatus("Your move (White)");
       }
@@ -85,68 +85,38 @@ export default function App() {
   }
 
   function onPieceDrop(sourceSquare, targetSquare) {
-    console.log("Drop attempt:", sourceSquare, "to", targetSquare);
+    if (busy) return false;
+    if (game.turn() !== "w") return false;
 
-    // Don't allow moves while engine is thinking
-    if (busy) {
-      console.log("Engine is thinking, please wait!");
-      return false;
-    }
-
-    // Only allow white to move (player is white)
-    if (game.turn() !== "w") {
-      console.log("Not white's turn!");
-      return false;
-    }
-
-    // Check if the piece being moved is white
     const piece = game.get(sourceSquare);
-    if (!piece || piece.color !== "w") {
-      console.log("Can only move white pieces!");
-      return false;
-    }
+    if (!piece || piece.color !== "w") return false;
 
     try {
       const move = game.move({
         from: sourceSquare,
         to: targetSquare,
-        promotion: "q", // OK for user moves; only used if pawn promotes
+        promotion: "q",
       });
 
-      if (move === null) {
-        console.log("Illegal move");
-        return false;
-      }
+      if (move === null) return false;
 
-      console.log("Your move:", move);
       setPosition(game.fen());
 
-      // Record UCI for player move
       const playerUci = `${sourceSquare}${targetSquare}${move.promotion || ""}`;
-
-      // Compute the new full history and store it
       const nextHistory = [...moveHistory, playerUci];
       setMoveHistory(nextHistory);
 
-      // If game ended, stop here
       if (game.isGameOver()) {
-        if (game.isCheckmate()) {
-          setStatus("Checkmate! White wins!");
-        } else if (game.isDraw()) {
-          setStatus("Game drawn!");
-        } else if (game.isStalemate()) {
-          setStatus("Stalemate!");
-        } else {
-          setStatus("Game over!");
-        }
+        if (game.isCheckmate()) setStatus("Checkmate! White wins!");
+        else if (game.isDraw()) setStatus("Game drawn!");
+        else if (game.isStalemate()) setStatus("Stalemate!");
+        else setStatus("Game over!");
         return true;
       }
 
-      // After white moves, it should be black to move; ask engine
       if (game.turn() === "b") {
         askEngine(nextHistory);
       } else {
-        // Shouldn't happen, but avoids weird desync
         setStatus("State desync (expected black to move).");
       }
 
@@ -162,7 +132,6 @@ export default function App() {
   }
 
   function reset() {
-    console.log("Reset game");
     game.reset();
     setPosition(game.fen());
     setMoveHistory([]);
