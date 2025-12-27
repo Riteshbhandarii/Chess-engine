@@ -178,14 +178,14 @@ button:active {
   place-items: center;
   padding: 24px;
 
-  /* Dark overlay + your tiled chess pieces image */
-  background:
-    linear-gradient(rgba(9, 10, 15, 0.90), rgba(9, 10, 15, 0.90)),
-    var(--landingBg);
+  background-image: var(--landingBg);
+  background-repeat: no-repeat;
+  background-size: cover;
 
-  background-repeat: repeat;
-  background-size: 320px;
+  /* Adjust what part of the image is visible */
+  background-position: center 60%;
 }
+
 
 .landingBox {
   width: min(92vw, 420px);
@@ -196,6 +196,8 @@ button:active {
   box-shadow: 0 25px 80px rgba(0, 0, 0, 0.7);
   display: grid;
   gap: 12px;
+
+  transform: translateY(60px);
 }
 
 .landingInput {
