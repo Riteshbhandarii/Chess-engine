@@ -17,32 +17,24 @@ function Landing({ playerName, setPlayerName }) {
   }
 
   return (
-    <div className="shell">
-      <div className="card">
-        <div className="topbar">
-          <h1 className="brand">TEORIAT</h1>
-          <button className="linkBtn" onClick={() => nav("/about")}>
-            About
-          </button>
-        </div>
-
-        <form onSubmit={submit} className="stack">
-          <label className="label">Your name</label>
-          <input
-            className="input"
-            value={localName}
-            onChange={(e) => setLocalName(e.target.value)}
-            placeholder="Type your username"
-            autoFocus
-          />
-          <button className="primary" type="submit">
-            Continue
-          </button>
-        </form>
-      </div>
+    <div className="landing">
+      <form className="landingBox" onSubmit={submit}>
+        <input
+          className="landingInput"
+          value={localName}
+          onChange={(e) => setLocalName(e.target.value)}
+          placeholder="Type your username"
+          autoFocus
+        />
+        <button className="landingPrimary" type="submit">
+          Continue
+        </button>
+      </form>
     </div>
   );
 }
+
+
 
 function SideSelect({ playerName, playerColor, setPlayerColor }) {
   const nav = useNavigate();
