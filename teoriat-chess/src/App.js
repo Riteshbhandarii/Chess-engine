@@ -17,7 +17,12 @@ function Landing({ playerName, setPlayerName }) {
   }
 
   return (
-    <div className="landing">
+    <div
+  className="landing"
+  style={{
+    "--landingBg": `url(${process.env.PUBLIC_URL}/design-01kdh2xh6d-1766878817.png)`,
+  }}
+>
       <form className="landingBox" onSubmit={submit}>
         <input
           className="landingInput"

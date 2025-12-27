@@ -171,12 +171,20 @@ button:active {
     padding: 12px 14px;
   }
 }
+/* landing page */
 .landing {
   min-height: 100vh;
   display: grid;
   place-items: center;
   padding: 24px;
-  background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+
+  /* Dark overlay + your tiled chess pieces image */
+  background:
+    linear-gradient(rgba(9, 10, 15, 0.90), rgba(9, 10, 15, 0.90)),
+    var(--landingBg);
+
+  background-repeat: repeat;
+  background-size: 320px;
 }
 
 .landingBox {
