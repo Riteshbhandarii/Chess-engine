@@ -176,31 +176,69 @@ button:active{ transform: translateY(0); }
   place-items: center;
   padding: 24px;
   position: relative;
+
   background-image: var(--landingBg);
   background-repeat: no-repeat;
   background-position: center 60%;
   background-size: cover;
 }
 
+/* Darken image behind text so white stays readable */
+.landing::before{
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0,0,0,0.55) 0%,
+    rgba(0,0,0,0.35) 35%,
+    rgba(0,0,0,0.60) 100%
+  );
+  pointer-events: none;
+}
 
-/* Slide-in menu */
+/* Slide-in menu: "hidden letters" Menu button */
 .landingMenuBtn{
   position: fixed;
   top: 18px;
   right: 18px;
   z-index: 60;
 
-  background: rgba(255,255,255,0.06);
-  background-image: none;
-  border: 1px solid rgba(255,255,255,0.18);
-  color: rgba(255,255,255,0.92);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  transform: none;
-  text-transform: none;
-  letter-spacing: 0.5px;
+  /* Remove button look */
+  background: transparent;
+  border: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+
+  /* Text styling */
+  font: 500 14px/1 "Segoe UI", system-ui, sans-serif;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+
+  /* Subtle / blends in */
+  color: rgba(255,255,255,0.60);
+  text-shadow: 0 1px 12px rgba(0,0,0,0.45);
+  cursor: pointer;
+
+  transition:
+    color 180ms ease,
+    text-shadow 180ms ease,
+    background-color 180ms ease,
+    transform 180ms ease;
+
+  /* Optional "hide behind background" feel */
+  mix-blend-mode: soft-light;
 }
 
+/* Reveal on hover */
+.landingMenuBtn:hover{
+  color: rgba(255,255,255,0.92);
+  background-color: rgba(0,0,0,0.18);
+  text-shadow: 0 10px 30px rgba(0,0,0,0.55);
+  transform: translateY(-1px);
+}
+
+/* Backdrop behind the open menu */
 .landingMenuBackdrop{
   position: fixed;
   inset: 0;
@@ -208,6 +246,7 @@ button:active{ transform: translateY(0); }
   background: rgba(0,0,0,0.35);
 }
 
+/* Slide-in panel */
 .landingMenuPanel{
   position: fixed;
   top: 0;
@@ -236,7 +275,6 @@ button:active{ transform: translateY(0); }
   margin-bottom: 10px;
 
   background: rgba(255,255,255,0.06);
-  background-image: none;
   border: 1px solid rgba(255,255,255,0.16);
   color: rgba(255,255,255,0.92);
 
@@ -250,7 +288,6 @@ button:active{ transform: translateY(0); }
   background: rgba(255,255,255,0.10);
   border-color: rgba(255,255,255,0.24);
 }
-
 
 /* Landing box */
 .landingBox{
@@ -270,7 +307,6 @@ button:active{ transform: translateY(0); }
   transform: translateX(-50%);
 }
 
-
 .landingInput{
   width: 100%;
   padding: 14px 16px;
@@ -282,16 +318,13 @@ button:active{ transform: translateY(0); }
   outline: none;
 }
 
-
 .landingInput:focus{
   border-color: rgba(255, 255, 255, 0.28);
   box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.10);
 }
 
-
 .landingBox .landingPrimary{
   background: rgba(255,255,255,0.08);
-  background-image: none;
   border: 1px solid rgba(255,255,255,0.18);
   color: rgba(255,250,240,0.92);
   letter-spacing: 0.6px;
@@ -306,7 +339,6 @@ button:active{ transform: translateY(0); }
   box-shadow: 0 20px 60px rgba(0,0,0,0.40);
   transform: none;
 }
-
 
 .landingHero{
   position: absolute;
@@ -353,22 +385,7 @@ button:active{ transform: translateY(0); }
   text-align: center;
 }
 
-/* Darken image behind text so white stays readable */
-.landing::before{
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(0,0,0,0.55) 0%,
-    rgba(0,0,0,0.35) 35%,
-    rgba(0,0,0,0.60) 100%
-  );
-  pointer-events: none;
-}
-
-
-/* Focus ring */
+/* Focus ring (keyboard) */
 .landingMenuBtn:focus-visible,
 .landingMenuItem:focus-visible,
 .landingPrimary:focus-visible,
@@ -377,7 +394,14 @@ button:active{ transform: translateY(0); }
   outline-offset: 3px;
 }
 
-
+/* Mobile */
 @media (max-width: 480px){
   .landingBox{ bottom: 40px; }
+
+  .landingMenuBtn{
+    top: 14px;
+    right: 14px;
+    padding: 10px 10px;
+    letter-spacing: 0.18em;
+  }
 }
