@@ -109,7 +109,7 @@ function SignIn({ playerName, setPlayerName }) {
             className="signinInput"
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder="Enter username"
+            placeholder="  No personal info Needed.."
             autoComplete="username"
             maxLength={20}
           />
