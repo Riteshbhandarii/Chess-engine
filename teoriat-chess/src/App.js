@@ -91,12 +91,17 @@ function SignIn({ playerName, setPlayerName }) {
         "--landingBg": `url(${process.env.PUBLIC_URL}/Honoré_Daumier_032.jpg)`,
       }}
     >
+      {/* Back OUTSIDE the sign-in content, same style as Menu */}
+      <button className="landingMenuBtn signinBackGlobal" type="button" onClick={() => nav("/")}>
+        Back
+      </button>
+
       <div className="signinCard">
         <h2 className="signinTitle">Choose a username</h2>
 
         <form className="signinForm" onSubmit={submit}>
           <label className="signinLabel" htmlFor="username">
-            Username
+            Username:
           </label>
 
           <input
@@ -115,14 +120,11 @@ function SignIn({ playerName, setPlayerName }) {
             Continue
           </button>
         </form>
-
-        <button className="landingMenuBtn" type="button" onClick={() => nav("/")}>
-          Back
-        </button>
       </div>
     </div>
   );
 }
+
 
 function HowToPlay() {
   const nav = useNavigate();

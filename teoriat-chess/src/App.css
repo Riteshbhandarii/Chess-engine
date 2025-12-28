@@ -415,7 +415,7 @@ button:active{ transform: translateY(0); }
   -webkit-backdrop-filter: none;
 
   /* placement on the painting (tweak) */
-  transform: translate(0vw, 16vh);
+  transform: translate(1vw, 19vh);
 }
 
 /* top-right BACK (inside the sign-in area) */
@@ -437,32 +437,38 @@ button:active{ transform: translateY(0); }
   cursor: pointer;
 }
 
-/* “painted on” typography (white like front page) */
+
+
 .signinTitle{
+  font: inherit;                 /* keep same letter style as landing */
+  font-size: clamp(30px, 6vw, 30px);  /* bigger title */
+  line-height: 1.05;
   margin: 0 0 14px;
-  color: rgba(255,255,255,0.94);
-  font-family: Georgia, "Times New Roman", Times, serif;
-  font-size: 34px;
-  font-weight: 700;
-  letter-spacing: 0.03em;
-  text-shadow: 0 2px 16px rgba(0,0,0,0.85);
+  color: rgba(255,255,255,0.92);
+  letter-spacing: inherit;
+  text-shadow: inherit;
 }
 
+
 .signinLabel{
-  color: rgba(255,255,255,0.80);
-  font-family: Georgia, "Times New Roman", Times, serif;
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-shadow: 0 2px 16px rgba(0,0,0,0.85);
+  color: rgba(255,245,235,0.84);
+  font: inherit;
+  letter-spacing: inherit;
+  text-shadow: inherit;
+  display: inline-block;
 }
 
 .signinHint{
-  color: rgba(255,255,255,0.62);
-  font: 400 12px/1.35 Georgia, "Times New Roman", Times, serif;
+  color: rgba(255,245,235,0.84);
+  font: inherit;
+  letter-spacing: inherit;
+  text-shadow: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  text-shadow: inherit;
   margin: 10px 0 18px;
-  text-shadow: 0 2px 16px rgba(0,0,0,0.85);
 }
+
 
 /* underline input (no box) */
 .signinInput{
@@ -512,4 +518,10 @@ button:active{ transform: translateY(0); }
 
 .signinContinue:hover{
   color: rgba(255,255,255,0.92);
+}
+
+.signinBackGlobal{
+  opacity: 1 !important;
+  color: rgba(255,255,255,1) !important;
+  font-weight: 700;
 }
