@@ -74,21 +74,20 @@ function Landing({ playerName, setPlayerName }) {
 
       <form className="landingBox" onSubmit={submit}>
         <label className="landingLabel" htmlFor="username">
-          Username
+          
         </label>
         <input
-          id="username"
+
           className="landingInput"
           value={localName}
           onChange={(e) => setLocalName(e.target.value)}
-          placeholder="Enter your nickname"
+          placeholder="Enter your username"
           autoFocus
-          autoComplete="nickname"
+          autoComplete="username"
         />
         <button className="landingPrimary" type="submit">
           Continue
         </button>
-        <div className="landingProof">No signup • Runs locally • Free</div>
       </form>
     </div>
   );
