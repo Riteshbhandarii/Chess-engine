@@ -177,13 +177,12 @@ button:active {
   display: grid;
   place-items: center;
   padding: 24px;
+  position: relative;
 
   background-image: var(--landingBg);
   background-repeat: no-repeat;
-  background-size: cover;
-
-  /* Adjust what part of the image is visible */
   background-position: center 60%;
+  background-size: cover;
 }
 
 
@@ -191,14 +190,27 @@ button:active {
   width: min(92vw, 420px);
   padding: 18px;
   border-radius: 16px;
-  background: rgba(25, 30, 40, 0.95);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.7);
+
+  /* Glass / see-through */
+  background: rgba(12, 16, 26, 0.35);
+  backdrop-filter: blur(18px) saturate(130%);
+  -webkit-backdrop-filter: blur(18px) saturate(130%);
+
+  /* Fancy edge + depth */
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow:
+    0 25px 70px rgba(0, 0, 0, 0.55),
+    inset 0 1px 0 rgba(255, 255, 255, 0.10);
+
   display: grid;
   gap: 12px;
+  position: absolute;
+  left: 50%;
+  bottom: 90px;          /* adjust: 70px lower, 110px higher */
+  transform: translateX(-50%);
 
-  transform: translateY(60px);
 }
+
 
 .landingInput {
   width: 100%;
@@ -209,6 +221,13 @@ button:active {
   color: #e8e8e8;
   font-size: 16px;
   outline: none;
+  
+}
+
+@media (max-width: 480px) {
+  .landingBox {
+    bottom: 40px;
+  }
 }
 
 .landingInput:focus {
@@ -218,4 +237,25 @@ button:active {
 
 .landingPrimary {
   width: 100%;
+  border-radius: 12px;
+
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  color: #e8e8e8;
+
+  text-transform: uppercase;
+  letter-spacing: 2px;
+
+  box-shadow:
+    0 10px 30px rgba(0, 0, 0, 0.25),
+    inset 0 1px 0 rgba(255, 255, 255, 0.10);
+}
+
+.landingPrimary:hover {
+  background: rgba(255, 255, 255, 0.12);
+  transform: translateY(-1px);
+}
+
+.landingPrimary:active {
+  transform: translateY(0);
 }
