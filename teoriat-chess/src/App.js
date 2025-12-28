@@ -18,11 +18,26 @@ function Landing({ playerName, setPlayerName }) {
 
   return (
     <div
-  className="landing"
-  style={{
-    "--landingBg": `url(${process.env.PUBLIC_URL}/design-01kdh2xh6d-1766878817.png)`,
-  }}
->
+      className="landing"
+      style={{
+        "--landingBg": `url(${process.env.PUBLIC_URL}/design-01kdh2xh6d-1766878817.png)`,
+      }}
+    >
+      <div className="landingTopRight" role="toolbar" aria-label="Landing links">
+        <button type="button" className="landingTopBtn" onClick={() => nav("/about")}>
+          About
+        </button>
+        <button type="button" className="landingTopBtn" onClick={() => nav("/how")}>
+          How to play
+        </button>
+        <button type="button" className="landingTopBtn" onClick={() => nav("/feedback")}>
+          Feedback
+        </button>
+        <button type="button" className="landingTopBtn" onClick={() => nav("/leaderboard")}>
+          Leaderboard
+        </button>
+      </div>
+
       <form className="landingBox" onSubmit={submit}>
         <input
           className="landingInput"
@@ -39,7 +54,69 @@ function Landing({ playerName, setPlayerName }) {
   );
 }
 
+function HowToPlay() {
+  const nav = useNavigate();
+  return (
+    <div className="shell">
+      <div className="card">
+        <div className="topbar">
+          <h2 className="title">How to play</h2>
+          <button className="linkBtn" onClick={() => nav("/")}>
+            Back
+          </button>
+        </div>
 
+        <div className="text">
+          <p>1) Enter username.</p>
+          <p>2) Choose side.</p>
+          <p>3) Make a move; engine responds.</p>
+          <p>Tip: Drag and drop pieces to move.</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Feedback() {
+  const nav = useNavigate();
+  return (
+    <div className="shell">
+      <div className="card">
+        <div className="topbar">
+          <h2 className="title">Feedback</h2>
+          <button className="linkBtn" onClick={() => nav("/")}>
+            Back
+          </button>
+        </div>
+
+        <div className="text">
+          <p>Send feedback to: your@email.com</p>
+          <p>(Replace with your real contact or a form later.)</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Leaderboard() {
+  const nav = useNavigate();
+  return (
+    <div className="shell">
+      <div className="card">
+        <div className="topbar">
+          <h2 className="title">Leaderboard</h2>
+          <button className="linkBtn" onClick={() => nav("/")}>
+            Back
+          </button>
+        </div>
+
+        <div className="text">
+          <p>Coming soon.</p>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 function SideSelect({ playerName, playerColor, setPlayerColor }) {
   const nav = useNavigate();
@@ -97,12 +174,12 @@ function About() {
 
         <div className="text">
           <p>
-            TEORIAT is a personal chess engine project built to imitate my own move
-            choices while filtering out obvious blunders.
+            TEORIAT is a personal chess engine project built to imitate my own move choices while
+            filtering out obvious blunders.
           </p>
           <p>
-            I built it to learn ML-driven gameplay, deploy it as an API, and make a
-            clean UI for testing and playing.
+            I built it to learn ML-driven gameplay, deploy it as an API, and make a clean UI for
+            testing and playing.
           </p>
         </div>
       </div>
@@ -304,6 +381,9 @@ export default function App() {
     <Routes>
       <Route path="/" element={<Landing playerName={playerName} setPlayerName={setPlayerName} />} />
       <Route path="/about" element={<About />} />
+      <Route path="/how" element={<HowToPlay />} />
+      <Route path="/feedback" element={<Feedback />} />
+      <Route path="/leaderboard" element={<Leaderboard />} />
       <Route
         path="/side"
         element={
