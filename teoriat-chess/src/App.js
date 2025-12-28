@@ -6,16 +6,7 @@ import "./App.css";
 
 function Landing({ playerName, setPlayerName }) {
   const nav = useNavigate();
-  const [localName, setLocalName] = useState(playerName);
   const [menuOpen, setMenuOpen] = useState(false);
-
-  function submit(e) {
-    e.preventDefault();
-    const name = localName.trim();
-    if (!name) return;
-    setPlayerName(name);
-    nav("/side");
-  }
 
   function go(path) {
     setMenuOpen(false);
@@ -73,22 +64,65 @@ function Landing({ playerName, setPlayerName }) {
       </div>
 
       <div className="landingBox">
-  <button
-    type="button"
-    className="landingBegin"
-    onClick={() => {
-      setPlayerName("Player"); // temporary default
-      nav("/side");
-    }}
-  >
-    Begin
-  </button>
-</div>
-
+        <button type="button" className="landingBegin" onClick={() => nav("/signin")}>
+          Begin
+        </button>
+      </div>
     </div>
   );
 }
 
+function SignIn({ playerName, setPlayerName }) {
+  const nav = useNavigate();
+  const [name, setName] = useState(playerName || "");
+
+  function submit(e) {
+    e.preventDefault();
+    const v = name.trim();
+    if (!v) return;
+    setPlayerName(v);
+    nav("/side");
+  }
+
+  return (
+    <div
+      className="signin"
+      style={{
+        "--landingBg": `url(${process.env.PUBLIC_URL}/design-01kdh2xh6d-1766878817.png)`,
+      }}
+    >
+      <div className="signinCard">
+        <h2 className="signinTitle">Choose a username</h2>
+
+        <form className="signinForm" onSubmit={submit}>
+          <label className="signinLabel" htmlFor="username">
+            Username
+          </label>
+
+          <input
+            id="username"
+            className="signinInput"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Enter username"
+            autoComplete="username"
+            maxLength={20}
+          />
+
+          <div className="signinHint">This name will be shown on the leaderboard.</div>
+
+          <button className="landingBegin" type="submit">
+            Continue
+          </button>
+        </form>
+
+        <button className="landingMenuBtn" type="button" onClick={() => nav("/")}>
+          Back
+        </button>
+      </div>
+    </div>
+  );
+}
 
 function HowToPlay() {
   const nav = useNavigate();
@@ -177,16 +211,10 @@ function SideSelect({ playerName, playerColor, setPlayerColor }) {
         </div>
 
         <div className="row">
-          <button
-            className={`choice ${playerColor === "w" ? "active" : ""}`}
-            onClick={() => pick("w")}
-          >
+          <button className={`choice ${playerColor === "w" ? "active" : ""}`} onClick={() => pick("w")}>
             White
           </button>
-          <button
-            className={`choice ${playerColor === "b" ? "active" : ""}`}
-            onClick={() => pick("b")}
-          >
+          <button className={`choice ${playerColor === "b" ? "active" : ""}`} onClick={() => pick("b")}>
             Black
           </button>
         </div>
@@ -212,9 +240,7 @@ function About() {
           <p>
             TEORIAT is a personal chess engine project built to imitate my own move choices while filtering out obvious blunders.
           </p>
-          <p>
-            I built it to learn ML-driven gameplay, deploy it as an API, and make a clean UI for testing and playing.
-          </p>
+          <p>I built it to learn ML-driven gameplay, deploy it as an API, and make a clean UI for testing and playing.</p>
         </div>
       </div>
     </div>
@@ -412,10 +438,14 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<Landing playerName={playerName} setPlayerName={setPlayerName} />} />
+
+      <Route path="/signin" element={<SignIn playerName={playerName} setPlayerName={setPlayerName} />} />
+
       <Route path="/about" element={<About />} />
       <Route path="/how" element={<HowToPlay />} />
       <Route path="/feedback" element={<Feedback />} />
       <Route path="/leaderboard" element={<Leaderboard />} />
+
       <Route
         path="/side"
         element={
@@ -430,6 +460,7 @@ export default function App() {
           )
         }
       />
+
       <Route
         path="/play"
         element={
