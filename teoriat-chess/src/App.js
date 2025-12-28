@@ -7,6 +7,7 @@ import "./App.css";
 function Landing({ playerName, setPlayerName }) {
   const nav = useNavigate();
   const [localName, setLocalName] = useState(playerName);
+  const [menuOpen, setMenuOpen] = useState(false);
 
   function submit(e) {
     e.preventDefault();
@@ -16,6 +17,11 @@ function Landing({ playerName, setPlayerName }) {
     nav("/side");
   }
 
+  function go(path) {
+    setMenuOpen(false);
+    nav(path);
+  }
+
   return (
     <div
       className="landing"
@@ -23,36 +29,71 @@ function Landing({ playerName, setPlayerName }) {
         "--landingBg": `url(${process.env.PUBLIC_URL}/design-01kdh2xh6d-1766878817.png)`,
       }}
     >
-      <div className="landingTopRight" role="toolbar" aria-label="Landing links">
-        <button type="button" className="landingTopBtn" onClick={() => nav("/about")}>
+      <button
+        type="button"
+        className="landingMenuBtn"
+        aria-expanded={menuOpen}
+        aria-controls="landingMenuPanel"
+        onClick={() => setMenuOpen((v) => !v)}
+      >
+        Menu
+      </button>
+
+      <div
+        id="landingMenuPanel"
+        className={`landingMenuPanel ${menuOpen ? "open" : ""}`}
+        role="menu"
+        aria-label="Landing menu"
+      >
+        <button type="button" className="landingMenuItem" role="menuitem" onClick={() => go("/about")}>
           About
         </button>
-        <button type="button" className="landingTopBtn" onClick={() => nav("/how")}>
+        <button type="button" className="landingMenuItem" role="menuitem" onClick={() => go("/how")}>
           How to play
         </button>
-        <button type="button" className="landingTopBtn" onClick={() => nav("/feedback")}>
+        <button type="button" className="landingMenuItem" role="menuitem" onClick={() => go("/feedback")}>
           Feedback
         </button>
-        <button type="button" className="landingTopBtn" onClick={() => nav("/leaderboard")}>
+        <button type="button" className="landingMenuItem" role="menuitem" onClick={() => go("/leaderboard")}>
           Leaderboard
         </button>
       </div>
 
+      {menuOpen && (
+        <div
+          className="landingMenuBackdrop"
+          onClick={() => setMenuOpen(false)}
+          aria-hidden="true"
+        />
+      )}
+
+      <div className="landingHero">
+        <h1 className="landingTitle">“The art of thinking ahead.”</h1>
+        <p className="landingSubtitle">“Every move is a choice.”</p>
+      </div>
+
       <form className="landingBox" onSubmit={submit}>
+        <label className="landingLabel" htmlFor="username">
+          Username
+        </label>
         <input
+          id="username"
           className="landingInput"
           value={localName}
           onChange={(e) => setLocalName(e.target.value)}
-          placeholder="Type your username"
+          placeholder="Enter your nickname"
           autoFocus
+          autoComplete="nickname"
         />
         <button className="landingPrimary" type="submit">
           Continue
         </button>
+        <div className="landingProof">No signup • Runs locally • Free</div>
       </form>
     </div>
   );
 }
+
 
 function HowToPlay() {
   const nav = useNavigate();
@@ -174,12 +215,10 @@ function About() {
 
         <div className="text">
           <p>
-            TEORIAT is a personal chess engine project built to imitate my own move choices while
-            filtering out obvious blunders.
+            TEORIAT is a personal chess engine project built to imitate my own move choices while filtering out obvious blunders.
           </p>
           <p>
-            I built it to learn ML-driven gameplay, deploy it as an API, and make a clean UI for
-            testing and playing.
+            I built it to learn ML-driven gameplay, deploy it as an API, and make a clean UI for testing and playing.
           </p>
         </div>
       </div>
@@ -191,12 +230,9 @@ function Play({ playerName, playerColor }) {
   const [game] = useState(() => new Chess());
   const [position, setPosition] = useState("start");
   const [moveHistory, setMoveHistory] = useState([]);
-  const [status, setStatus] = useState(
-    playerColor === "w" ? "Your move (White)" : "Engine thinking..."
-  );
+  const [status, setStatus] = useState(playerColor === "w" ? "Your move (White)" : "Engine thinking...");
   const [busy, setBusy] = useState(false);
 
-  // Responsive board width for mobile/desktop. react-chessboard sizes from boardWidth. [web:118]
   const [boardWidth, setBoardWidth] = useState(() =>
     Math.min(560, Math.floor(window.innerWidth * 0.92))
   );
@@ -285,7 +321,6 @@ function Play({ playerName, playerColor }) {
     const piece = game.get(sourceSquare);
     if (!piece || piece.color !== playerColor) return false;
 
-    // Promotion only when a pawn reaches last rank. chess.js uses promotion only for that. [web:100]
     const isPawn = piece.type === "p";
     const promotionRank = piece.color === "w" ? "8" : "1";
     const isPromotion = isPawn && targetSquare?.[1] === promotionRank;
@@ -298,7 +333,6 @@ function Play({ playerName, playerColor }) {
     try {
       move = game.move(moveObj);
     } catch {
-      // Illegal move -> snap back (no red overlay).
       return false;
     }
 
@@ -344,6 +378,7 @@ function Play({ playerName, playerColor }) {
   return (
     <div className="app">
       <div className="stars" />
+
       <div className="container">
         <div className="topbar">
           <h1>TEORIAT</h1>
@@ -352,15 +387,17 @@ function Play({ playerName, playerColor }) {
           </div>
         </div>
 
-        <Chessboard
-          position={position}
-          onPieceDrop={onPieceDrop}
-          isDraggablePiece={isDraggablePiece}
-          boardWidth={boardWidth}
-          boardOrientation={playerColor === "w" ? "white" : "black"}
-          customDarkSquareStyle={{ backgroundColor: "#b58863" }}
-          customLightSquareStyle={{ backgroundColor: "#f0d9b5" }}
-        />
+        <div className="boardTopLeft">
+          <Chessboard
+            position={position}
+            onPieceDrop={onPieceDrop}
+            isDraggablePiece={isDraggablePiece}
+            boardWidth={boardWidth}
+            boardOrientation={playerColor === "w" ? "white" : "black"}
+            customDarkSquareStyle={{ backgroundColor: "#b58863" }}
+            customLightSquareStyle={{ backgroundColor: "#f0d9b5" }}
+          />
+        </div>
 
         <div className="controls">
           <button onClick={reset} disabled={busy}>

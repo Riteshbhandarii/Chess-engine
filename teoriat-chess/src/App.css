@@ -1,38 +1,38 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
+/* Base */
+* { margin: 0; padding: 0; box-sizing: border-box; }
 
-.app {
+
+/* Play screen */
+.app{
   min-height: 100vh;
   background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
-  display: flex;
-  align-items: center;
-  justify-content: center;
   font-family: "Segoe UI", system-ui, sans-serif;
   position: relative;
   overflow: hidden;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 16px;
 }
 
-/* Animated starfield */
-.stars {
+
+.stars{
   position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   pointer-events: none;
 }
 
+
 .stars::before,
-.stars::after {
+.stars::after{
   content: "";
   position: absolute;
   width: 2px;
   height: 2px;
-  background: white;
-  box-shadow: 100px 200px white, 300px 100px white, 500px 300px white,
+  background: #fff;
+  box-shadow:
+    100px 200px white, 300px 100px white, 500px 300px white,
     700px 150px white, 900px 250px white, 200px 400px white, 600px 500px white,
     800px 50px white, 400px 350px white, 150px 150px white, 650px 200px white,
     350px 450px white, 1100px 300px white, 250px 100px white, 950px 400px white,
@@ -42,62 +42,57 @@
   animation: stars-move 100s linear infinite;
 }
 
-.stars::after {
+
+.stars::after{
   width: 1px;
   height: 1px;
-  box-shadow: 1400px 350px white, 200px 500px white, 800px 150px white,
+  box-shadow:
+    1400px 350px white, 200px 500px white, 800px 150px white,
     1100px 200px white, 500px 100px white, 300px 300px white, 1250px 450px white,
     650px 250px white, 150px 350px white, 950px 100px white, 400px 450px white,
     1350px 150px white;
   animation: stars-move 150s linear infinite;
 }
 
-@keyframes stars-move {
-  from {
-    transform: translateY(0);
-  }
-  to {
-    transform: translateY(-1000px);
-  }
+
+@keyframes stars-move{
+  from { transform: translateY(0); }
+  to { transform: translateY(-1000px); }
 }
 
-/* Floating board container */
-.container {
+
+/* Main content box */
+.container{
   position: relative;
   z-index: 10;
   background: rgba(25, 30, 40, 0.95);
   width: min(92vw, 720px);
   padding: 50px;
   border-radius: 16px;
-  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.7),
-    0 0 100px rgba(100, 150, 255, 0.1);
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.7), 0 0 100px rgba(100, 150, 255, 0.1);
   backdrop-filter: blur(15px);
   border: 1px solid rgba(255, 255, 255, 0.08);
-  animation: float 6s ease-in-out infinite;
+  margin: 0;
+  animation: none;
 }
 
-@keyframes float {
-  0%,
-  100% {
-    transform: translateY(0px);
-  }
-  50% {
-    transform: translateY(-15px);
-  }
-}
 
-h1 {
-  text-align: center;
+.boardTopLeft{ margin-top: 8px; }
+
+
+h1{
+  text-align: left;
   color: #e8e8e8;
   font-size: 2.5em;
-  margin-bottom: 35px;
+  margin-bottom: 20px;
   letter-spacing: 10px;
   font-weight: 200;
   text-transform: uppercase;
   text-shadow: 0 0 40px rgba(200, 220, 255, 0.3);
 }
 
-.controls {
+
+.controls{
   margin-top: 30px;
   display: flex;
   align-items: center;
@@ -105,7 +100,8 @@ h1 {
   gap: 20px;
 }
 
-button {
+
+button{
   padding: 14px 32px;
   background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
   color: #e8e8e8;
@@ -119,17 +115,18 @@ button {
   text-transform: uppercase;
 }
 
-button:hover {
+
+button:hover{
   background: linear-gradient(135deg, #5a6678 0%, #3d4758 100%);
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(100, 150, 255, 0.2);
 }
 
-button:active {
-  transform: translateY(0);
-}
 
-.status {
+button:active{ transform: translateY(0); }
+
+
+.status{
   color: #c7d2e0;
   font-size: 16px;
   padding: 14px 24px;
@@ -141,44 +138,44 @@ button:active {
   font-weight: 400;
 }
 
-/* Responsive */
-@media (max-width: 768px) {
-  .container {
+
+/* Mobile */
+@media (max-width: 768px){
+  .container{
     width: 94vw;
     padding: 16px;
     border-radius: 14px;
   }
 
-  h1 {
+  h1{
     font-size: 1.8em;
     letter-spacing: 5px;
     margin-bottom: 16px;
   }
 
-  .controls {
+  .controls{
     flex-direction: column;
     align-items: stretch;
     gap: 12px;
     margin-top: 16px;
   }
 
-  button {
-    width: 100%;
-  }
+  button{ width: 100%; }
 
-  .status {
+  .status{
     width: 100%;
     padding: 12px 14px;
   }
 }
-/* landing page */
-.landing {
+
+
+/* Landing */
+.landing{
   min-height: 100vh;
   display: grid;
   place-items: center;
   padding: 24px;
   position: relative;
-
   background-image: var(--landingBg);
   background-repeat: no-repeat;
   background-position: center 60%;
@@ -186,33 +183,95 @@ button:active {
 }
 
 
-.landingBox {
+/* Slide-in menu */
+.landingMenuBtn{
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 60;
+
+  background: rgba(255,255,255,0.06);
+  background-image: none;
+  border: 1px solid rgba(255,255,255,0.18);
+  color: rgba(255,255,255,0.92);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  transform: none;
+  text-transform: none;
+  letter-spacing: 0.5px;
+}
+
+.landingMenuBackdrop{
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  background: rgba(0,0,0,0.35);
+}
+
+.landingMenuPanel{
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100vh;
+  width: min(320px, 86vw);
+  padding: 76px 16px 16px;
+  z-index: 70;
+
+  background: rgba(18, 20, 26, 0.55);
+  border-left: 1px solid rgba(255,255,255,0.14);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  transform: translateX(100%);
+  transition: transform 220ms ease;
+}
+
+.landingMenuPanel.open{
+  transform: translateX(0);
+}
+
+.landingMenuItem{
+  width: 100%;
+  text-align: left;
+  margin-bottom: 10px;
+
+  background: rgba(255,255,255,0.06);
+  background-image: none;
+  border: 1px solid rgba(255,255,255,0.16);
+  color: rgba(255,255,255,0.92);
+
+  text-transform: none;
+  letter-spacing: 0.3px;
+  box-shadow: none;
+  transform: none;
+}
+
+.landingMenuItem:hover{
+  background: rgba(255,255,255,0.10);
+  border-color: rgba(255,255,255,0.24);
+}
+
+
+/* Landing box */
+.landingBox{
   width: min(92vw, 420px);
   padding: 18px;
   border-radius: 16px;
-
-  /* Glass / see-through */
   background: rgba(12, 16, 26, 0.35);
   backdrop-filter: blur(18px) saturate(130%);
   -webkit-backdrop-filter: blur(18px) saturate(130%);
-
-  /* Fancy edge + depth */
   border: 1px solid rgba(255, 255, 255, 0.14);
-  box-shadow:
-    0 25px 70px rgba(0, 0, 0, 0.55),
-    inset 0 1px 0 rgba(255, 255, 255, 0.10);
-
+  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.10);
   display: grid;
   gap: 12px;
   position: absolute;
   left: 50%;
-  bottom: 90px;          /* adjust: 70px lower, 110px higher */
+  bottom: 90px;
   transform: translateX(-50%);
-
 }
 
 
-.landingInput {
+.landingInput{
   width: 100%;
   padding: 14px 16px;
   border-radius: 12px;
@@ -221,20 +280,85 @@ button:active {
   color: #e8e8e8;
   font-size: 16px;
   outline: none;
-  
 }
 
-@media (max-width: 480px) {
-  .landingBox {
-    bottom: 40px;
-  }
+
+.landingInput:focus{
+  border-color: rgba(255, 255, 255, 0.28);
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.10);
 }
 
-.landingInput:focus {
-  border-color: rgba(100, 150, 255, 0.55);
-  box-shadow: 0 0 0 4px rgba(100, 150, 255, 0.12);
-}
 
-.landingPrimary {
+.landingBox .landingPrimary{
   width: 100%;
+  background: rgba(255,255,255,0.10);
+  background-image: none;
+  border: 1px solid rgba(255,255,255,0.22);
+  color: rgba(255,255,255,0.95);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  transform: none;
+}
+
+
+.landingBox .landingPrimary:hover{
+  background: rgba(255,255,255,0.14);
+  border-color: rgba(255,255,255,0.32);
+}
+
+
+.landingHero{
+  position: absolute;
+  top: 110px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(92vw, 720px);
+  text-align: center;
+  color: rgba(255,255,255,0.92);
+  text-shadow: 0 10px 40px rgba(0,0,0,0.55);
+}
+
+
+.landingTitle{
+  letter-spacing: 10px;
+  font-weight: 200;
+  text-transform: uppercase;
+  font-size: 44px;
+  margin-bottom: 8px;
+}
+
+
+.landingSubtitle{
+  font-size: 16px;
+  color: rgba(255,255,255,0.82);
+  line-height: 1.4;
+}
+
+
+.landingLabel{
+  font-size: 13px;
+  color: rgba(255,255,255,0.75);
+  letter-spacing: 0.4px;
+}
+
+.landingProof{
+  font-size: 12px;
+  color: rgba(255,255,255,0.70);
+  text-align: center;
+}
+
+
+/* Focus ring */
+.landingMenuBtn:focus-visible,
+.landingMenuItem:focus-visible,
+.landingPrimary:focus-visible,
+.landingInput:focus-visible{
+  outline: 2px solid rgba(255,255,255,0.85);
+  outline-offset: 3px;
+}
+
+
+@media (max-width: 480px){
+  .landingBox{ bottom: 40px; }
 }
