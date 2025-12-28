@@ -348,6 +348,20 @@ button:active{ transform: translateY(0); }
   text-align: center;
 }
 
+/* Darken image behind text so white stays readable */
+.landing::before{
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0,0,0,0.55) 0%,
+    rgba(0,0,0,0.35) 35%,
+    rgba(0,0,0,0.60) 100%
+  );
+  pointer-events: none;
+}
+
 
 /* Focus ring */
 .landingMenuBtn:focus-visible,
