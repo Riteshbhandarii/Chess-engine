@@ -219,12 +219,13 @@ button:active{ transform: translateY(0); }
   mix-blend-mode: soft-light; /* blends content with backdrop */ /* [web:141] */
 }
 
-.landingMenuBtn:hover{
-  color: rgba(255,255,255,0.92);
-  background-color: rgba(0,0,0,0.18);
-  text-shadow: 0 10px 30px rgba(0,0,0,0.55);
-  transform: translateY(-1px);
+.landingMenuBtn:focus-visible,
+.landingMenuItem:focus-visible,
+.landingBegin:focus-visible{
+  outline: 2px solid rgba(255,255,255,0.85);
+  outline-offset: 3px;
 }
+
 
 /* Slide-in menu overlay */
 .landingMenuBackdrop{
@@ -309,51 +310,46 @@ button:active{ transform: translateY(0); }
 
 /* Bottom center box holding ONLY the Begin button */
 .landingBox{
-  width: min(92vw, 420px);
-  padding: 18px;
   position: absolute;
   left: 50%;
-  bottom: 90px;
+  bottom: clamp(42px, 7vh, 90px);
   transform: translateX(-50%);
-  display: grid;
-  place-items: center;
+  z-index: 20;
 
-  background: rgba(12, 16, 26, 0.30);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  backdrop-filter: blur(18px) saturate(130%);
-  -webkit-backdrop-filter: blur(18px) saturate(130%);
-  box-shadow: 0 25px 70px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.10);
-  border-radius: 16px;
+  width: auto;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  border-radius: 0;
 }
 
-/* Classical Begin button (sharp corners) */
-.landingBegin{
-  width: 100%;
-  padding: 16px 18px;
 
-  border-radius: 0;
-  border: 1px solid rgba(255,255,255,0.26);
-  background: rgba(0,0,0,0.18);
+.landingBegin {
+  margin: 12px;
+  height: 50px;
+  width: 140px;
+  border-radius: 10px;
+  background: #333;
+  justify-content: center;
+  align-items: center;
+  box-shadow: -5px -5px 15px #444, 5px 5px 15px #222, inset 5px 5px 10px #444,
+    inset -5px -5px 10px #222;
 
-  color: rgba(255,250,240,0.90);
-  font-family: "Georgia", "Times New Roman", Times, serif;
-  font-size: 15px;
+  font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  font-variant: small-caps;
-
-  text-shadow: 0 1px 0 rgba(0,0,0,0.55), 0 12px 28px rgba(0,0,0,0.55);
-  box-shadow: inset 0 1px 0 rgba(255,255,255,0.08), 0 18px 55px rgba(0,0,0,0.45);
 
   cursor: pointer;
-  transition: transform 180ms ease, background-color 180ms ease, border-color 180ms ease;
+  border: none;
+  color: rgba(255,255,255,0.60);
+  transition: 500ms;
 }
 
-.landingBegin:hover{
-  background: rgba(0,0,0,0.26);
-  border-color: rgba(255,255,255,0.36);
-  transform: translateY(-1px);
-}
 
 /* Keyboard focus (use focus-visible heuristics) */
 .landingMenuBtn:focus-visible,
