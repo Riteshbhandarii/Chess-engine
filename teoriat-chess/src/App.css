@@ -377,17 +377,26 @@ button:active{ transform: translateY(0); }
     letter-spacing: 0.18em;
   }
 }
-/* sign-in */
 .signin{
   min-height: 100vh;
   display: grid;
   place-items: center;
-  padding: 24px;
+  padding: 0 34px;
   position: relative;
-
-  background: var(--landingBg) 50% 45% / 112% no-repeat;
+  background: var(--landingBg) 50% 45% /112% no-repeat;
   background-color: rgba(0,0,0,0.38);
   background-blend-mode: multiply;
+  /* Add fade-in animation */
+  animation: fadeIn 0.6s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .signin::before{
@@ -400,23 +409,33 @@ button:active{ transform: translateY(0); }
   pointer-events: none;
 }
 
-/* NO BOX: the “card” becomes just a text container */
+/* text container */
 .signinCard{
   position: relative;
   z-index: 2;
-
   width: min(92vw, 720px);
   padding: 0;
-
   background: transparent;
   border: 0;
   border-radius: 0;
   box-shadow: none;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-
   /* placement on the painting (tweak) */
   transform: translate(1vw, 19vh);
+  /* Add subtle slide-up animation */
+  animation: slideUp 0.8s ease-out 0.2s both;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translate(1vw, calc(19vh + 20px));
+  }
+  to {
+    opacity: 1;
+    transform: translate(1vw, 19vh);
+  }
 }
 
 /* top-right BACK (inside the sign-in area) */
@@ -424,30 +443,32 @@ button:active{ transform: translateY(0); }
   position: absolute;
   top: -48px;
   right: 0;
-
   background: transparent;
   border: 0;
   padding: 8px 6px;
-
   color: rgba(255,255,255,0.75);
   font: 600 14px/1 "Segoe UI", system-ui, sans-serif;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-
   text-shadow: 0 2px 14px rgba(0,0,0,0.85);
   cursor: pointer;
+  transition: color 0.3s ease;
 }
 
+.signinBack:hover{
+  color: rgba(255,255,255,0.95);
+}
 
 .signinTitle{
-  font: inherit;                 /* keep same letter style as landing */
-  font-size: clamp(30px, 6vw, 30px);  /* bigger title */
+  font: inherit;
+  font-size: clamp(30px, 6vw, 30px);
   line-height: 1.05;
   margin: 0 0 14px;
   color: rgba(255,255,255,0.92);
   letter-spacing: inherit;
   text-shadow: inherit;
 }
+
 /* size tweaks */
 .signin .landingBegin{
   width: auto;
@@ -457,7 +478,6 @@ button:active{ transform: translateY(0); }
   align-items: center;
   justify-content: center;
 }
-
 
 .signinLabel{
   color: rgba(255,245,235,0.84);
@@ -472,61 +492,74 @@ button:active{ transform: translateY(0); }
   font: inherit;
   letter-spacing: inherit;
   text-shadow: inherit;
-  font: inherit;
-  letter-spacing: inherit;
-  text-shadow: inherit;
   margin: 10px 0 18px;
 }
 
-
-/* underline input (no box) */
+/* Enhanced underline input with better visibility and glow effect */
 .signinInput{
   appearance: none;
-  -webkit-appearance: none; /* removes native styling so underline look works */
+  -webkit-appearance: none;
   width: min(560px, 92vw);
   padding: 10px 2px 8px;
-
   background: transparent;
   border: 0;
-  border-bottom: 2px solid rgba(255,255,255,0.48);
+  border-bottom: 2px solid rgba(255,255,255,0.62); /* Increased from 0.48 */
   border-radius: 0;
-
   color: rgba(255,255,255,0.92);
   font: 600 16px/1.2 "Segoe UI", system-ui, sans-serif;
-
   text-shadow: 0 2px 16px rgba(0,0,0,0.85);
   outline: none;
+  transition: all 0.3s ease;
+  /* Add subtle glow by default */
+  box-shadow: 0 1px 8px rgba(255,255,255,0.08);
 }
 
 .signinInput::placeholder{
   color: rgba(255,255,255,0.40);
+  transition: color 0.3s ease;
 }
 
+.signinInput:hover{
+  border-bottom-color: rgba(255,255,255,0.75);
+}
+
+.signinInput:focus,
 .signinInput:focus-visible{
-  border-bottom-color: rgba(255,255,255,0.90);
-  outline: 2px solid rgba(255,255,255,0.70);
-  outline-offset: 6px;
+  border-bottom-color: rgba(255,255,255,0.95); /* Brighter when focused */
+  outline: none;
+  /* Enhanced glow effect on focus */
+  box-shadow: 
+    0 1px 12px rgba(255,255,255,0.25),
+    0 2px 24px rgba(255,255,255,0.15);
 }
 
-/* CONTINUE button like a simple “type” button (match your landing style) */
+.signinInput:focus::placeholder{
+  color: rgba(255,255,255,0.50);
+}
+
+/* CONTINUE button with smooth transitions */
 .signinContinue{
   margin-top: 18px;
   padding: 10px 0;
-
   background: transparent;
   border: 0;
-
   color: rgba(255,255,255,0.78);
   font: 600 16px/1 "Segoe UI", system-ui, sans-serif;
   letter-spacing: 0.32em;
   text-transform: uppercase;
-
   text-shadow: 0 2px 16px rgba(0,0,0,0.85);
   cursor: pointer;
+  transition: all 0.3s ease;
 }
 
 .signinContinue:hover{
   color: rgba(255,255,255,0.92);
+  text-shadow: 0 2px 20px rgba(0,0,0,0.95);
+  transform: translateY(-1px);
+}
+
+.signinContinue:active{
+  transform: translateY(0);
 }
 
 .signinBackGlobal{
