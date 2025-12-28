@@ -72,23 +72,19 @@ function Landing({ playerName, setPlayerName }) {
         <p className="landingSubtitle">“Every move is a choice.”</p>
       </div>
 
-      <form className="landingBox" onSubmit={submit}>
-        <label className="landingLabel" htmlFor="username">
-          
-        </label>
-        <input
+      <div className="landingBox">
+  <button
+    type="button"
+    className="landingBegin"
+    onClick={() => {
+      setPlayerName("Player"); // temporary default
+      nav("/side");
+    }}
+  >
+    Begin
+  </button>
+</div>
 
-          className="landingInput"
-          value={localName}
-          onChange={(e) => setLocalName(e.target.value)}
-          placeholder="Enter your username"
-          autoFocus
-          autoComplete="username"
-        />
-        <button className="landingPrimary" type="submit">
-          Continue
-        </button>
-      </form>
     </div>
   );
 }
