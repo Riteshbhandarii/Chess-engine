@@ -88,7 +88,7 @@ function SignIn({ playerName, setPlayerName }) {
     <div
       className="signin"
       style={{
-        "--landingBg": `url(${process.env.PUBLIC_URL}/design-01kdh2xh6d-1766878817.png)`,
+        "--landingBg": `url(${process.env.PUBLIC_URL}/Honoré_Daumier_032.jpg)`,
       }}
     >
       <div className="signinCard">

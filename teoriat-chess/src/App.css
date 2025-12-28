@@ -377,3 +377,93 @@ button:active{ transform: translateY(0); }
     letter-spacing: 0.18em;
   }
 }
+.signin{
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  position: relative;
+
+  background: var(--landingBg) 50% 45% / 112% no-repeat;
+
+  background-color: rgba(0,0,0,0.58);
+  background-blend-mode: multiply;
+}
+
+.signin::before{
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.64) 62%, rgba(0,0,0,0.80) 100%),
+    linear-gradient(
+      to bottom,
+      rgba(0,0,0,0.68) 0%,
+      rgba(0,0,0,0.52) 45%,
+      rgba(0,0,0,0.78) 100%
+    );
+  pointer-events: none;
+}
+
+.signinCard{
+  position: relative;
+  z-index: 2;
+
+  width: min(92vw, 480px);
+  padding: 24px 26px 20px;
+
+  background: rgba(10,10,12,0.72);
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 26px 90px rgba(0,0,0,0.65);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+.signinTitle{
+  margin: 0 0 14px;
+  color: rgba(255,255,255,0.92);
+  font: 500 18px/1.2 "Segoe UI", system-ui, sans-serif;
+  letter-spacing: 0.06em;
+}
+
+.signinForm{
+  display: grid;
+  gap: 10px;
+}
+
+.signinLabel{
+  color: rgba(255,255,255,0.72);
+  font: 500 13px/1 "Segoe UI", system-ui, sans-serif;
+}
+
+.signinInput{
+  appearance: none;
+  -webkit-appearance: none;
+
+  width: 100%;
+  padding: 12px 14px;
+
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.16);
+  border-radius: 10px;
+
+  color: rgba(255,255,255,0.86);
+  font: 500 14px/1.2 "Segoe UI", system-ui, sans-serif;
+
+  outline: none;
+}
+
+.signinInput::placeholder{
+  color: rgba(255,255,255,0.40);
+}
+
+.signinInput:focus-visible{
+  outline: 2px solid rgba(255,255,255,0.85);
+  outline-offset: 3px;
+}
+
+.signinHint{
+  color: rgba(255,255,255,0.55);
+  font: 400 12px/1.3 "Segoe UI", system-ui, sans-serif;
+  margin-bottom: 6px;
+}
