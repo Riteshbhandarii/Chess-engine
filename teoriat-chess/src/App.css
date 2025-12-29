@@ -701,6 +701,27 @@ button:active{ transform: translateY(0); }
   transform: translateY(0);
 }
 
+.app.appBg::before{
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  background-image: var(--playBg);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+
+  filter: none;
+  transform: none;
+  z-index: 0;
+}
+
+.app.appBg > *{
+  position: relative;
+  z-index: 1;
+}
+
+
 .sideBtnWide.active{
   box-shadow:
     -3px -3px 8px #444,

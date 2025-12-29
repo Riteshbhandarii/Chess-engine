@@ -465,13 +465,15 @@ function Play({ playerName, playerColor, timeMode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  return (
-    <div
-      className="app"
-      style={{
-        background: "url(/The_Chess_Players_MET_DT1506.jpg) center / cover no-repeat",
-      }}
-    >
+ return (
+  <div
+    className="app appBg"
+    style={{
+      "--playBg": `url(${process.env.PUBLIC_URL}/The_Chess_Players_MET_DT1506.jpg)`,
+    }}
+  >
+
+
       <div className="container playBox">
         <div className="playHudRow">
           <div className="playHudName">{topName}</div>
