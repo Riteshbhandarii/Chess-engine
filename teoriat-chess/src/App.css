@@ -710,41 +710,6 @@ button:active{ transform: translateY(0); }
   color: rgba(245, 240, 232, 0.92);
 }
 
-button.fsBtn{
-  position: fixed !important;   /* key change */
-  top: 16px !important;
-  right: 16px !important;
-  z-index: 2147483647 !important;
-
-  width: 42px !important;
-  height: 42px !important;
-  padding: 0 !important;
-  margin: 0 !important;
-
-  display: grid !important;
-  place-items: center !important;
-
-  border-radius: 10px !important;
-  background: rgba(0,0,0,0.55) !important;
-  border: 1px solid rgba(255,255,255,0.25) !important;
-  color: rgba(255,255,255,0.95) !important;
-
-  text-transform: none !important;
-  letter-spacing: 0 !important;
-  font: 700 18px/1 "Segoe UI", system-ui, sans-serif !important;
-
-  cursor: pointer !important;
-  transform: none !important;
-  box-shadow: none !important;
-}
-button.fsBtn:hover{
-  background: rgba(0,0,0,0.70) !important;
-  transform: none !important;
-  box-shadow: none !important;
-}
-
-
-
 /* Responsive */
 @media (max-width: 980px){
   .sideGrid{ grid-template-columns: 1fr; }

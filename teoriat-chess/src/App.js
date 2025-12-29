@@ -315,9 +315,9 @@ function Play({ playerName, playerColor, timeMode }) {
   const [game] = useState(() => new Chess());
   const [position, setPosition] = useState("start");
   const [moveHistory, setMoveHistory] = useState([]);
-  const [status, setStatus] = useState("");
   const [busy, setBusy] = useState(false);
 
+  // board size (simple desktop responsive)
   const [boardWidth, setBoardWidth] = useState(() => Math.min(560, Math.floor(window.innerWidth * 0.92)));
 
   useEffect(() => {
@@ -366,27 +366,8 @@ function Play({ playerName, playerColor, timeMode }) {
     return () => clearInterval(t);
   }, [clockRunning, game]);
 
-  // --- Fullscreen (board only) ---
-  const fsRef = useRef(null);
-  const [isFs, setIsFs] = useState(false);
-
-  useEffect(() => {
-    const onFsChange = () => setIsFs(Boolean(document.fullscreenElement));
-    document.addEventListener("fullscreenchange", onFsChange);
-    return () => document.removeEventListener("fullscreenchange", onFsChange);
-  }, []);
-
-  async function toggleFullscreen() {
-    if (!fsRef.current) return;
-    try {
-      if (document.fullscreenElement) await document.exitFullscreen();
-      else await fsRef.current.requestFullscreen();
-    } catch {}
-  }
-
   async function askEngine(movesSoFar) {
     setBusy(true);
-    setStatus("");
 
     try {
       const res = await fetch("http://localhost:8000/move", {
@@ -396,12 +377,6 @@ function Play({ playerName, playerColor, timeMode }) {
       });
 
       if (!res.ok) {
-        let errText = `HTTP ${res.status}`;
-        try {
-          const err = await res.json();
-          if (err?.detail) errText = err.detail;
-        } catch {}
-        setStatus(`Engine error: ${errText}`);
         setBusy(false);
         return;
       }
@@ -413,7 +388,6 @@ function Play({ playerName, playerColor, timeMode }) {
       const promotion = uci.length > 4 ? uci[4] : undefined;
 
       if (game.turn() !== engineColor) {
-        setStatus("State desync (wrong turn). Reset and try again.");
         setBusy(false);
         return;
       }
@@ -426,7 +400,6 @@ function Play({ playerName, playerColor, timeMode }) {
       }
 
       if (!engineMove) {
-        setStatus(`Engine gave illegal move: ${uci}`);
         setBusy(false);
         return;
       }
@@ -435,17 +408,10 @@ function Play({ playerName, playerColor, timeMode }) {
       const engineUci = `${from}${to}${engineMove.promotion || ""}`;
       setMoveHistory((prev) => [...prev, engineUci]);
 
-      if (game.isGameOver()) {
-        setClockRunning(false);
-        if (game.isCheckmate()) setStatus("Checkmate!");
-        else if (game.isDraw()) setStatus("Game drawn!");
-        else if (game.isStalemate()) setStatus("Stalemate!");
-        else setStatus("Game over!");
-      }
+      if (game.isGameOver()) setClockRunning(false);
 
       setBusy(false);
     } catch {
-      setStatus("Engine offline / CORS / network error");
       setBusy(false);
     }
   }
@@ -481,10 +447,6 @@ function Play({ playerName, playerColor, timeMode }) {
 
     if (game.isGameOver()) {
       setClockRunning(false);
-      if (game.isCheckmate()) setStatus("Checkmate!");
-      else if (game.isDraw()) setStatus("Game drawn!");
-      else if (game.isStalemate()) setStatus("Stalemate!");
-      else setStatus("Game over!");
       return true;
     }
 
@@ -494,18 +456,6 @@ function Play({ playerName, playerColor, timeMode }) {
 
   function isDraggablePiece({ piece }) {
     return !busy && game.turn() === playerColor && piece[0].toLowerCase() === playerColor;
-  }
-
-  function reset() {
-    game.reset();
-    setPosition(game.fen());
-    setMoveHistory([]);
-    setBusy(false);
-    setStatus("");
-
-    setWhiteSec(startSeconds);
-    setBlackSec(startSeconds);
-    setClockRunning(true);
   }
 
   useEffect(() => {
@@ -528,29 +478,16 @@ function Play({ playerName, playerColor, timeMode }) {
           <div className="playHudClock">{topClock}</div>
         </div>
 
-        {/* BOARD + fullscreen toggle */}
-        <div ref={fsRef} className="fsWrap">
-          <button
-            type="button"
-            className={`fsBtn ${isFs ? "on" : ""}`}
-            onClick={toggleFullscreen}
-            aria-label={isFs ? "Exit fullscreen" : "Enter fullscreen"}
-            title={isFs ? "Exit fullscreen" : "Fullscreen"}
-          >
-            ⛶
-          </button>
-
-          <div className="boardTopLeft">
-            <Chessboard
-              position={position}
-              onPieceDrop={onPieceDrop}
-              isDraggablePiece={isDraggablePiece}
-              boardWidth={boardWidth}
-              boardOrientation={playerColor === "w" ? "white" : "black"}
-              customDarkSquareStyle={{ backgroundColor: "#b58863" }}
-              customLightSquareStyle={{ backgroundColor: "#f0d9b5" }}
-            />
-          </div>
+        <div className="boardTopLeft">
+          <Chessboard
+            position={position}
+            onPieceDrop={onPieceDrop}
+            isDraggablePiece={isDraggablePiece}
+            boardWidth={boardWidth}
+            boardOrientation={playerColor === "w" ? "white" : "black"}
+            customDarkSquareStyle={{ backgroundColor: "#b58863" }}
+            customLightSquareStyle={{ backgroundColor: "#f0d9b5" }}
+          />
         </div>
 
         <div className="playHudRow">
@@ -561,6 +498,8 @@ function Play({ playerName, playerColor, timeMode }) {
     </div>
   );
 }
+
+
 
 export default function App() {
   const [playerName, setPlayerName] = useState("");
