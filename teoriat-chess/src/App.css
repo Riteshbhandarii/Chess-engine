@@ -4,16 +4,21 @@
 /* Play screen */
 .app{
   min-height: 100vh;
+
+  /* will be overridden by inline style on Play (image bg) */
   background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+
   font-family: "Segoe UI", system-ui, sans-serif;
   position: relative;
   overflow: hidden;
-  display: flex;
-  align-items: flex-start;
-  justify-content: flex-start;
-  padding: 16px;
+
+  /* MATCH shell */
+  display: grid;
+  place-items: start center;
+  padding: 24px 16px;
 }
 
+/* Stars (harmless if not rendered) */
 .stars{
   position: fixed;
   inset: 0;
@@ -54,22 +59,31 @@
   to { transform: translateY(-1000px); }
 }
 
-/* Main content box (Play screen) */
+/* Main content box (Play screen) — MATCH sideLayout */
 .container{
   position: relative;
   z-index: 10;
-  background: rgba(25, 30, 40, 0.95);
-  width: min(92vw, 720px);
-  padding: 50px;
-  border-radius: 16px;
-  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.7), 0 0 100px rgba(100, 150, 255, 0.1);
-  backdrop-filter: blur(15px);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  margin: 0;
+
+  width: min(92vw, 1200px);
+  margin-top: 30px;          /* same as sideLayout */
+  padding: 22px 22px 26px;
+
+  border-radius: 0;          /* square */
+
+  background: rgba(20, 18, 16, 0.55);
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.7);
+  backdrop-filter: blur(10px);
 }
 
-.boardTopLeft{ margin-top: 8px; }
+/* Center the board */
+.boardTopLeft{
+  margin-top: 8px;
+  display: flex;
+  justify-content: center;
+}
 
+/* Title + typography */
 h1{
   text-align: left;
   color: #e8e8e8;
@@ -129,7 +143,7 @@ button:active{ transform: translateY(0); }
   .container{
     width: 94vw;
     padding: 16px;
-    border-radius: 14px;
+    margin-top: 18px;
   }
 
   h1{
@@ -369,7 +383,6 @@ button:active{ transform: translateY(0); }
 @keyframes fadeIn{
   from { opacity: 0; }
   to { opacity: 1; }
-
 }
 
 .signin::before{
@@ -382,15 +395,12 @@ button:active{ transform: translateY(0); }
   pointer-events: none;
 }
 
-
 .signinCard{
   position: relative;
   z-index: 2;
   width: min(92vw, 720px);
   padding: 26px 26px 28px;
-
   border-radius: 0; /* square */
-
   background: rgba(18, 20, 26, 0.42);
   border: 1px solid rgba(255,255,255,0.12);
   box-shadow: 0 25px 80px rgba(0,0,0,0.65);
@@ -398,18 +408,6 @@ button:active{ transform: translateY(0); }
   -webkit-backdrop-filter: blur(18px);
   transform: none;
   animation: none;
-}
-
-
-@keyframes slideUp{
-  from{
-    opacity: 0;
-    transform: translate(1vw, calc(19vh + 20px));
-  }
-  to{
-    opacity: 1;
-    transform: translate(1vw, 19vh);
-  }
 }
 
 .signinTitle{
@@ -462,12 +460,6 @@ button:active{ transform: translateY(0); }
   outline: none;
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
   box-shadow: none;
-}
-
-.signinInput:focus,
-.signinInput:focus-visible{
-  border-bottom-color: rgba(255,255,255,0.92);
-  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
 }
 
 .signinInput::placeholder{
@@ -590,15 +582,13 @@ button:active{ transform: translateY(0); }
 /* SideSelect: board left, controls right */
 .sideLayout{
   width: min(92vw, 1200px);
-  margin-top: 30px; /* tweak: 12px–48px */
-
-  border-radius: 0; /* square */
-
-  /* key: let painting show through */
+  margin-top: 30px;
+  border-radius: 0;
   background: rgba(20, 18, 16, 0.55);
   border: 1px solid rgba(255,255,255,0.08);
   backdrop-filter: blur(10px);
 }
+
 .sideMeta{ display: none; }
 
 .sideGrid{
@@ -615,8 +605,6 @@ button:active{ transform: translateY(0); }
   align-items: center;
   width: 100%;
   padding: 24px;
-
-  /* translucent, not solid */
   background: rgba(38, 36, 33, 0.45);
 }
 
@@ -624,8 +612,6 @@ button:active{ transform: translateY(0); }
   display: flex;
   justify-content: center;
   width: 100%;
-
-  /* translucent, not solid */
   background: rgba(43, 41, 38, 0.55);
   border-left: 1px solid rgba(0,0,0,0.45);
   padding: 24px 20px;
