@@ -715,29 +715,44 @@ button:active{ transform: translateY(0); }
   z-index: 0;
 }
 
-/* Slight dark mode on background only */
+.app.appBg::before{
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  background-image: var(--playBg);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+
+  z-index: 0;
+}
+
+/* 2x darker background */
 .app.appBg::after{
   content: "";
   position: absolute;
   inset: 0;
 
-  background: rgba(0,0,0,0.22);
+  background: rgba(0,0,0,0.60);
   z-index: 0;
 }
 
-/* Keep UI above background layers */
 .app.appBg > *{
   position: relative;
   z-index: 1;
 }
 
-/* Board comes forward */
+/* 2x board pop */
 .boardTopLeft{
-  border-radius: 14px;
+  border-radius: 18px;
+  transform: translateZ(0) scale(1.04);
+
   box-shadow:
-    0 28px 90px rgba(0,0,0,0.55),
-    0 10px 22px rgba(0,0,0,0.35);
-  transform: translateZ(0) scale(1.01);
+    0 2px 0 rgba(255,255,255,0.08),
+    0 14px 26px rgba(0,0,0,0.45),
+    0 34px 70px rgba(0,0,0,0.60),
+    0 70px 160px rgba(0,0,0,0.85);
 }
 
 
