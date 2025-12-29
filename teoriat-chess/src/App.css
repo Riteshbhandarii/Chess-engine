@@ -1,6 +1,5 @@
 /* Base */
-* { margin: 0; padding: 0; box-sizing: border-box; }
-
+*{ margin: 0; padding: 0; box-sizing: border-box; }
 
 /* Play screen */
 .app{
@@ -9,20 +8,17 @@
   font-family: "Segoe UI", system-ui, sans-serif;
   position: relative;
   overflow: hidden;
-
   display: flex;
   align-items: flex-start;
   justify-content: flex-start;
   padding: 16px;
 }
 
-
 .stars{
   position: fixed;
   inset: 0;
   pointer-events: none;
 }
-
 
 .stars::before,
 .stars::after{
@@ -42,7 +38,6 @@
   animation: stars-move 100s linear infinite;
 }
 
-
 .stars::after{
   width: 1px;
   height: 1px;
@@ -54,14 +49,12 @@
   animation: stars-move 150s linear infinite;
 }
 
-
 @keyframes stars-move{
   from { transform: translateY(0); }
   to { transform: translateY(-1000px); }
 }
 
-
-/* Main content box */
+/* Main content box (Play screen) */
 .container{
   position: relative;
   z-index: 10;
@@ -73,12 +66,9 @@
   backdrop-filter: blur(15px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   margin: 0;
-  animation: none;
 }
 
-
 .boardTopLeft{ margin-top: 8px; }
-
 
 h1{
   text-align: left;
@@ -91,7 +81,6 @@ h1{
   text-shadow: 0 0 40px rgba(200, 220, 255, 0.3);
 }
 
-
 .controls{
   margin-top: 30px;
   display: flex;
@@ -100,7 +89,7 @@ h1{
   gap: 20px;
 }
 
-
+/* Global button (default) */
 button{
   padding: 14px 32px;
   background: linear-gradient(135deg, #4a5568 0%, #2d3748 100%);
@@ -115,16 +104,13 @@ button{
   text-transform: uppercase;
 }
 
-
 button:hover{
   background: linear-gradient(135deg, #5a6678 0%, #3d4758 100%);
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(100, 150, 255, 0.2);
 }
 
-
 button:active{ transform: translateY(0); }
-
 
 .status{
   color: #c7d2e0;
@@ -138,8 +124,7 @@ button:active{ transform: translateY(0); }
   font-weight: 400;
 }
 
-
-/* Mobile */
+/* Mobile (Play screen) */
 @media (max-width: 768px){
   .container{
     width: 94vw;
@@ -168,7 +153,7 @@ button:active{ transform: translateY(0); }
   }
 }
 
-
+/* Landing */
 .landing{
   min-height: 100vh;
   display: grid;
@@ -196,20 +181,16 @@ button:active{ transform: translateY(0); }
   top: 18px;
   right: 18px;
   z-index: 60;
-
   background: transparent;
   border: 0;
   padding: 10px 12px;
   border-radius: 10px;
-
   font: 500 14px/1 "Segoe UI", system-ui, sans-serif;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-
   color: rgba(255,255,255,0.60);
   text-shadow: 0 1px 12px rgba(0,0,0,0.45);
   cursor: pointer;
-
   transition: color 180ms ease, text-shadow 180ms ease, background-color 180ms ease, transform 180ms ease;
   mix-blend-mode: soft-light;
 }
@@ -236,12 +217,10 @@ button:active{ transform: translateY(0); }
   width: min(320px, 86vw);
   padding: 76px 16px 16px;
   z-index: 70;
-
   background: rgba(18, 20, 26, 0.55);
   border-left: 1px solid rgba(255,255,255,0.14);
   backdrop-filter: blur(18px);
   -webkit-backdrop-filter: blur(18px);
-
   transform: translateX(100%);
   transition: transform 220ms ease;
 }
@@ -252,25 +231,20 @@ button:active{ transform: translateY(0); }
   width: 100%;
   text-align: left;
   margin-bottom: 10px;
-
   background: rgba(12, 10, 8, 0.08);
   border: 1px solid rgba(235, 228, 218, 0.16);
   border-radius: 0;
-
   font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
   font-size: 14px;
   font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-
   color: rgba(255,255,255,0.60);
-
   box-shadow:
     -5px -5px 15px rgba(255,255,255,0.05),
     5px 5px 15px rgba(0,0,0,0.35),
     inset 2px 2px 6px rgba(255,255,255,0.06),
     inset -2px -2px 6px rgba(0,0,0,0.28);
-
   cursor: pointer;
   transition: 300ms;
 }
@@ -278,7 +252,6 @@ button:active{ transform: translateY(0); }
 .landingMenuItem:hover{
   color: rgba(245, 240, 232, 0.92);
   background: rgba(12, 10, 8, 0.12);
-
   box-shadow:
     -5px -5px 15px rgba(255,255,255,0.04),
     5px 5px 15px rgba(0,0,0,0.40),
@@ -324,7 +297,6 @@ button:active{ transform: translateY(0); }
   bottom: clamp(42px, 7vh, 90px);
   transform: translateX(-50%);
   z-index: 20;
-
   width: auto;
   padding: 0;
   background: transparent;
@@ -338,15 +310,16 @@ button:active{ transform: translateY(0); }
   width: 140px;
   border-radius: 10px;
   background: #333;
-  box-shadow: -5px -5px 15px #444, 5px 5px 15px #222, inset 5px 5px 10px #444,
+  box-shadow:
+    -5px -5px 15px #444,
+    5px 5px 15px #222,
+    inset 5px 5px 10px #444,
     inset -5px -5px 10px #222;
-
   font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
   font-size: 14px;
   font-weight: 500;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-
   cursor: pointer;
   border: none;
   color: rgba(255,255,255,0.60);
@@ -354,10 +327,12 @@ button:active{ transform: translateY(0); }
 }
 
 .landingBegin:hover{
-  box-shadow: -5px -5px 15px #444, 5px 5px 15px #222, inset 5px 5px 10px #222,
+  box-shadow:
+    -5px -5px 15px #444,
+    5px 5px 15px #222,
+    inset 5px 5px 10px #222,
     inset -5px -5px 10px #444;
   color: rgba(245, 240, 232, 0.92);
-  transition: 500ms;
 }
 
 .landingMenuBtn:focus-visible,
@@ -377,26 +352,23 @@ button:active{ transform: translateY(0); }
     letter-spacing: 0.18em;
   }
 }
+
+/* Sign-in */
 .signin{
   min-height: 100vh;
   display: grid;
   place-items: center;
   padding: 0 34px;
   position: relative;
-  background: var(--landingBg) 50% 45% /112% no-repeat;
+  background: var(--landingBg) 50% 45% / 112% no-repeat;
   background-color: rgba(0,0,0,0.38);
   background-blend-mode: multiply;
-  /* Add fade-in animation */
   animation: fadeIn 0.6s ease-out;
 }
 
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
+@keyframes fadeIn{
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .signin::before{
@@ -409,7 +381,6 @@ button:active{ transform: translateY(0); }
   pointer-events: none;
 }
 
-/* text container */
 .signinCard{
   position: relative;
   z-index: 2;
@@ -421,42 +392,19 @@ button:active{ transform: translateY(0); }
   box-shadow: none;
   backdrop-filter: none;
   -webkit-backdrop-filter: none;
-  /* placement on the painting (tweak) */
   transform: translate(1vw, 19vh);
-  /* Add subtle slide-up animation */
   animation: slideUp 0.8s ease-out 0.2s both;
 }
 
-@keyframes slideUp {
-  from {
+@keyframes slideUp{
+  from{
     opacity: 0;
     transform: translate(1vw, calc(19vh + 20px));
   }
-  to {
+  to{
     opacity: 1;
     transform: translate(1vw, 19vh);
   }
-}
-
-/* top-right BACK (inside the sign-in area) */
-.signinBack{
-  position: absolute;
-  top: -48px;
-  right: 0;
-  background: transparent;
-  border: 0;
-  padding: 8px 6px;
-  color: rgba(255,255,255,0.75);
-  font: 600 14px/1 "Segoe UI", system-ui, sans-serif;
-  letter-spacing: 0.22em;
-  text-transform: uppercase;
-  text-shadow: 0 2px 14px rgba(0,0,0,0.85);
-  cursor: pointer;
-  transition: color 0.3s ease;
-}
-
-.signinBack:hover{
-  color: rgba(255,255,255,0.95);
 }
 
 .signinTitle{
@@ -469,7 +417,6 @@ button:active{ transform: translateY(0); }
   text-shadow: inherit;
 }
 
-/* size tweaks */
 .signin .landingBegin{
   width: auto;
   min-width: 100px;
@@ -495,7 +442,6 @@ button:active{ transform: translateY(0); }
   margin: 10px 0 18px;
 }
 
-/* Enhanced underline input with better visibility and glow effect */
 .signinInput{
   appearance: none;
   -webkit-appearance: none;
@@ -503,14 +449,13 @@ button:active{ transform: translateY(0); }
   padding: 10px 2px 8px;
   background: transparent;
   border: 0;
-  border-bottom: 2px solid rgba(255,255,255,0.62); /* Increased from 0.48 */
+  border-bottom: 2px solid rgba(255,255,255,0.62);
   border-radius: 0;
   color: rgba(255,255,255,0.92);
   font: 600 16px/1.2 "Segoe UI", system-ui, sans-serif;
   text-shadow: 0 2px 16px rgba(0,0,0,0.85);
   outline: none;
   transition: all 0.3s ease;
-  /* Add subtle glow by default */
   box-shadow: 0 1px 8px rgba(255,255,255,0.08);
 }
 
@@ -525,45 +470,189 @@ button:active{ transform: translateY(0); }
 
 .signinInput:focus,
 .signinInput:focus-visible{
-  border-bottom-color: rgba(255,255,255,0.95); /* Brighter when focused */
+  border-bottom-color: rgba(255,255,255,0.95);
   outline: none;
-  /* Enhanced glow effect on focus */
-  box-shadow: 
+  box-shadow:
     0 1px 12px rgba(255,255,255,0.25),
     0 2px 24px rgba(255,255,255,0.15);
 }
 
-.signinInput:focus::placeholder{
-  color: rgba(255,255,255,0.50);
-}
-
-/* CONTINUE button with smooth transitions */
-.signinContinue{
-  margin-top: 18px;
-  padding: 10px 0;
-  background: transparent;
-  border: 0;
-  color: rgba(255,255,255,0.78);
-  font: 600 16px/1 "Segoe UI", system-ui, sans-serif;
-  letter-spacing: 0.32em;
-  text-transform: uppercase;
-  text-shadow: 0 2px 16px rgba(0,0,0,0.85);
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.signinContinue:hover{
-  color: rgba(255,255,255,0.92);
-  text-shadow: 0 2px 20px rgba(0,0,0,0.95);
-  transform: translateY(-1px);
-}
-
-.signinContinue:active{
-  transform: translateY(0);
-}
+.signinInput:focus::placeholder{ color: rgba(255,255,255,0.50); }
 
 .signinBackGlobal{
   opacity: 1 !important;
   color: rgba(255,255,255,1) !important;
   font-weight: 700;
+}
+
+/* Generic pages */
+.shell{
+  min-height: 100vh;
+  padding: 24px 16px;
+  display: grid;
+  place-items: start center;
+  background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+  font-family: "Segoe UI", system-ui, sans-serif;
+  color: rgba(255,255,255,0.92);
+}
+
+.card{
+  width: min(92vw, 720px);
+  background: rgba(25, 30, 40, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.7), 0 0 100px rgba(100, 150, 255, 0.1);
+  backdrop-filter: blur(15px);
+  padding: 22px 22px 26px;
+}
+
+.topbar{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.title{
+  margin: 0;
+  font-size: 22px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 300;
+  color: rgba(255,255,255,0.92);
+  text-shadow: 0 0 30px rgba(200, 220, 255, 0.18);
+}
+
+.linkBtn{
+  background: transparent;
+  border: 0;
+  padding: 8px 10px;
+  border-radius: 10px;
+  font: 600 13px/1 "Segoe UI", system-ui, sans-serif;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.70);
+  cursor: pointer;
+  transition: color 180ms ease, background-color 180ms ease, transform 180ms ease;
+  width: auto;
+}
+
+.linkBtn:hover{
+  color: rgba(255,255,255,0.95);
+  background-color: rgba(0,0,0,0.18);
+  transform: translateY(-1px);
+}
+
+.text{
+  color: rgba(255,245,235,0.84);
+  line-height: 1.55;
+  font-size: 15px;
+}
+
+.text p{ margin: 10px 0; }
+
+/* SideSelect: board left, controls right */
+/* SideSelect: board left, controls right */
+.sideLayout{
+  width: min(92vw, 1200px);
+  background: #262421;
+}
+
+.sideMeta{
+  display: none;
+}
+
+.sideGrid{
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  gap: 0;
+  align-items: start;
+  margin-top: 0;
+}
+
+.sideLeft{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 24px;
+  background: #262421;
+}
+
+.sideRight{
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  background: #2b2926;
+  border-left: 1px solid #1a1816;
+  padding: 24px 20px;
+}
+
+.sidePanel{
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+}
+
+.sideSectionTitle{
+  font: 600 11px/1 "Segoe UI", system-ui, sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.50);
+  margin-bottom: 12px;
+}
+
+.sideToggle{
+  display: grid;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.sideBtnWide{
+  width: 100%;
+  height: 44px;
+  margin: 0;
+  padding: 0 16px;
+  border-radius: 6px;
+  background: #333;
+  box-shadow:
+    -3px -3px 8px #444,
+    3px 3px 8px #222,
+    inset 3px 3px 6px #444,
+    inset -3px -3px 6px #222;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  cursor: pointer;
+  border: none;
+  color: rgba(255,255,255,0.60);
+  transition: 300ms;
+}
+
+.sideBtnWide:hover{
+  color: rgba(245, 240, 232, 0.80);
+  transform: translateY(0);
+}
+
+.sideBtnWide.active{
+  box-shadow:
+    -3px -3px 8px #444,
+    3px 3px 8px #222,
+    inset 3px 3px 6px #222,
+    inset -3px -3px 6px #444;
+  color: rgba(245, 240, 232, 0.92);
+}
+
+
+.sideBtnWide.active{
+  background: rgba(255,255,255,0.95);
+  border: 1px solid rgba(255,255,255,1);
+  color: rgba(0,0,0,0.90);
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(255,255,255,0.25);
 }

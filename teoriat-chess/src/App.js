@@ -50,13 +50,7 @@ function Landing({ playerName, setPlayerName }) {
         </button>
       </div>
 
-      {menuOpen && (
-        <div
-          className="landingMenuBackdrop"
-          onClick={() => setMenuOpen(false)}
-          aria-hidden="true"
-        />
-      )}
+      {menuOpen && <div className="landingMenuBackdrop" onClick={() => setMenuOpen(false)} aria-hidden="true" />}
 
       <div className="landingHero">
         <h1 className="landingTitle">“The art of thinking ahead.”</h1>
@@ -91,7 +85,6 @@ function SignIn({ playerName, setPlayerName }) {
         "--landingBg": `url(${process.env.PUBLIC_URL}/Honoré_Daumier_032.jpg)`,
       }}
     >
-      {/* Back OUTSIDE the sign-in content, same style as Menu */}
       <button className="landingMenuBtn signinBackGlobal" type="button" onClick={() => nav("/")}>
         Back
       </button>
@@ -125,7 +118,6 @@ function SignIn({ playerName, setPlayerName }) {
   );
 }
 
-
 function HowToPlay() {
   const nav = useNavigate();
   return (
@@ -140,7 +132,7 @@ function HowToPlay() {
 
         <div className="text">
           <p>1) Enter username.</p>
-          <p>2) Choose side.</p>
+          <p>2) Choose side + time.</p>
           <p>3) Make a move; engine responds.</p>
           <p>Tip: Drag and drop pieces to move.</p>
         </div>
@@ -190,41 +182,6 @@ function Leaderboard() {
   );
 }
 
-function SideSelect({ playerName, playerColor, setPlayerColor }) {
-  const nav = useNavigate();
-
-  function pick(color) {
-    setPlayerColor(color);
-    nav("/play");
-  }
-
-  return (
-    <div className="shell">
-      <div className="card">
-        <div className="topbar">
-          <h2 className="title">Choose side</h2>
-          <button className="linkBtn" onClick={() => nav("/")}>
-            Back
-          </button>
-        </div>
-
-        <div className="text" style={{ marginBottom: 12 }}>
-          Playing as: {playerName}
-        </div>
-
-        <div className="row">
-          <button className={`choice ${playerColor === "w" ? "active" : ""}`} onClick={() => pick("w")}>
-            White
-          </button>
-          <button className={`choice ${playerColor === "b" ? "active" : ""}`} onClick={() => pick("b")}>
-            Black
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 function About() {
   const nav = useNavigate();
 
@@ -240,7 +197,8 @@ function About() {
 
         <div className="text">
           <p>
-            TEORIAT is a personal chess engine project built to imitate my own move choices while filtering out obvious blunders.
+            TEORIAT is a personal chess engine project built to imitate my own move choices while filtering out obvious
+            blunders.
           </p>
           <p>I built it to learn ML-driven gameplay, deploy it as an API, and make a clean UI for testing and playing.</p>
         </div>
@@ -249,16 +207,107 @@ function About() {
   );
 }
 
-function Play({ playerName, playerColor }) {
+function SideSelect({ playerName, playerColor, setPlayerColor, timeMode, setTimeMode }) {
+  const nav = useNavigate();
+
+  const [previewWidth, setPreviewWidth] = useState(() =>
+    Math.min(640, Math.floor(window.innerWidth * 0.62))
+  );
+
+  useEffect(() => {
+    const onResize = () => setPreviewWidth(Math.min(640, Math.floor(window.innerWidth * 0.62)));
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, []);
+
+  function start(color) {
+    setPlayerColor(color);
+    nav("/play");
+  }
+
+  return (
+    <div className="shell">
+      <div className="card sideLayout">
+        <div className="topbar">
+          <h2 className="title">Choose side</h2>
+          <button className="linkBtn" onClick={() => nav("/")}>
+            Back
+          </button>
+        </div>
+
+        <div className="text sideMeta">Playing as: {playerName}</div>
+
+        <div className="sideGrid">
+          <div className="sideLeft">
+            <Chessboard
+              position="start"
+              boardWidth={previewWidth}
+              arePiecesDraggable={false}
+              boardOrientation={playerColor === "b" ? "black" : "white"}
+              customDarkSquareStyle={{ backgroundColor: "#b58863" }}
+              customLightSquareStyle={{ backgroundColor: "#f0d9b5" }}
+            />
+          </div>
+
+          <div className="sideRight">
+            <div className="sidePanel">
+              <div className="sideSectionTitle">Time</div>
+
+              <div className="sideToggle">
+                <button
+                  type="button"
+                  className={`landingBegin sideBtnWide ${timeMode === "rapid" ? "active" : ""}`}
+                  onClick={() => setTimeMode("rapid")}
+                >
+                  10 min (Rapid)
+                </button>
+
+                <button
+                  type="button"
+                  className={`landingBegin sideBtnWide ${timeMode === "bullet" ? "active" : ""}`}
+                  onClick={() => setTimeMode("bullet")}
+                >
+                  1 min (Bullet)
+                </button>
+              </div>
+
+              <div className="sideSectionTitle" style={{ marginTop: 14 }}>
+                Side
+              </div>
+
+              <div className="sideToggle">
+                <button
+                  type="button"
+                  className={`landingBegin sideBtnWide ${playerColor === "w" ? "active" : ""}`}
+                  onClick={() => start("w")}
+                >
+                  Play White
+                </button>
+
+                <button
+                  type="button"
+                  className={`landingBegin sideBtnWide ${playerColor === "b" ? "active" : ""}`}
+                  onClick={() => start("b")}
+                >
+                  Play Black
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function Play({ playerName, playerColor, timeMode }) {
   const [game] = useState(() => new Chess());
   const [position, setPosition] = useState("start");
   const [moveHistory, setMoveHistory] = useState([]);
   const [status, setStatus] = useState(playerColor === "w" ? "Your move (White)" : "Engine thinking...");
   const [busy, setBusy] = useState(false);
 
-  const [boardWidth, setBoardWidth] = useState(() =>
-    Math.min(560, Math.floor(window.innerWidth * 0.92))
-  );
+  const [boardWidth, setBoardWidth] = useState(() => Math.min(560, Math.floor(window.innerWidth * 0.92)));
 
   useEffect(() => {
     const onResize = () => setBoardWidth(Math.min(560, Math.floor(window.innerWidth * 0.92)));
@@ -276,7 +325,7 @@ function Play({ playerName, playerColor }) {
       const res = await fetch("http://localhost:8000/move", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ moves: movesSoFar }),
+        body: JSON.stringify({ moves: movesSoFar, mode: timeMode }),
       });
 
       if (!res.ok) {
@@ -291,7 +340,6 @@ function Play({ playerName, playerColor }) {
       }
 
       const data = await res.json();
-
       const uci = data.move;
       const from = uci.slice(0, 2);
       const to = uci.slice(2, 4);
@@ -317,7 +365,6 @@ function Play({ playerName, playerColor }) {
       }
 
       setPosition(game.fen());
-
       const engineUci = `${from}${to}${engineMove.promotion || ""}`;
       setMoveHistory((prev) => [...prev, engineUci]);
 
@@ -406,7 +453,7 @@ function Play({ playerName, playerColor }) {
         <div className="topbar">
           <h1>TEORIAT</h1>
           <div className="status">
-            {playerName} ({playerColor === "w" ? "White" : "Black"})
+            {playerName} ({playerColor === "w" ? "White" : "Black"}) • {timeMode === "rapid" ? "10:00" : "1:00"}
           </div>
         </div>
 
@@ -436,13 +483,12 @@ function Play({ playerName, playerColor }) {
 export default function App() {
   const [playerName, setPlayerName] = useState("");
   const [playerColor, setPlayerColor] = useState(null);
+  const [timeMode, setTimeMode] = useState("rapid");
 
   return (
     <Routes>
       <Route path="/" element={<Landing playerName={playerName} setPlayerName={setPlayerName} />} />
-
       <Route path="/signin" element={<SignIn playerName={playerName} setPlayerName={setPlayerName} />} />
-
       <Route path="/about" element={<About />} />
       <Route path="/how" element={<HowToPlay />} />
       <Route path="/feedback" element={<Feedback />} />
@@ -456,6 +502,8 @@ export default function App() {
               playerName={playerName}
               playerColor={playerColor}
               setPlayerColor={setPlayerColor}
+              timeMode={timeMode}
+              setTimeMode={setTimeMode}
             />
           ) : (
             <Navigate to="/" replace />
@@ -467,7 +515,7 @@ export default function App() {
         path="/play"
         element={
           playerName && playerColor ? (
-            <Play playerName={playerName} playerColor={playerColor} />
+            <Play playerName={playerName} playerColor={playerColor} timeMode={timeMode} />
           ) : (
             <Navigate to="/" replace />
           )
