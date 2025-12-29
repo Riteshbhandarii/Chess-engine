@@ -318,10 +318,12 @@ function Play({ playerName, playerColor, timeMode }) {
   const [game] = useState(() => new Chess());
   const [position, setPosition] = useState("start");
   const [moveHistory, setMoveHistory] = useState([]);
-  const [status, setStatus] = useState(playerColor === "w" ? "Your move (White)" : "Engine thinking...");
+  const [status, setStatus] = useState("");
   const [busy, setBusy] = useState(false);
 
-  const [boardWidth, setBoardWidth] = useState(() => Math.min(560, Math.floor(window.innerWidth * 0.92)));
+  const [boardWidth, setBoardWidth] = useState(() =>
+    Math.min(560, Math.floor(window.innerWidth * 0.92))
+  );
 
   useEffect(() => {
     const onResize = () => setBoardWidth(Math.min(560, Math.floor(window.innerWidth * 0.92)));
@@ -331,9 +333,51 @@ function Play({ playerName, playerColor, timeMode }) {
 
   const engineColor = useMemo(() => (playerColor === "w" ? "b" : "w"), [playerColor]);
 
+  // --- Timers (simple countdown, no increment) ---
+  const startSeconds = useMemo(() => (timeMode === "rapid" ? 10 * 60 : 60), [timeMode]);
+  const [whiteSec, setWhiteSec] = useState(startSeconds);
+  const [blackSec, setBlackSec] = useState(startSeconds);
+  const [clockRunning, setClockRunning] = useState(true);
+
+  useEffect(() => {
+    // when mode changes / new game mounts
+    setWhiteSec(startSeconds);
+    setBlackSec(startSeconds);
+    setClockRunning(true);
+  }, [startSeconds]);
+
+  function fmt(sec) {
+    const s = Math.max(0, sec);
+    const mm = String(Math.floor(s / 60)).padStart(1, "0");
+    const ss = String(s % 60).padStart(2, "0");
+    return `${mm}:${ss}`;
+  }
+
+  const engineName = "TEORIAT";
+  const topName = engineName;
+  const bottomName = playerName;
+
+  const topClock =
+    engineColor === "w" ? fmt(whiteSec) : fmt(blackSec);
+
+  const bottomClock =
+    playerColor === "w" ? fmt(whiteSec) : fmt(blackSec);
+
+  useEffect(() => {
+    if (!clockRunning) return;
+
+    const t = setInterval(() => {
+      const turn = game.turn(); // "w" | "b"
+      if (turn === "w") setWhiteSec((v) => (v > 0 ? v - 1 : 0));
+      else setBlackSec((v) => (v > 0 ? v - 1 : 0));
+    }, 1000);
+
+    return () => clearInterval(t);
+  }, [clockRunning, game]);
+
   async function askEngine(movesSoFar) {
     setBusy(true);
-    setStatus("Engine thinking...");
+    setStatus("");
 
     try {
       const res = await fetch("http://localhost:8000/move", {
@@ -383,12 +427,11 @@ function Play({ playerName, playerColor, timeMode }) {
       setMoveHistory((prev) => [...prev, engineUci]);
 
       if (game.isGameOver()) {
+        setClockRunning(false);
         if (game.isCheckmate()) setStatus("Checkmate!");
         else if (game.isDraw()) setStatus("Game drawn!");
         else if (game.isStalemate()) setStatus("Stalemate!");
         else setStatus("Game over!");
-      } else {
-        setStatus(playerColor === "w" ? "Your move (White)" : "Your move (Black)");
       }
 
       setBusy(false);
@@ -419,7 +462,6 @@ function Play({ playerName, playerColor, timeMode }) {
     } catch {
       return false;
     }
-
     if (move === null) return false;
 
     setPosition(game.fen());
@@ -429,6 +471,7 @@ function Play({ playerName, playerColor, timeMode }) {
     setMoveHistory(nextHistory);
 
     if (game.isGameOver()) {
+      setClockRunning(false);
       if (game.isCheckmate()) setStatus("Checkmate!");
       else if (game.isDraw()) setStatus("Game drawn!");
       else if (game.isStalemate()) setStatus("Stalemate!");
@@ -449,7 +492,11 @@ function Play({ playerName, playerColor, timeMode }) {
     setPosition(game.fen());
     setMoveHistory([]);
     setBusy(false);
-    setStatus(playerColor === "w" ? "Your move (White)" : "Engine thinking...");
+    setStatus("");
+
+    setWhiteSec(startSeconds);
+    setBlackSec(startSeconds);
+    setClockRunning(true);
   }
 
   useEffect(() => {
@@ -460,22 +507,20 @@ function Play({ playerName, playerColor, timeMode }) {
   }, []);
 
   return (
-  <div
-    className="app"
-    style={{
-      background: "url(/The_Chess_Players_MET_DT1506.jpg) center / cover no-repeat",
-    }}
-  >
-    <div className="container">
-      <div className="topbar">
-        <h1>TEORIAT</h1>
-        <div className="status">
-          {playerName} ({playerColor === "w" ? "White" : "Black"}) •{" "}
-          {timeMode === "rapid" ? "10:00" : "1:00"}
+    <div
+      className="app"
+      style={{
+        background: "url(/The_Chess_Players_MET_DT1506.jpg) center / cover no-repeat",
+      }}
+    >
+      <div className="container playBox">
+        {/* TOP (engine) */}
+        <div className="playHudRow">
+          <div className="playHudName">{topName}</div>
+          <div className="playHudClock">{topClock}</div>
         </div>
-      </div>
 
-
+        {/* BOARD */}
         <div className="boardTopLeft">
           <Chessboard
             position={position}
@@ -488,16 +533,24 @@ function Play({ playerName, playerColor, timeMode }) {
           />
         </div>
 
+        {/* BOTTOM (player) */}
+        <div className="playHudRow">
+          <div className="playHudName">{bottomName}</div>
+          <div className="playHudClock">{bottomClock}</div>
+        </div>
+
+        {/* Controls (kept minimal) */}
         <div className="controls">
           <button onClick={reset} disabled={busy}>
             New Game
           </button>
-          <div className="status">{status}</div>
+          {status ? <div className="status">{status}</div> : <div className="status" style={{ opacity: 0.5 }} />}
         </div>
       </div>
     </div>
   );
 }
+
 
 export default function App() {
   const [playerName, setPlayerName] = useState("");

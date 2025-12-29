@@ -43,6 +43,7 @@
   animation: stars-move 100s linear infinite;
 }
 
+
 .stars::after{
   width: 1px;
   height: 1px;
@@ -53,6 +54,42 @@
     1350px 150px white;
   animation: stars-move 150s linear infinite;
 }
+
+/* Play HUD: name left, clock right (chess.com-ish, but matches your glass style) */
+.playHudRow{
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+
+  margin: 8px 0;
+}
+
+.playHudName{
+  color: rgba(255,255,255,0.85);
+  font: 600 14px/1 "Segoe UI", system-ui, sans-serif;
+  letter-spacing: 0.08em;
+}
+
+.playHudClock{
+  min-width: 110px;            /* makes both clocks the same size */
+  text-align: right;
+
+  color: rgba(255,255,255,0.92);
+  font: 800 20px/1 "Segoe UI", system-ui, sans-serif;
+
+  padding: 10px 12px;
+  border-radius: 10px;
+
+  background: rgba(0,0,0,0.30);
+  border: 1px solid rgba(255,255,255,0.10);
+  backdrop-filter: blur(10px);
+}
+
+/* Optional: tighter spacing around the board */
+.playHudSpacer{ height: 6px; }
+
 
 @keyframes stars-move{
   from { transform: translateY(0); }
