@@ -360,7 +360,7 @@ button:active{ transform: translateY(0); }
   place-items: center;
   padding: 0 34px;
   position: relative;
-  background: var(--landingBg) 50% 45% / 112% no-repeat;
+  background: var(--landingBg) 50% 45% / 120% no-repeat;
   background-color: rgba(0,0,0,0.38);
   background-blend-mode: multiply;
   animation: fadeIn 0.6s ease-out;
@@ -369,6 +369,7 @@ button:active{ transform: translateY(0); }
 @keyframes fadeIn{
   from { opacity: 0; }
   to { opacity: 1; }
+
 }
 
 .signin::before{
@@ -376,25 +377,29 @@ button:active{ transform: translateY(0); }
   position: absolute;
   inset: 0;
   background:
-    radial-gradient(circle at 50% 45%, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.42) 62%, rgba(0,0,0,0.62) 100%),
-    linear-gradient(to bottom, rgba(0,0,0,0.45) 0%, rgba(0,0,0,0.30) 45%, rgba(0,0,0,0.55) 100%);
+    radial-gradient(circle at 50% 45%, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.42) 62%, rgba(0,0,0,0.55) 100%),
+    linear-gradient(to bottom, rgba(0,0,0,0.40) 0%, rgba(0,0,0,0.22) 45%, rgba(0,0,0,0.50) 100%);
   pointer-events: none;
 }
+
 
 .signinCard{
   position: relative;
   z-index: 2;
   width: min(92vw, 720px);
-  padding: 0;
-  background: transparent;
-  border: 0;
-  border-radius: 0;
-  box-shadow: none;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-  transform: translate(1vw, 19vh);
-  animation: slideUp 0.8s ease-out 0.2s both;
+  padding: 26px 26px 28px;
+
+  border-radius: 0; /* square */
+
+  background: rgba(18, 20, 26, 0.42);
+  border: 1px solid rgba(255,255,255,0.12);
+  box-shadow: 0 25px 80px rgba(0,0,0,0.65);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  transform: none;
+  animation: none;
 }
+
 
 @keyframes slideUp{
   from{
@@ -446,17 +451,23 @@ button:active{ transform: translateY(0); }
   appearance: none;
   -webkit-appearance: none;
   width: min(560px, 92vw);
-  padding: 10px 2px 8px;
+  padding: 10px 4px 10px;
   background: transparent;
   border: 0;
-  border-bottom: 2px solid rgba(255,255,255,0.62);
+  border-bottom: 2px solid rgba(255,255,255,0.55);
   border-radius: 0;
   color: rgba(255,255,255,0.92);
   font: 600 16px/1.2 "Segoe UI", system-ui, sans-serif;
-  text-shadow: 0 2px 16px rgba(0,0,0,0.85);
+  text-shadow: 0 2px 16px rgba(0,0,0,0.70);
   outline: none;
-  transition: all 0.3s ease;
-  box-shadow: 0 1px 8px rgba(255,255,255,0.08);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: none;
+}
+
+.signinInput:focus,
+.signinInput:focus-visible{
+  border-bottom-color: rgba(255,255,255,0.92);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
 }
 
 .signinInput::placeholder{
@@ -497,7 +508,7 @@ button:active{ transform: translateY(0); }
   position: relative;
 }
 
-/* Shell background image helper (for settings page) */
+/* Shell background image helper */
 .shell.shellBg{
   background-image: var(--shellBg);
   background-size: cover;
@@ -579,13 +590,15 @@ button:active{ transform: translateY(0); }
 /* SideSelect: board left, controls right */
 .sideLayout{
   width: min(92vw, 1200px);
+  margin-top: 30px; /* tweak: 12px–48px */
+
+  border-radius: 0; /* square */
 
   /* key: let painting show through */
   background: rgba(20, 18, 16, 0.55);
   border: 1px solid rgba(255,255,255,0.08);
   backdrop-filter: blur(10px);
 }
-
 .sideMeta{ display: none; }
 
 .sideGrid{
