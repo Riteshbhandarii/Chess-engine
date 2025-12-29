@@ -226,10 +226,15 @@ function SideSelect({ playerName, playerColor, setPlayerColor, timeMode, setTime
   }
 
   return (
-    <div className="shell">
+    <div
+      className="shell shellBg"
+      style={{
+        "--shellBg": `url(${process.env.PUBLIC_URL}/The_Chess_Players_MET_DT1506.jpg)`,
+      }}
+    >
       <div className="card sideLayout">
         <div className="topbar">
-          <h2 className="title">Choose side</h2>
+          <h2 className="title">Game settings</h2>
           <button className="linkBtn" onClick={() => nav("/")}>
             Back
           </button>
@@ -258,6 +263,7 @@ function SideSelect({ playerName, playerColor, setPlayerColor, timeMode, setTime
                   type="button"
                   className={`landingBegin sideBtnWide ${timeMode === "rapid" ? "active" : ""}`}
                   onClick={() => setTimeMode("rapid")}
+                  aria-pressed={timeMode === "rapid"}
                 >
                   10 min (Rapid)
                 </button>
@@ -266,6 +272,7 @@ function SideSelect({ playerName, playerColor, setPlayerColor, timeMode, setTime
                   type="button"
                   className={`landingBegin sideBtnWide ${timeMode === "bullet" ? "active" : ""}`}
                   onClick={() => setTimeMode("bullet")}
+                  aria-pressed={timeMode === "bullet"}
                 >
                   1 min (Bullet)
                 </button>
@@ -280,6 +287,7 @@ function SideSelect({ playerName, playerColor, setPlayerColor, timeMode, setTime
                   type="button"
                   className={`landingBegin sideBtnWide ${playerColor === "w" ? "active" : ""}`}
                   onClick={() => start("w")}
+                  aria-pressed={playerColor === "w"}
                 >
                   Play White
                 </button>
@@ -288,9 +296,15 @@ function SideSelect({ playerName, playerColor, setPlayerColor, timeMode, setTime
                   type="button"
                   className={`landingBegin sideBtnWide ${playerColor === "b" ? "active" : ""}`}
                   onClick={() => start("b")}
+                  aria-pressed={playerColor === "b"}
                 >
                   Play Black
                 </button>
+              </div>
+
+              <div className="text" style={{ marginTop: 12, opacity: 0.85 }}>
+                Selected: {timeMode === "rapid" ? "10:00" : "1:00"} •{" "}
+                {playerColor === "b" ? "Black" : "White"}
               </div>
             </div>
           </div>

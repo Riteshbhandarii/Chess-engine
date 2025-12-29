@@ -494,6 +494,30 @@ button:active{ transform: translateY(0); }
   background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
   font-family: "Segoe UI", system-ui, sans-serif;
   color: rgba(255,255,255,0.92);
+  position: relative;
+}
+
+/* Shell background image helper (for settings page) */
+.shell.shellBg{
+  background-image: var(--shellBg);
+  background-size: cover;
+  background-position: center 45%;
+  background-repeat: no-repeat;
+}
+
+.shell.shellBg::before{
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.55) 62%, rgba(0,0,0,0.72) 100%),
+    linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.35) 45%, rgba(0,0,0,0.65) 100%);
+  pointer-events: none;
+}
+
+.shell.shellBg > .card{
+  position: relative;
+  z-index: 1;
 }
 
 .card{
@@ -555,12 +579,14 @@ button:active{ transform: translateY(0); }
 /* SideSelect: board left, controls right */
 .sideLayout{
   width: min(92vw, 1200px);
-  background: #262421;
+
+  /* key: let painting show through */
+  background: rgba(20, 18, 16, 0.55);
+  border: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(10px);
 }
 
-.sideMeta{
-  display: none;
-}
+.sideMeta{ display: none; }
 
 .sideGrid{
   display: grid;
@@ -576,15 +602,19 @@ button:active{ transform: translateY(0); }
   align-items: center;
   width: 100%;
   padding: 24px;
-  background: #262421;
+
+  /* translucent, not solid */
+  background: rgba(38, 36, 33, 0.45);
 }
 
 .sideRight{
   display: flex;
   justify-content: center;
   width: 100%;
-  background: #2b2926;
-  border-left: 1px solid #1a1816;
+
+  /* translucent, not solid */
+  background: rgba(43, 41, 38, 0.55);
+  border-left: 1px solid rgba(0,0,0,0.45);
   padding: 24px 20px;
 }
 
@@ -645,4 +675,10 @@ button:active{ transform: translateY(0); }
     inset 3px 3px 6px #222,
     inset -3px -3px 6px #444;
   color: rgba(245, 240, 232, 0.92);
+}
+
+/* Responsive */
+@media (max-width: 980px){
+  .sideGrid{ grid-template-columns: 1fr; }
+  .sideRight{ border-left: 0; border-top: 1px solid rgba(0,0,0,0.45); }
 }
