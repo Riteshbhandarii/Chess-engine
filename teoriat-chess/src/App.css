@@ -553,7 +553,6 @@ button:active{ transform: translateY(0); }
 .text p{ margin: 10px 0; }
 
 /* SideSelect: board left, controls right */
-/* SideSelect: board left, controls right */
 .sideLayout{
   width: min(92vw, 1200px);
   background: #262421;
@@ -646,13 +645,4 @@ button:active{ transform: translateY(0); }
     inset 3px 3px 6px #222,
     inset -3px -3px 6px #444;
   color: rgba(245, 240, 232, 0.92);
-}
-
-
-.sideBtnWide.active{
-  background: rgba(255,255,255,0.95);
-  border: 1px solid rgba(255,255,255,1);
-  color: rgba(0,0,0,0.90);
-  font-weight: 600;
-  box-shadow: 0 2px 8px rgba(255,255,255,0.25);
 }
