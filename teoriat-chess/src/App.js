@@ -1,5 +1,5 @@
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Chessboard } from "react-chessboard";
 import { Chess } from "chess.js";
 import "./App.css";
@@ -210,9 +210,7 @@ function About() {
 function SideSelect({ playerName, playerColor, setPlayerColor, timeMode, setTimeMode }) {
   const nav = useNavigate();
 
-  const [previewWidth, setPreviewWidth] = useState(() =>
-    Math.min(640, Math.floor(window.innerWidth * 0.62))
-  );
+  const [previewWidth, setPreviewWidth] = useState(() => Math.min(640, Math.floor(window.innerWidth * 0.62)));
 
   useEffect(() => {
     const onResize = () => setPreviewWidth(Math.min(640, Math.floor(window.innerWidth * 0.62)));
@@ -303,8 +301,7 @@ function SideSelect({ playerName, playerColor, setPlayerColor, timeMode, setTime
               </div>
 
               <div className="text" style={{ marginTop: 12, opacity: 0.85 }}>
-                Selected: {timeMode === "rapid" ? "10:00" : "1:00"} •{" "}
-                {playerColor === "b" ? "Black" : "White"}
+                Selected: {timeMode === "rapid" ? "10:00" : "1:00"} • {playerColor === "b" ? "Black" : "White"}
               </div>
             </div>
           </div>
@@ -321,9 +318,7 @@ function Play({ playerName, playerColor, timeMode }) {
   const [status, setStatus] = useState("");
   const [busy, setBusy] = useState(false);
 
-  const [boardWidth, setBoardWidth] = useState(() =>
-    Math.min(560, Math.floor(window.innerWidth * 0.92))
-  );
+  const [boardWidth, setBoardWidth] = useState(() => Math.min(560, Math.floor(window.innerWidth * 0.92)));
 
   useEffect(() => {
     const onResize = () => setBoardWidth(Math.min(560, Math.floor(window.innerWidth * 0.92)));
@@ -340,7 +335,6 @@ function Play({ playerName, playerColor, timeMode }) {
   const [clockRunning, setClockRunning] = useState(true);
 
   useEffect(() => {
-    // when mode changes / new game mounts
     setWhiteSec(startSeconds);
     setBlackSec(startSeconds);
     setClockRunning(true);
@@ -357,23 +351,38 @@ function Play({ playerName, playerColor, timeMode }) {
   const topName = engineName;
   const bottomName = playerName;
 
-  const topClock =
-    engineColor === "w" ? fmt(whiteSec) : fmt(blackSec);
-
-  const bottomClock =
-    playerColor === "w" ? fmt(whiteSec) : fmt(blackSec);
+  const topClock = engineColor === "w" ? fmt(whiteSec) : fmt(blackSec);
+  const bottomClock = playerColor === "w" ? fmt(whiteSec) : fmt(blackSec);
 
   useEffect(() => {
     if (!clockRunning) return;
 
     const t = setInterval(() => {
-      const turn = game.turn(); // "w" | "b"
+      const turn = game.turn();
       if (turn === "w") setWhiteSec((v) => (v > 0 ? v - 1 : 0));
       else setBlackSec((v) => (v > 0 ? v - 1 : 0));
     }, 1000);
 
     return () => clearInterval(t);
   }, [clockRunning, game]);
+
+  // --- Fullscreen (board only) ---
+  const fsRef = useRef(null);
+  const [isFs, setIsFs] = useState(false);
+
+  useEffect(() => {
+    const onFsChange = () => setIsFs(Boolean(document.fullscreenElement));
+    document.addEventListener("fullscreenchange", onFsChange);
+    return () => document.removeEventListener("fullscreenchange", onFsChange);
+  }, []);
+
+  async function toggleFullscreen() {
+    if (!fsRef.current) return;
+    try {
+      if (document.fullscreenElement) await document.exitFullscreen();
+      else await fsRef.current.requestFullscreen();
+    } catch {}
+  }
 
   async function askEngine(movesSoFar) {
     setBusy(true);
@@ -514,26 +523,36 @@ function Play({ playerName, playerColor, timeMode }) {
       }}
     >
       <div className="container playBox">
-        {/* TOP (engine) */}
         <div className="playHudRow">
           <div className="playHudName">{topName}</div>
           <div className="playHudClock">{topClock}</div>
         </div>
 
-        {/* BOARD */}
-        <div className="boardTopLeft">
-          <Chessboard
-            position={position}
-            onPieceDrop={onPieceDrop}
-            isDraggablePiece={isDraggablePiece}
-            boardWidth={boardWidth}
-            boardOrientation={playerColor === "w" ? "white" : "black"}
-            customDarkSquareStyle={{ backgroundColor: "#b58863" }}
-            customLightSquareStyle={{ backgroundColor: "#f0d9b5" }}
-          />
+        {/* BOARD + fullscreen toggle */}
+        <div ref={fsRef} className="fsWrap">
+          <button
+            type="button"
+            className={`fsBtn ${isFs ? "on" : ""}`}
+            onClick={toggleFullscreen}
+            aria-label={isFs ? "Exit fullscreen" : "Enter fullscreen"}
+            title={isFs ? "Exit fullscreen" : "Fullscreen"}
+          >
+            ⛶
+          </button>
+
+          <div className="boardTopLeft">
+            <Chessboard
+              position={position}
+              onPieceDrop={onPieceDrop}
+              isDraggablePiece={isDraggablePiece}
+              boardWidth={boardWidth}
+              boardOrientation={playerColor === "w" ? "white" : "black"}
+              customDarkSquareStyle={{ backgroundColor: "#b58863" }}
+              customLightSquareStyle={{ backgroundColor: "#f0d9b5" }}
+            />
+          </div>
         </div>
 
-        {/* BOTTOM (player) */}
         <div className="playHudRow">
           <div className="playHudName">{bottomName}</div>
           <div className="playHudClock">{bottomClock}</div>
@@ -542,7 +561,6 @@ function Play({ playerName, playerColor, timeMode }) {
     </div>
   );
 }
-
 
 export default function App() {
   const [playerName, setPlayerName] = useState("");
