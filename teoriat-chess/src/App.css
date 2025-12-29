@@ -701,6 +701,7 @@ button:active{ transform: translateY(0); }
   transform: translateY(0);
 }
 
+/* Play bg image */
 .app.appBg::before{
   content: "";
   position: absolute;
@@ -711,15 +712,34 @@ button:active{ transform: translateY(0); }
   background-repeat: no-repeat;
   background-size: cover;
 
-  filter: none;
-  transform: none;
   z-index: 0;
 }
 
+/* Slight dark mode on background only */
+.app.appBg::after{
+  content: "";
+  position: absolute;
+  inset: 0;
+
+  background: rgba(0,0,0,0.22);
+  z-index: 0;
+}
+
+/* Keep UI above background layers */
 .app.appBg > *{
   position: relative;
   z-index: 1;
 }
+
+/* Board comes forward */
+.boardTopLeft{
+  border-radius: 14px;
+  box-shadow:
+    0 28px 90px rgba(0,0,0,0.55),
+    0 10px 22px rgba(0,0,0,0.35);
+  transform: translateZ(0) scale(1.01);
+}
+
 
 
 .sideBtnWide.active{
