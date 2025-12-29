@@ -460,16 +460,21 @@ function Play({ playerName, playerColor, timeMode }) {
   }, []);
 
   return (
-    <div className="app">
-      <div className="stars" />
-
-      <div className="container">
-        <div className="topbar">
-          <h1>TEORIAT</h1>
-          <div className="status">
-            {playerName} ({playerColor === "w" ? "White" : "Black"}) • {timeMode === "rapid" ? "10:00" : "1:00"}
-          </div>
+  <div
+    className="app"
+    style={{
+      background: "url(/The_Chess_Players_MET_DT1506.jpg) center / cover no-repeat",
+    }}
+  >
+    <div className="container">
+      <div className="topbar">
+        <h1>TEORIAT</h1>
+        <div className="status">
+          {playerName} ({playerColor === "w" ? "White" : "Black"}) •{" "}
+          {timeMode === "rapid" ? "10:00" : "1:00"}
         </div>
+      </div>
+
 
         <div className="boardTopLeft">
           <Chessboard
