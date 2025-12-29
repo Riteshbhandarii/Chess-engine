@@ -59,26 +59,23 @@
   to { transform: translateY(-1000px); }
 }
 
-/* Main content box (Play screen) — MATCH sideLayout */
+/* Main content box (Play screen) */
+/* Make the play box wrap the board (remove right empty space) */
 .container{
-  position: relative;
-  z-index: 10;
-
-  width: min(92vw, 1200px);
-  margin-top: 30px;          /* same as sideLayout */
-  padding: 22px 22px 26px;
-
-  border-radius: 0;          /* square */
-
-  background: rgba(20, 18, 16, 0.55);
-  border: 1px solid rgba(255,255,255,0.08);
-  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(10px);
+  width: fit-content;
+  max-width: calc(100vw - 32px); /* keep safe on small screens */
+  margin: 0 auto;               /* center the whole box */
 }
 
-/* Center the board */
+/* Ensure inner sections don't force extra width */
+.topbar,
+.controls{
+  width: 100%;
+}
+
+/* Center board inside the box */
 .boardTopLeft{
-  margin-top: 8px;
+  width: 100%;
   display: flex;
   justify-content: center;
 }
