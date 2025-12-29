@@ -538,14 +538,6 @@ function Play({ playerName, playerColor, timeMode }) {
           <div className="playHudName">{bottomName}</div>
           <div className="playHudClock">{bottomClock}</div>
         </div>
-
-        {/* Controls (kept minimal) */}
-        <div className="controls">
-          <button onClick={reset} disabled={busy}>
-            New Game
-          </button>
-          {status ? <div className="status">{status}</div> : <div className="status" style={{ opacity: 0.5 }} />}
-        </div>
       </div>
     </div>
   );
