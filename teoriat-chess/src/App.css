@@ -714,7 +714,6 @@ button:active{ transform: translateY(0); }
 
   z-index: 0;
 }
-
 .app.appBg::before{
   content: "";
   position: absolute;
@@ -754,6 +753,7 @@ button:active{ transform: translateY(0); }
     0 34px 70px rgba(0,0,0,0.60),
     0 70px 160px rgba(0,0,0,0.85);
 }
+
 
 
 
