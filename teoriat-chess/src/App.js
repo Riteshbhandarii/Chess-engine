@@ -317,8 +317,9 @@ function Play({ playerName, playerColor, timeMode }) {
   const [moveHistory, setMoveHistory] = useState([]);
   const [busy, setBusy] = useState(false);
 
-  // board size (simple desktop responsive)
-  const [boardWidth, setBoardWidth] = useState(() => Math.min(560, Math.floor(window.innerWidth * 0.92)));
+  const [boardWidth, setBoardWidth] = useState(() =>
+    Math.min(560, Math.floor(window.innerWidth * 0.92))
+  );
 
   useEffect(() => {
     const onResize = () => setBoardWidth(Math.min(560, Math.floor(window.innerWidth * 0.92)));
@@ -328,43 +329,77 @@ function Play({ playerName, playerColor, timeMode }) {
 
   const engineColor = useMemo(() => (playerColor === "w" ? "b" : "w"), [playerColor]);
 
-  // --- Timers (simple countdown, no increment) ---
   const startSeconds = useMemo(() => (timeMode === "rapid" ? 10 * 60 : 60), [timeMode]);
-  const [whiteSec, setWhiteSec] = useState(startSeconds);
-  const [blackSec, setBlackSec] = useState(startSeconds);
+
+  const [whiteMs, setWhiteMs] = useState(startSeconds * 1000);
+  const [blackMs, setBlackMs] = useState(startSeconds * 1000);
+
   const [clockRunning, setClockRunning] = useState(true);
+  const [activeColor, setActiveColor] = useState("w"); // whose clock is ticking
+
+  const tickRef = useRef(null);
+  const lastRef = useRef(performance.now());
 
   useEffect(() => {
-    setWhiteSec(startSeconds);
-    setBlackSec(startSeconds);
+    setWhiteMs(startSeconds * 1000);
+    setBlackMs(startSeconds * 1000);
     setClockRunning(true);
+    setActiveColor("w");
+    lastRef.current = performance.now();
   }, [startSeconds]);
 
-  function fmt(sec) {
-    const s = Math.max(0, sec);
-    const mm = String(Math.floor(s / 60)).padStart(1, "0");
-    const ss = String(s % 60).padStart(2, "0");
-    return `${mm}:${ss}`;
+  // ONE monotonic ticker: always decreases, never increases
+  useEffect(() => {
+    if (tickRef.current) {
+      clearInterval(tickRef.current);
+      tickRef.current = null;
+    }
+    lastRef.current = performance.now();
+
+    if (!clockRunning) return;
+
+    tickRef.current = setInterval(() => {
+      const now = performance.now();
+      const dt = now - lastRef.current;
+      lastRef.current = now;
+
+      if (activeColor === "w") {
+        setWhiteMs(v => Math.max(0, v - dt));
+      } else {
+        setBlackMs(v => Math.max(0, v - dt));
+      }
+    }, 50);
+
+    return () => {
+      if (tickRef.current) {
+        clearInterval(tickRef.current);
+        tickRef.current = null;
+      }
+    };
+  }, [clockRunning, activeColor]);
+
+  useEffect(() => {
+    if (!clockRunning) return;
+    if (whiteMs <= 0 || blackMs <= 0) setClockRunning(false);
+  }, [whiteMs, blackMs, clockRunning]);
+
+  function fmtMs(ms) {
+    const totalSec = Math.max(0, ms / 1000);
+    const whole = Math.floor(totalSec);
+    const mm = String(Math.floor(whole / 60)).padStart(1, "0");
+    const ss = String(whole % 60).padStart(2, "0");
+    const tenths = Math.floor((totalSec - whole) * 10);
+    return `${mm}:${ss}.${tenths}`;
   }
 
   const engineName = "TEORIAT";
   const topName = engineName;
   const bottomName = playerName;
 
-  const topClock = engineColor === "w" ? fmt(whiteSec) : fmt(blackSec);
-  const bottomClock = playerColor === "w" ? fmt(whiteSec) : fmt(blackSec);
-
-  useEffect(() => {
-    if (!clockRunning) return;
-
-    const t = setInterval(() => {
-      const turn = game.turn();
-      if (turn === "w") setWhiteSec((v) => (v > 0 ? v - 1 : 0));
-      else setBlackSec((v) => (v > 0 ? v - 1 : 0));
-    }, 1000);
-
-    return () => clearInterval(t);
-  }, [clockRunning, game]);
+  const playerClock = playerColor === "w" ? fmtMs(whiteMs) : fmtMs(blackMs);
+  const engineClock = engineColor === "w" ? fmtMs(whiteMs) : fmtMs(blackMs);
+  const topClock = engineClock;
+  const bottomClock = playerClock;
 
   async function askEngine(movesSoFar) {
     setBusy(true);
@@ -378,6 +413,7 @@ function Play({ playerName, playerColor, timeMode }) {
 
       if (!res.ok) {
         setBusy(false);
+        setActiveColor(playerColor);
         return;
       }
 
@@ -387,8 +423,14 @@ function Play({ playerName, playerColor, timeMode }) {
       const to = uci.slice(2, 4);
       const promotion = uci.length > 4 ? uci[4] : undefined;
 
+      if (!clockRunning) {
+        setBusy(false);
+        return;
+      }
+
       if (game.turn() !== engineColor) {
         setBusy(false);
+        setActiveColor(playerColor);
         return;
       }
 
@@ -401,23 +443,29 @@ function Play({ playerName, playerColor, timeMode }) {
 
       if (!engineMove) {
         setBusy(false);
+        setActiveColor(playerColor);
         return;
       }
 
       setPosition(game.fen());
       const engineUci = `${from}${to}${engineMove.promotion || ""}`;
-      setMoveHistory((prev) => [...prev, engineUci]);
+      setMoveHistory(prev => [...prev, engineUci]);
+
+      // engine done -> start player clock
+      setActiveColor(playerColor);
 
       if (game.isGameOver()) setClockRunning(false);
 
       setBusy(false);
     } catch {
       setBusy(false);
+      setActiveColor(playerColor);
     }
   }
 
   function onPieceDrop(sourceSquare, targetSquare) {
     if (busy) return false;
+    if (!clockRunning) return false;
     if (game.turn() !== playerColor) return false;
 
     const piece = game.get(sourceSquare);
@@ -445,6 +493,9 @@ function Play({ playerName, playerColor, timeMode }) {
     const nextHistory = [...moveHistory, playerUci];
     setMoveHistory(nextHistory);
 
+    // player done -> start engine clock immediately
+    setActiveColor(engineColor);
+
     if (game.isGameOver()) {
       setClockRunning(false);
       return true;
@@ -455,25 +506,24 @@ function Play({ playerName, playerColor, timeMode }) {
   }
 
   function isDraggablePiece({ piece }) {
-    return !busy && game.turn() === playerColor && piece[0].toLowerCase() === playerColor;
+    return !busy && clockRunning && game.turn() === playerColor && piece[0].toLowerCase() === playerColor;
   }
 
   useEffect(() => {
     if (playerColor === "b" && game.turn() === "w" && moveHistory.length === 0) {
+      setActiveColor("w");
       askEngine([]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
- return (
-  <div
-    className="app appBg"
-    style={{
-      "--playBg": `url(${process.env.PUBLIC_URL}/The_Chess_Players_MET_DT1506.jpg)`,
-    }}
-  >
-
-
+  return (
+    <div
+      className="app appBg"
+      style={{
+        "--playBg": `url(${process.env.PUBLIC_URL}/The_Chess_Players_MET_DT1506.jpg)`,
+      }}
+    >
       <div className="container playBox">
         <div className="playHudRow">
           <div className="playHudName">{topName}</div>
@@ -500,7 +550,6 @@ function Play({ playerName, playerColor, timeMode }) {
     </div>
   );
 }
-
 
 
 export default function App() {

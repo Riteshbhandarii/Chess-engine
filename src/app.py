@@ -4,20 +4,21 @@ from pydantic import BaseModel
 from pathlib import Path
 import json
 import random
+import asyncio
+import time
 
 import chess
 import chess.polyglot
 import torch
 
-
 app = FastAPI(title="TEORIAT Chess Engine API")
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -29,9 +30,12 @@ DROPOUT = 0.3
 PAD_TOKEN = 1927
 MAX_SEQ_LEN = 6
 
+# candidate generation
 TOPK = 120
-TEMPERATURE = 0.85
-STYLE_SAMPLE_K = 6
+
+# sampling + "style"
+TEMPERATURE = 0.90
+STYLE_SAMPLE_K = 8  # sample among top N after scoring
 
 PIECE_VALUE = {
     chess.PAWN: 1,
@@ -41,6 +45,20 @@ PIECE_VALUE = {
     chess.QUEEN: 9,
     chess.KING: 0,
 }
+
+# Heuristic weights (tuned down from your current very defensive setup)
+W_CAPTURE = 1.0
+W_CHECK = 120.0          # was effectively tiny (45) vs huge penalties [file:123]
+W_HANG = 120.0           # was 450*v [file:123]
+W_ATTACKED = 15.0        # was 50*v [file:123]
+W_WORST_REPLY = 120.0    # was 600*pieceValue [file:123]
+W_REPETITION_2 = 200.0   # was 1200 [file:123]
+W_REPETITION_3 = 800.0   # was 4000 [file:123]
+
+# Blend model + heuristics
+# Higher = more "play like me"; lower = more hand-crafted safety.
+MODEL_LOGPROB_WEIGHT = 1.0
+HEURISTIC_WEIGHT = 0.35
 
 
 class ChessRNN(torch.nn.Module):
@@ -103,6 +121,7 @@ if not MODEL_PATH.exists():
 
 with MOVE_TO_NUMBER_PATH.open("r", encoding="utf-8") as f:
     move_to_number = json.load(f)
+
 number_to_move = {int(v): k for k, v in move_to_number.items()}
 
 model = ChessRNN().to(device)
@@ -112,6 +131,7 @@ model.eval()
 
 class MoveRequest(BaseModel):
     moves: list[str]
+    mode: str = "rapid"  # "bullet" or "rapid" from frontend [file:21]
 
 
 class MoveResponse(BaseModel):
@@ -125,8 +145,10 @@ def build_board_from_uci(uci_moves: list[str]) -> chess.Board:
             mv = chess.Move.from_uci(uci)
         except ValueError:
             raise HTTPException(status_code=400, detail=f"Invalid UCI: {uci}")
+
         if mv not in board.legal_moves:
             raise HTTPException(status_code=400, detail=f"Illegal move: {uci} in {board.fen()}")
+
         board.push(mv)
     return board
 
@@ -142,19 +164,19 @@ def prepare_game_data(uci_moves: list[str]) -> tuple[list[int], list[int], list[
             mv = chess.Move.from_uci(uci)
         except ValueError:
             raise HTTPException(status_code=400, detail=f"Invalid UCI: {uci}")
+
         if mv not in board.legal_moves:
             raise HTTPException(status_code=400, detail=f"Illegal move: {uci} in {board.fen()}")
 
         san = board.san(mv)
         color = 1 if board.turn == chess.WHITE else 0
 
-        move_idx = move_to_number.get(san)
-        if move_idx is None:
-            move_idx = PAD_TOKEN
+        move_idx = move_to_number.get(san, PAD_TOKEN)
 
         colors.append(color)
         moves.append(int(move_idx))
         theory.append(0)
+
         board.push(mv)
 
     while len(moves) < MAX_SEQ_LEN:
@@ -186,9 +208,9 @@ def try_book_move(board: chess.Board) -> chess.Move | None:
         return None
 
 
-def capture_score(board: chess.Board, mv: chess.Move) -> int:
+def capture_score(board: chess.Board, mv: chess.Move) -> float:
     if not board.is_capture(mv):
-        return 0
+        return 0.0
 
     if board.is_en_passant(mv):
         captured_value = PIECE_VALUE[chess.PAWN]
@@ -199,30 +221,31 @@ def capture_score(board: chess.Board, mv: chess.Move) -> int:
     attacker = board.piece_at(mv.from_square)
     attacker_value = PIECE_VALUE.get(attacker.piece_type, 0) if attacker else 0
 
-    return 120 + 14 * captured_value - 2 * attacker_value
+    # your original had 120 + 14*captured - 2*attacker [file:123]
+    return float(120 + 14 * captured_value - 2 * attacker_value)
 
 
-def hang_penalty(board_after: chess.Board, mv: chess.Move) -> int:
+def hang_penalty(board_after: chess.Board, mv: chess.Move) -> float:
     sq = mv.to_square
     piece = board_after.piece_at(sq)
     if not piece:
-        return 0
+        return 0.0
 
     opp = board_after.turn
     me = not opp
 
     attacked = board_after.is_attacked_by(opp, sq)
     defended = board_after.is_attacked_by(me, sq)
-
     v = PIECE_VALUE.get(piece.piece_type, 0)
+
     if attacked and not defended:
-        return 450 * v
+        return float(W_HANG * v)
     if attacked:
-        return 50 * v
-    return 0
+        return float(W_ATTACKED * v)
+    return 0.0
 
 
-def worst_reply_capture_loss(board_after: chess.Board) -> int:
+def worst_reply_capture_loss(board_after: chess.Board) -> float:
     worst = 0
     for reply in board_after.legal_moves:
         if not board_after.is_capture(reply):
@@ -233,26 +256,28 @@ def worst_reply_capture_loss(board_after: chess.Board) -> int:
         worst = max(worst, PIECE_VALUE.get(captured.piece_type, 0))
         if worst >= 9:
             break
-    return worst
+    return float(worst)
 
 
-def repetition_penalty(board_after: chess.Board) -> int:
+def repetition_penalty(board_after: chess.Board) -> float:
     if board_after.is_repetition(2):
-        return 1200
+        return float(W_REPETITION_2)
     if board_after.can_claim_threefold_repetition():
-        return 4000
-    return 0
+        return float(W_REPETITION_3)
+    return 0.0
 
 
-def sample_index(indices: list[int], scores: list[float], temperature: float) -> int:
+def sample_index(scores: list[float], temperature: float) -> int:
     t = max(0.05, float(temperature))
     logits = torch.tensor(scores, dtype=torch.float32) / t
     probs = torch.softmax(logits, dim=0)
-    j = int(torch.multinomial(probs, num_samples=1).item())
-    return indices[j]
+    return int(torch.multinomial(probs, num_samples=1).item())
 
 
 def pick_legal_move(board: chess.Board, logits: torch.Tensor, topk: int = TOPK) -> chess.Move:
+    # model logprobs for blending
+    log_probs = torch.log_softmax(logits[0], dim=0)
+
     _, top_idx = torch.topk(logits[0], k=min(topk, logits.shape[-1]))
 
     candidates: list[tuple[chess.Move, float]] = []
@@ -261,26 +286,38 @@ def pick_legal_move(board: chess.Board, logits: torch.Tensor, topk: int = TOPK) 
         san = number_to_move.get(int(idx))
         if not san:
             continue
+
         try:
             mv = board.parse_san(san)
         except ValueError:
             continue
+
         if mv not in board.legal_moves:
             continue
 
-        score = 0.0
-        score += float(capture_score(board, mv))
+        # model preference (higher = more "you-like")
+        model_term = float(log_probs[int(idx)].item()) * MODEL_LOGPROB_WEIGHT
+
+        # heuristic term (smaller weight so it doesn't erase your style)
+        h = 0.0
+        h += W_CAPTURE * capture_score(board, mv)
         if board.gives_check(mv):
-            score += 45.0
+            h += W_CHECK
 
         board.push(mv)
+
+        # big win
         if board.is_checkmate():
-            score += 100000.0
-        score -= float(hang_penalty(board, mv))
-        score -= 600.0 * float(worst_reply_capture_loss(board))
-        score -= float(repetition_penalty(board))
+            board.pop()
+            return mv
+
+        h -= hang_penalty(board, mv)
+        h -= W_WORST_REPLY * worst_reply_capture_loss(board)
+        h -= repetition_penalty(board)
+
         board.pop()
 
+        score = model_term + HEURISTIC_WEIGHT * h
         candidates.append((mv, score))
 
     if not candidates:
@@ -290,12 +327,23 @@ def pick_legal_move(board: chess.Board, logits: torch.Tensor, topk: int = TOPK) 
         return random.choice(legal)
 
     candidates.sort(key=lambda x: x[1], reverse=True)
-    keep = candidates[: min(STYLE_SAMPLE_K, len(candidates))]
 
+    # sample among top STYLE_SAMPLE_K for "human-ish" variety
+    keep = candidates[: min(STYLE_SAMPLE_K, len(candidates))]
     moves = [m for m, _ in keep]
     scores = [s for _, s in keep]
-    choice = sample_index(list(range(len(moves))), scores, TEMPERATURE)
-    return moves[choice]
+
+    j = sample_index(scores, TEMPERATURE)
+    return moves[j]
+
+
+def min_think_seconds(mode: str) -> float:
+    # Tune these freely.
+    if mode == "bullet":
+        return 0.20
+    if mode == "rapid":
+        return 0.60
+    return 0.40
 
 
 @app.get("/")
@@ -304,17 +352,30 @@ def root():
 
 
 @app.post("/move", response_model=MoveResponse)
-def get_move(req: MoveRequest):
-    # Allow an empty move list so the engine can play the first move
-    # (needed when the user chooses to play Black).
+async def get_move(req: MoveRequest):
     board = build_board_from_uci(req.moves) if req.moves else chess.Board()
 
+    # Start timer for min-think
+    t0 = time.perf_counter()
+
+    # Book move first
     book_mv = try_book_move(board)
     if book_mv:
+        # still wait a bit so opponent clock/UI moves
+        spent = time.perf_counter() - t0
+        wait = min_think_seconds(req.mode) - spent
+        if wait > 0:
+            await asyncio.sleep(wait)
         return MoveResponse(move=book_mv.uci())
 
     logits = model_logits_for(req.moves)
     mv = pick_legal_move(board, logits, topk=TOPK)
+
+    spent = time.perf_counter() - t0
+    wait = min_think_seconds(req.mode) - spent
+    if wait > 0:
+        await asyncio.sleep(wait)
+
     return MoveResponse(move=mv.uci())
 
 

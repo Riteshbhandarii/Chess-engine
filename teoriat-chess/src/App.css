@@ -767,8 +767,6 @@ button:active{ transform: translateY(0); }
   }
 }
 
-
-
 .sideBtnWide.active{
   box-shadow:
     -3px -3px 8px #444,
