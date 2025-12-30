@@ -742,18 +742,31 @@ button:active{ transform: translateY(0); }
   z-index: 1;
 }
 
-/* 2x board pop */
+
 .boardTopLeft{
-  border-radius: 18px;
-  transform: translateZ(0) scale(1.04);
+  border-radius: 0;
+  overflow: hidden;
 
   box-shadow:
     0 2px 0 rgba(255,255,255,0.08),
     0 14px 26px rgba(0,0,0,0.45),
     0 34px 70px rgba(0,0,0,0.60),
     0 70px 160px rgba(0,0,0,0.85);
+
+  transform: none;
 }
 
+
+
+.playBox{
+  margin-top: 100px;
+}
+
+@media (max-width: 768px){
+  .playBox{
+    margin-top: 20px;
+  }
+}
 
 
 
