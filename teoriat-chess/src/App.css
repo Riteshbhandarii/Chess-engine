@@ -923,6 +923,7 @@ button:active{ transform: translateY(0); }
 }
 
 /* Fullscreen dim layer */
+/* Fullscreen dim/blur */
 .gameOverDim{
   position: fixed;
   inset: 0;
@@ -931,56 +932,54 @@ button:active{ transform: translateY(0); }
   backdrop-filter: blur(10px);
 }
 
-/* Make the board a positioning context */
+/* Board positioning context */
 .boardWrap{
   position: relative;
   width: fit-content;
 }
 
-/* Overlay that sits ON the board area */
+/* Overlay sits ON the board */
 .gameOverOnBoard{
   position: absolute;
   inset: 0;
   z-index: 99999;
   display: grid;
   place-items: center;
-  background: rgba(0,0,0,0.35); /* extra local dark */
+  background: rgba(0,0,0,0.32);
 }
 
-/* Big, squared panel that matches your UI */
+/* Squared “tournament card” */
 .gameOverPanelBoard{
   width: min(520px, calc(100% - 24px));
   padding: 18px 16px;
   border-radius: 0;
-  background: rgba(0,0,0,0.55);
+  background: rgba(0,0,0,0.56);
   border: 1px solid rgba(255,255,255,0.14);
   box-shadow: 0 30px 90px rgba(0,0,0,0.65);
 }
 
-/* Same font style vibe as rest (Segoe UI/system) */
-.gameOverTop{
-  color: rgba(255,255,255,0.92);
-  font: 900 14px/1 "Segoe UI", system-ui, sans-serif;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-}
-
-.gameOverWinner{
-  margin-top: 12px;
-  color: rgba(255,255,255,0.98);
-  font: 900 30px/1.05 "Segoe UI", system-ui, sans-serif;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.gameOverReason{
-  margin-top: 8px;
-  color: rgba(255,255,255,0.78);
-  font: 800 14px/1.2 "Segoe UI", system-ui, sans-serif;
+/* Elegant result text */
+.resultKicker{
+  color: rgba(255,255,255,0.68);
+  font: 800 12px/1 "Segoe UI", system-ui, sans-serif;
   letter-spacing: 0.14em;
   text-transform: uppercase;
 }
 
+.resultMain{
+  margin-top: 12px;
+  color: rgba(255,255,255,0.98);
+  font: 900 32px/1.05 "Segoe UI", system-ui, sans-serif;
+  letter-spacing: 0.02em;
+}
+
+.resultSub{
+  margin-top: 10px;
+  color: rgba(255,255,255,0.78);
+  font: 700 15px/1.2 "Segoe UI", system-ui, sans-serif;
+}
+
+/* Actions match your squared aesthetic here */
 .gameOverActions{
   margin-top: 16px;
   display: flex;
@@ -1012,7 +1011,7 @@ button:active{ transform: translateY(0); }
 }
 .gameOverBtnGhost:hover{ background: rgba(255,255,255,0.10); }
 
-/* Resign button (keep) */
+/* Resign header (keep) */
 .sidePanelHeader{
   display: flex;
   align-items: center;
@@ -1030,7 +1029,6 @@ button:active{ transform: translateY(0); }
   font: 800 12px/1 "Segoe UI", system-ui, sans-serif;
 }
 .resignBtn:hover{ background: rgba(255, 80, 80, 0.20); }
-
 
 /* Responsive */
 @media (max-width: 980px){

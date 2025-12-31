@@ -428,6 +428,12 @@ function Play({ playerName, playerColor, timeMode }) {
     );
   }
 
+  function reasonLine(reason) {
+    if (reason === "RESIGNED") return "By resignation.";
+    if (reason === "TIMEOUT") return "On time.";
+    return "By checkmate.";
+  }
+
   function openResult(winner, reason) {
     setClockRunning(false);
     setBusy(false);
@@ -454,7 +460,7 @@ function Play({ playerName, playerColor, timeMode }) {
   }
 
   function resign() {
-    const winner = playerColor === "w" ? "BLACK" : "WHITE";
+    const winner = playerColor === "w" ? "Black" : "White";
     openResult(winner, "RESIGNED");
   }
 
@@ -508,8 +514,8 @@ function Play({ playerName, playerColor, timeMode }) {
 
   useEffect(() => {
     if (resultOpen) return;
-    if (whiteMs <= 0) openResult("BLACK", "TIMEOUT");
-    else if (blackMs <= 0) openResult("WHITE", "TIMEOUT");
+    if (whiteMs <= 0) openResult("Black", "TIMEOUT");
+    else if (blackMs <= 0) openResult("White", "TIMEOUT");
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [whiteMs, blackMs]);
 
@@ -566,13 +572,13 @@ function Play({ playerName, playerColor, timeMode }) {
       setMoveHistory((prev) => [...prev, engineUci]);
 
       if (game.isCheckmate && game.isCheckmate()) {
-        const w = engineColor === "w" ? "WHITE" : "BLACK";
+        const w = engineColor === "w" ? "White" : "Black";
         openResult(w, "CHECKMATED");
         return;
       }
 
       if (game.isGameOver && game.isGameOver()) {
-        const w = engineColor === "w" ? "WHITE" : "BLACK";
+        const w = engineColor === "w" ? "White" : "Black";
         openResult(w, "CHECKMATED");
         return;
       }
@@ -617,13 +623,13 @@ function Play({ playerName, playerColor, timeMode }) {
     setMoveHistory(nextHistory);
 
     if (game.isCheckmate && game.isCheckmate()) {
-      const w = playerColor === "w" ? "WHITE" : "BLACK";
+      const w = playerColor === "w" ? "White" : "Black";
       openResult(w, "CHECKMATED");
       return true;
     }
 
     if (game.isGameOver && game.isGameOver()) {
-      const w = playerColor === "w" ? "WHITE" : "BLACK";
+      const w = playerColor === "w" ? "White" : "Black";
       openResult(w, "CHECKMATED");
       return true;
     }
@@ -652,12 +658,10 @@ function Play({ playerName, playerColor, timeMode }) {
         "--playBg": `url(${process.env.PUBLIC_URL}/The_Chess_Players_MET_DT1506.jpg)`,
       }}
     >
-      {/* Fullscreen dim/blur layer (covers everything, keeps game behind) */}
       {resultOpen && <div className="gameOverDim" aria-hidden="true" />}
 
       <div className="container playBox">
         <div className="playGrid">
-          {/* LEFT */}
           <div className="playMain">
             <div className="playHudRow">
               <div className="playHudName">{topName}</div>
@@ -666,7 +670,6 @@ function Play({ playerName, playerColor, timeMode }) {
 
             <CapturedRow title="Captured (White)" items={captured.w} color="w" />
 
-            {/* Board wrapper so GAME OVER panel aligns with board */}
             <div className="boardWrap">
               <div className="boardTopLeft">
                 <Chessboard
@@ -680,13 +683,12 @@ function Play({ playerName, playerColor, timeMode }) {
                 />
               </div>
 
-              {/* Board-level overlay (same level as board, covers it) */}
               {resultOpen && (
-                <div className="gameOverOnBoard" role="dialog" aria-modal="true" aria-label="Game over">
+                <div className="gameOverOnBoard" role="dialog" aria-modal="true" aria-label="Result">
                   <div className="gameOverPanelBoard">
-                    <div className="gameOverTop">GAME OVER!</div>
-                    <div className="gameOverWinner">{resultWinner} WINS</div>
-                    <div className="gameOverReason">{resultReason}.</div>
+                    <div className="resultKicker">Result</div>
+                    <div className="resultMain">{resultWinner} wins.</div>
+                    <div className="resultSub">{reasonLine(resultReason)}</div>
 
                     <div className="gameOverActions">
                       <button type="button" className="gameOverBtnPrimary" onClick={startNewGame}>
@@ -709,7 +711,6 @@ function Play({ playerName, playerColor, timeMode }) {
             </div>
           </div>
 
-          {/* RIGHT */}
           <aside className="sidePanelPlay" aria-label="Moves">
             <div className="sidePanelHeader">
               <div className="sidePanelTitle">Moves</div>
