@@ -317,9 +317,7 @@ function Play({ playerName, playerColor, timeMode }) {
   const [moveHistory, setMoveHistory] = useState([]);
   const [busy, setBusy] = useState(false);
 
-  const [boardWidth, setBoardWidth] = useState(() =>
-    Math.min(560, Math.floor(window.innerWidth * 0.92))
-  );
+  const [boardWidth, setBoardWidth] = useState(() => Math.min(560, Math.floor(window.innerWidth * 0.92)));
 
   useEffect(() => {
     const onResize = () => setBoardWidth(Math.min(560, Math.floor(window.innerWidth * 0.92)));
@@ -335,7 +333,7 @@ function Play({ playerName, playerColor, timeMode }) {
   const [blackMs, setBlackMs] = useState(startSeconds * 1000);
 
   const [clockRunning, setClockRunning] = useState(true);
-  const [activeColor, setActiveColor] = useState("w"); // whose clock is ticking
+  const [activeColor, setActiveColor] = useState("w");
 
   const tickRef = useRef(null);
   const lastRef = useRef(performance.now());
@@ -348,7 +346,7 @@ function Play({ playerName, playerColor, timeMode }) {
     lastRef.current = performance.now();
   }, [startSeconds]);
 
-  // ONE monotonic ticker: always decreases, never increases
+  // monotonic ticker
   useEffect(() => {
     if (tickRef.current) {
       clearInterval(tickRef.current);
@@ -363,11 +361,8 @@ function Play({ playerName, playerColor, timeMode }) {
       const dt = now - lastRef.current;
       lastRef.current = now;
 
-      if (activeColor === "w") {
-        setWhiteMs(v => Math.max(0, v - dt));
-      } else {
-        setBlackMs(v => Math.max(0, v - dt));
-      }
+      if (activeColor === "w") setWhiteMs((v) => Math.max(0, v - dt));
+      else setBlackMs((v) => Math.max(0, v - dt));
     }, 50);
 
     return () => {
@@ -391,6 +386,21 @@ function Play({ playerName, playerColor, timeMode }) {
     const tenths = Math.floor((totalSec - whole) * 10);
     return `${mm}:${ss}.${tenths}`;
   }
+
+  // Move list + FEN (no buttons)
+  function uciToSanList(uciList) {
+    const b = new Chess();
+    const out = [];
+    for (const uci of uciList) {
+      const mv = b.move(uci, { sloppy: true });
+      if (!mv) break;
+      out.push(mv.san);
+    }
+    return out;
+  }
+
+  const sanMoves = useMemo(() => uciToSanList(moveHistory), [moveHistory]);
+  const fen = position;
 
   const engineName = "TEORIAT";
   const topName = engineName;
@@ -449,9 +459,8 @@ function Play({ playerName, playerColor, timeMode }) {
 
       setPosition(game.fen());
       const engineUci = `${from}${to}${engineMove.promotion || ""}`;
-      setMoveHistory(prev => [...prev, engineUci]);
+      setMoveHistory((prev) => [...prev, engineUci]);
 
-      // engine done -> start player clock
       setActiveColor(playerColor);
 
       if (game.isGameOver()) setClockRunning(false);
@@ -493,7 +502,6 @@ function Play({ playerName, playerColor, timeMode }) {
     const nextHistory = [...moveHistory, playerUci];
     setMoveHistory(nextHistory);
 
-    // player done -> start engine clock immediately
     setActiveColor(engineColor);
 
     if (game.isGameOver()) {
@@ -517,6 +525,15 @@ function Play({ playerName, playerColor, timeMode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // build rows: 1. white black
+  const moveRows = useMemo(() => {
+    const rows = [];
+    for (let i = 0; i < sanMoves.length; i += 2) {
+      rows.push({ no: Math.floor(i / 2) + 1, w: sanMoves[i] || "", b: sanMoves[i + 1] || "" });
+    }
+    return rows;
+  }, [sanMoves]);
+
   return (
     <div
       className="app appBg"
@@ -525,26 +542,55 @@ function Play({ playerName, playerColor, timeMode }) {
       }}
     >
       <div className="container playBox">
-        <div className="playHudRow">
-          <div className="playHudName">{topName}</div>
-          <div className="playHudClock">{topClock}</div>
-        </div>
+        <div className="playGrid">
+          {/* LEFT */}
+          <div className="playMain">
+            <div className="playHudRow">
+              <div className="playHudName">{topName}</div>
+              <div className="playHudClock">{topClock}</div>
+            </div>
 
-        <div className="boardTopLeft">
-          <Chessboard
-            position={position}
-            onPieceDrop={onPieceDrop}
-            isDraggablePiece={isDraggablePiece}
-            boardWidth={boardWidth}
-            boardOrientation={playerColor === "w" ? "white" : "black"}
-            customDarkSquareStyle={{ backgroundColor: "#b58863" }}
-            customLightSquareStyle={{ backgroundColor: "#f0d9b5" }}
-          />
-        </div>
+            <div className="boardTopLeft">
+              <Chessboard
+                position={position}
+                onPieceDrop={onPieceDrop}
+                isDraggablePiece={isDraggablePiece}
+                boardWidth={boardWidth}
+                boardOrientation={playerColor === "w" ? "white" : "black"}
+                customDarkSquareStyle={{ backgroundColor: "#b58863" }}
+                customLightSquareStyle={{ backgroundColor: "#f0d9b5" }}
+              />
+            </div>
 
-        <div className="playHudRow">
-          <div className="playHudName">{bottomName}</div>
-          <div className="playHudClock">{bottomClock}</div>
+            <div className="playHudRow">
+              <div className="playHudName">{bottomName}</div>
+              <div className="playHudClock">{bottomClock}</div>
+            </div>
+          </div>
+
+          {/* RIGHT */}
+          <aside className="sidePanelPlay" aria-label="Moves and FEN">
+            <div className="sidePanelTitle">Moves</div>
+
+            <div className="sideMoves">
+              {moveRows.length === 0 ? (
+                <div className="sideEmpty">No moves yet.</div>
+              ) : (
+                moveRows.map((r) => (
+                  <div key={r.no} className="sideMoveRow">
+                    <div className="sideMoveNo">{r.no}.</div>
+                    <div className="sideMoveW">{r.w}</div>
+                    <div className="sideMoveB">{r.b}</div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="sidePanelTitle" style={{ marginTop: 14 }}>
+              FEN
+            </div>
+            <div className="sideFen">{fen}</div>
+          </aside>
         </div>
       </div>
     </div>
