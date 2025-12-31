@@ -338,13 +338,24 @@ function Play({ playerName, playerColor, timeMode }) {
   const tickRef = useRef(null);
   const lastRef = useRef(performance.now());
 
+  // Captured pieces trays
+  const [captured, setCaptured] = useState({ w: [], b: [] });
+  // w = pieces captured FROM White, b = pieces captured FROM Black
+
   useEffect(() => {
     setWhiteMs(startSeconds * 1000);
     setBlackMs(startSeconds * 1000);
     setClockRunning(true);
     setActiveColor("w");
     lastRef.current = performance.now();
-  }, [startSeconds]);
+    setCaptured({ w: [], b: [] });
+
+    // Optional reset when time changes: also reset the actual game state
+    game.reset();
+    setPosition("start");
+    setMoveHistory([]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [startSeconds, playerColor]);
 
   // monotonic ticker
   useEffect(() => {
@@ -387,7 +398,7 @@ function Play({ playerName, playerColor, timeMode }) {
     return `${mm}:${ss}.${tenths}`;
   }
 
-  // Move list + FEN (no buttons)
+  // Move list + FEN
   function uciToSanList(uciList) {
     const b = new Chess();
     const out = [];
@@ -410,6 +421,54 @@ function Play({ playerName, playerColor, timeMode }) {
   const engineClock = engineColor === "w" ? fmtMs(whiteMs) : fmtMs(blackMs);
   const topClock = engineClock;
   const bottomClock = playerClock;
+
+  // Captured pieces rendering (no assets)
+  const PIECE_GLYPH = {
+    wp: "♙",
+    wn: "♘",
+    wb: "♗",
+    wr: "♖",
+    wq: "♕",
+    wk: "♔",
+    bp: "♟",
+    bn: "♞",
+    bb: "♝",
+    br: "♜",
+    bq: "♛",
+    bk: "♚",
+  };
+
+  function recomputeCaptured() {
+    // verbose history includes "color" (mover) and "captured" (piece type) on capture moves [web:34]
+    const hist = game.history({ verbose: true });
+    const cap = { w: [], b: [] };
+
+    for (const m of hist) {
+      if (!m.captured) continue;
+      const capturedColor = m.color === "w" ? "b" : "w";
+      cap[capturedColor].push(m.captured); // 'p','n','b','r','q' [web:34]
+    }
+    setCaptured(cap);
+  }
+
+  function CapturedRow({ title, items, color }) {
+    return (
+      <div className="capRow">
+        <div className="capTitle">{title}</div>
+        <div className="capPieces">
+          {items.length === 0 ? (
+            <div className="capEmpty">—</div>
+          ) : (
+            items.map((p, i) => (
+              <span key={`${color}-${p}-${i}`} className={`capIcon ${color}`}>
+                {PIECE_GLYPH[`${color}${p}`]}
+              </span>
+            ))
+          )}
+        </div>
+      </div>
+    );
+  }
 
   async function askEngine(movesSoFar) {
     setBusy(true);
@@ -458,6 +517,8 @@ function Play({ playerName, playerColor, timeMode }) {
       }
 
       setPosition(game.fen());
+      recomputeCaptured();
+
       const engineUci = `${from}${to}${engineMove.promotion || ""}`;
       setMoveHistory((prev) => [...prev, engineUci]);
 
@@ -497,6 +558,7 @@ function Play({ playerName, playerColor, timeMode }) {
     if (move === null) return false;
 
     setPosition(game.fen());
+    recomputeCaptured();
 
     const playerUci = `${sourceSquare}${targetSquare}${move.promotion || ""}`;
     const nextHistory = [...moveHistory, playerUci];
@@ -525,7 +587,6 @@ function Play({ playerName, playerColor, timeMode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // build rows: 1. white black
   const moveRows = useMemo(() => {
     const rows = [];
     for (let i = 0; i < sanMoves.length; i += 2) {
@@ -550,6 +611,8 @@ function Play({ playerName, playerColor, timeMode }) {
               <div className="playHudClock">{topClock}</div>
             </div>
 
+            <CapturedRow title="Captured (White)" items={captured.w} color="w" />
+
             <div className="boardTopLeft">
               <Chessboard
                 position={position}
@@ -561,6 +624,8 @@ function Play({ playerName, playerColor, timeMode }) {
                 customLightSquareStyle={{ backgroundColor: "#f0d9b5" }}
               />
             </div>
+
+            <CapturedRow title="Captured (Black)" items={captured.b} color="b" />
 
             <div className="playHudRow">
               <div className="playHudName">{bottomName}</div>
@@ -596,6 +661,7 @@ function Play({ playerName, playerColor, timeMode }) {
     </div>
   );
 }
+
 
 
 export default function App() {
