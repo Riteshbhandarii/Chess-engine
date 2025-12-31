@@ -310,9 +310,10 @@ function SideSelect({ playerName, playerColor, setPlayerColor, timeMode, setTime
     </div>
   );
 }
-
 function Play({ playerName, playerColor, timeMode }) {
   const [game] = useState(() => new Chess());
+  const nav = useNavigate();
+
   const [position, setPosition] = useState("start");
   const [moveHistory, setMoveHistory] = useState([]);
   const [busy, setBusy] = useState(false);
@@ -326,7 +327,6 @@ function Play({ playerName, playerColor, timeMode }) {
   }, []);
 
   const engineColor = useMemo(() => (playerColor === "w" ? "b" : "w"), [playerColor]);
-
   const startSeconds = useMemo(() => (timeMode === "rapid" ? 10 * 60 : 60), [timeMode]);
 
   const [whiteMs, setWhiteMs] = useState(startSeconds * 1000);
@@ -338,56 +338,15 @@ function Play({ playerName, playerColor, timeMode }) {
   const tickRef = useRef(null);
   const lastRef = useRef(performance.now());
 
-  // Captured pieces trays
   const [captured, setCaptured] = useState({ w: [], b: [] });
-  // w = pieces captured FROM White, b = pieces captured FROM Black
 
-  useEffect(() => {
-    setWhiteMs(startSeconds * 1000);
-    setBlackMs(startSeconds * 1000);
-    setClockRunning(true);
-    setActiveColor("w");
-    lastRef.current = performance.now();
-    setCaptured({ w: [], b: [] });
+  const [resultOpen, setResultOpen] = useState(false);
+  const [resultWinner, setResultWinner] = useState("");
+  const [resultReason, setResultReason] = useState("");
 
-    // Optional reset when time changes: also reset the actual game state
-    game.reset();
-    setPosition("start");
-    setMoveHistory([]);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [startSeconds, playerColor]);
-
-  // monotonic ticker
-  useEffect(() => {
-    if (tickRef.current) {
-      clearInterval(tickRef.current);
-      tickRef.current = null;
-    }
-    lastRef.current = performance.now();
-
-    if (!clockRunning) return;
-
-    tickRef.current = setInterval(() => {
-      const now = performance.now();
-      const dt = now - lastRef.current;
-      lastRef.current = now;
-
-      if (activeColor === "w") setWhiteMs((v) => Math.max(0, v - dt));
-      else setBlackMs((v) => Math.max(0, v - dt));
-    }, 50);
-
-    return () => {
-      if (tickRef.current) {
-        clearInterval(tickRef.current);
-        tickRef.current = null;
-      }
-    };
-  }, [clockRunning, activeColor]);
-
-  useEffect(() => {
-    if (!clockRunning) return;
-    if (whiteMs <= 0 || blackMs <= 0) setClockRunning(false);
-  }, [whiteMs, blackMs, clockRunning]);
+  const engineName = "TEORIAT";
+  const topName = engineName;
+  const bottomName = playerName;
 
   function fmtMs(ms) {
     const totalSec = Math.max(0, ms / 1000);
@@ -398,7 +357,11 @@ function Play({ playerName, playerColor, timeMode }) {
     return `${mm}:${ss}.${tenths}`;
   }
 
-  // Move list + FEN
+  const playerClock = playerColor === "w" ? fmtMs(whiteMs) : fmtMs(blackMs);
+  const engineClock = engineColor === "w" ? fmtMs(whiteMs) : fmtMs(blackMs);
+  const topClock = engineClock;
+  const bottomClock = playerClock;
+
   function uciToSanList(uciList) {
     const b = new Chess();
     const out = [];
@@ -411,18 +374,15 @@ function Play({ playerName, playerColor, timeMode }) {
   }
 
   const sanMoves = useMemo(() => uciToSanList(moveHistory), [moveHistory]);
-  const fen = position;
 
-  const engineName = "TEORIAT";
-  const topName = engineName;
-  const bottomName = playerName;
+  const moveRows = useMemo(() => {
+    const rows = [];
+    for (let i = 0; i < sanMoves.length; i += 2) {
+      rows.push({ no: Math.floor(i / 2) + 1, w: sanMoves[i] || "", b: sanMoves[i + 1] || "" });
+    }
+    return rows;
+  }, [sanMoves]);
 
-  const playerClock = playerColor === "w" ? fmtMs(whiteMs) : fmtMs(blackMs);
-  const engineClock = engineColor === "w" ? fmtMs(whiteMs) : fmtMs(blackMs);
-  const topClock = engineClock;
-  const bottomClock = playerClock;
-
-  // Captured pieces rendering (no assets)
   const PIECE_GLYPH = {
     wp: "♙",
     wn: "♘",
@@ -439,14 +399,12 @@ function Play({ playerName, playerColor, timeMode }) {
   };
 
   function recomputeCaptured() {
-    // verbose history includes "color" (mover) and "captured" (piece type) on capture moves [web:34]
-    const hist = game.history({ verbose: true });
+    const hist = game.history({ verbose: true }); // capture info in verbose history [web:34]
     const cap = { w: [], b: [] };
-
     for (const m of hist) {
       if (!m.captured) continue;
       const capturedColor = m.color === "w" ? "b" : "w";
-      cap[capturedColor].push(m.captured); // 'p','n','b','r','q' [web:34]
+      cap[capturedColor].push(m.captured);
     }
     setCaptured(cap);
   }
@@ -470,6 +428,91 @@ function Play({ playerName, playerColor, timeMode }) {
     );
   }
 
+  function openResult(winner, reason) {
+    setClockRunning(false);
+    setBusy(false);
+    setResultWinner(winner);
+    setResultReason(reason);
+    setResultOpen(true);
+  }
+
+  function startNewGame() {
+    game.reset();
+    setPosition("start");
+    setMoveHistory([]);
+    setCaptured({ w: [], b: [] });
+
+    setWhiteMs(startSeconds * 1000);
+    setBlackMs(startSeconds * 1000);
+    setActiveColor("w");
+    setClockRunning(true);
+
+    setResultOpen(false);
+    setResultWinner("");
+    setResultReason("");
+    lastRef.current = performance.now();
+  }
+
+  function resign() {
+    const winner = playerColor === "w" ? "BLACK" : "WHITE";
+    openResult(winner, "RESIGNED");
+  }
+
+  function leaderboard() {
+    nav("/leaderboard");
+  }
+
+  useEffect(() => {
+    setWhiteMs(startSeconds * 1000);
+    setBlackMs(startSeconds * 1000);
+    setClockRunning(true);
+    setActiveColor("w");
+    lastRef.current = performance.now();
+    setCaptured({ w: [], b: [] });
+
+    game.reset();
+    setPosition("start");
+    setMoveHistory([]);
+
+    setResultOpen(false);
+    setResultWinner("");
+    setResultReason("");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [startSeconds, playerColor]);
+
+  useEffect(() => {
+    if (tickRef.current) {
+      clearInterval(tickRef.current);
+      tickRef.current = null;
+    }
+    lastRef.current = performance.now();
+
+    if (!clockRunning || resultOpen) return;
+
+    tickRef.current = setInterval(() => {
+      const now = performance.now();
+      const dt = now - lastRef.current;
+      lastRef.current = now;
+
+      if (activeColor === "w") setWhiteMs((v) => Math.max(0, v - dt));
+      else setBlackMs((v) => Math.max(0, v - dt));
+    }, 50);
+
+    return () => {
+      if (tickRef.current) {
+        clearInterval(tickRef.current);
+        tickRef.current = null;
+      }
+    };
+  }, [clockRunning, activeColor, resultOpen]);
+
+  useEffect(() => {
+    if (resultOpen) return;
+    if (whiteMs <= 0) openResult("BLACK", "TIMEOUT");
+    else if (blackMs <= 0) openResult("WHITE", "TIMEOUT");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [whiteMs, blackMs]);
+
   async function askEngine(movesSoFar) {
     setBusy(true);
 
@@ -492,7 +535,7 @@ function Play({ playerName, playerColor, timeMode }) {
       const to = uci.slice(2, 4);
       const promotion = uci.length > 4 ? uci[4] : undefined;
 
-      if (!clockRunning) {
+      if (!clockRunning || resultOpen) {
         setBusy(false);
         return;
       }
@@ -522,10 +565,19 @@ function Play({ playerName, playerColor, timeMode }) {
       const engineUci = `${from}${to}${engineMove.promotion || ""}`;
       setMoveHistory((prev) => [...prev, engineUci]);
 
+      if (game.isCheckmate && game.isCheckmate()) {
+        const w = engineColor === "w" ? "WHITE" : "BLACK";
+        openResult(w, "CHECKMATED");
+        return;
+      }
+
+      if (game.isGameOver && game.isGameOver()) {
+        const w = engineColor === "w" ? "WHITE" : "BLACK";
+        openResult(w, "CHECKMATED");
+        return;
+      }
+
       setActiveColor(playerColor);
-
-      if (game.isGameOver()) setClockRunning(false);
-
       setBusy(false);
     } catch {
       setBusy(false);
@@ -535,7 +587,7 @@ function Play({ playerName, playerColor, timeMode }) {
 
   function onPieceDrop(sourceSquare, targetSquare) {
     if (busy) return false;
-    if (!clockRunning) return false;
+    if (!clockRunning || resultOpen) return false;
     if (game.turn() !== playerColor) return false;
 
     const piece = game.get(sourceSquare);
@@ -564,19 +616,25 @@ function Play({ playerName, playerColor, timeMode }) {
     const nextHistory = [...moveHistory, playerUci];
     setMoveHistory(nextHistory);
 
-    setActiveColor(engineColor);
-
-    if (game.isGameOver()) {
-      setClockRunning(false);
+    if (game.isCheckmate && game.isCheckmate()) {
+      const w = playerColor === "w" ? "WHITE" : "BLACK";
+      openResult(w, "CHECKMATED");
       return true;
     }
 
+    if (game.isGameOver && game.isGameOver()) {
+      const w = playerColor === "w" ? "WHITE" : "BLACK";
+      openResult(w, "CHECKMATED");
+      return true;
+    }
+
+    setActiveColor(engineColor);
     askEngine(nextHistory);
     return true;
   }
 
   function isDraggablePiece({ piece }) {
-    return !busy && clockRunning && game.turn() === playerColor && piece[0].toLowerCase() === playerColor;
+    return !busy && clockRunning && !resultOpen && game.turn() === playerColor && piece[0].toLowerCase() === playerColor;
   }
 
   useEffect(() => {
@@ -587,14 +645,6 @@ function Play({ playerName, playerColor, timeMode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const moveRows = useMemo(() => {
-    const rows = [];
-    for (let i = 0; i < sanMoves.length; i += 2) {
-      rows.push({ no: Math.floor(i / 2) + 1, w: sanMoves[i] || "", b: sanMoves[i + 1] || "" });
-    }
-    return rows;
-  }, [sanMoves]);
-
   return (
     <div
       className="app appBg"
@@ -602,6 +652,9 @@ function Play({ playerName, playerColor, timeMode }) {
         "--playBg": `url(${process.env.PUBLIC_URL}/The_Chess_Players_MET_DT1506.jpg)`,
       }}
     >
+      {/* Fullscreen dim/blur layer (covers everything, keeps game behind) */}
+      {resultOpen && <div className="gameOverDim" aria-hidden="true" />}
+
       <div className="container playBox">
         <div className="playGrid">
           {/* LEFT */}
@@ -613,16 +666,39 @@ function Play({ playerName, playerColor, timeMode }) {
 
             <CapturedRow title="Captured (White)" items={captured.w} color="w" />
 
-            <div className="boardTopLeft">
-              <Chessboard
-                position={position}
-                onPieceDrop={onPieceDrop}
-                isDraggablePiece={isDraggablePiece}
-                boardWidth={boardWidth}
-                boardOrientation={playerColor === "w" ? "white" : "black"}
-                customDarkSquareStyle={{ backgroundColor: "#b58863" }}
-                customLightSquareStyle={{ backgroundColor: "#f0d9b5" }}
-              />
+            {/* Board wrapper so GAME OVER panel aligns with board */}
+            <div className="boardWrap">
+              <div className="boardTopLeft">
+                <Chessboard
+                  position={position}
+                  onPieceDrop={onPieceDrop}
+                  isDraggablePiece={isDraggablePiece}
+                  boardWidth={boardWidth}
+                  boardOrientation={playerColor === "w" ? "white" : "black"}
+                  customDarkSquareStyle={{ backgroundColor: "#b58863" }}
+                  customLightSquareStyle={{ backgroundColor: "#f0d9b5" }}
+                />
+              </div>
+
+              {/* Board-level overlay (same level as board, covers it) */}
+              {resultOpen && (
+                <div className="gameOverOnBoard" role="dialog" aria-modal="true" aria-label="Game over">
+                  <div className="gameOverPanelBoard">
+                    <div className="gameOverTop">GAME OVER!</div>
+                    <div className="gameOverWinner">{resultWinner} WINS</div>
+                    <div className="gameOverReason">{resultReason}.</div>
+
+                    <div className="gameOverActions">
+                      <button type="button" className="gameOverBtnPrimary" onClick={startNewGame}>
+                        REMATCH
+                      </button>
+                      <button type="button" className="gameOverBtnGhost" onClick={leaderboard}>
+                        LEADERBOARD
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             <CapturedRow title="Captured (Black)" items={captured.b} color="b" />
@@ -634,8 +710,13 @@ function Play({ playerName, playerColor, timeMode }) {
           </div>
 
           {/* RIGHT */}
-          <aside className="sidePanelPlay" aria-label="Moves and FEN">
-            <div className="sidePanelTitle">Moves</div>
+          <aside className="sidePanelPlay" aria-label="Moves">
+            <div className="sidePanelHeader">
+              <div className="sidePanelTitle">Moves</div>
+              <button type="button" className="resignBtn" onClick={resign}>
+                Resign
+              </button>
+            </div>
 
             <div className="sideMoves">
               {moveRows.length === 0 ? (
@@ -650,18 +731,12 @@ function Play({ playerName, playerColor, timeMode }) {
                 ))
               )}
             </div>
-
-            <div className="sidePanelTitle" style={{ marginTop: 14 }}>
-              FEN
-            </div>
-            <div className="sideFen">{fen}</div>
           </aside>
         </div>
       </div>
     </div>
   );
 }
-
 
 
 export default function App() {
