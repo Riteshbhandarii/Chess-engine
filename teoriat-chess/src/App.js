@@ -53,8 +53,8 @@ function Landing({ playerName, setPlayerName }) {
       {menuOpen && <div className="landingMenuBackdrop" onClick={() => setMenuOpen(false)} aria-hidden="true" />}
 
       <div className="landingHero">
-        <h1 className="landingTitle">“The art of thinking ahead.”</h1>
-        <p className="landingSubtitle">“Every move is a choice.”</p>
+        <h1 className="landingTitle">"The art of thinking ahead."</h1>
+        <p className="landingSubtitle">"Every move is a choice."</p>
       </div>
 
       <div className="landingBox">
@@ -310,6 +310,7 @@ function SideSelect({ playerName, playerColor, setPlayerColor, timeMode, setTime
     </div>
   );
 }
+
 function Play({ playerName, playerColor, timeMode }) {
   const [game] = useState(() => new Chess());
   const nav = useNavigate();
@@ -343,6 +344,8 @@ function Play({ playerName, playerColor, timeMode }) {
   const [resultOpen, setResultOpen] = useState(false);
   const [resultWinner, setResultWinner] = useState("");
   const [resultReason, setResultReason] = useState("");
+
+  const [pendingPromotion, setPendingPromotion] = useState(null);
 
   const engineName = "TEORIAT";
   const topName = engineName;
@@ -399,7 +402,7 @@ function Play({ playerName, playerColor, timeMode }) {
   };
 
   function recomputeCaptured() {
-    const hist = game.history({ verbose: true }); // capture info in verbose history [web:34]
+    const hist = game.history({ verbose: true });
     const cap = { w: [], b: [] };
     for (const m of hist) {
       if (!m.captured) continue;
@@ -456,6 +459,7 @@ function Play({ playerName, playerColor, timeMode }) {
     setResultOpen(false);
     setResultWinner("");
     setResultReason("");
+    setPendingPromotion(null);
     lastRef.current = performance.now();
   }
 
@@ -483,6 +487,7 @@ function Play({ playerName, playerColor, timeMode }) {
     setResultOpen(false);
     setResultWinner("");
     setResultReason("");
+    setPendingPromotion(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startSeconds, playerColor]);
 
@@ -591,20 +596,23 @@ function Play({ playerName, playerColor, timeMode }) {
     }
   }
 
-  function onPieceDrop(sourceSquare, targetSquare) {
+  function onPieceDrop(sourceSquare, targetSquare, piece) {
     if (busy) return false;
     if (!clockRunning || resultOpen) return false;
     if (game.turn() !== playerColor) return false;
 
-    const piece = game.get(sourceSquare);
-    if (!piece || piece.color !== playerColor) return false;
+    const sourcePiece = game.get(sourceSquare);
+    if (!sourcePiece || sourcePiece.color !== playerColor) return false;
 
-    const isPawn = piece.type === "p";
-    const promotionRank = piece.color === "w" ? "8" : "1";
+    const isPawn = sourcePiece.type === "p";
+    const promotionRank = sourcePiece.color === "w" ? "8" : "1";
     const isPromotion = isPawn && targetSquare?.[1] === promotionRank;
 
+    // If this is a promotion, piece parameter will contain the selected piece (e.g., "wQ")
+    const promotionPiece = isPromotion && piece ? piece[1].toLowerCase() : undefined;
+
     const moveObj = isPromotion
-      ? { from: sourceSquare, to: targetSquare, promotion: "q" }
+      ? { from: sourceSquare, to: targetSquare, promotion: promotionPiece || "q" }
       : { from: sourceSquare, to: targetSquare };
 
     let move;
@@ -738,7 +746,6 @@ function Play({ playerName, playerColor, timeMode }) {
     </div>
   );
 }
-
 
 export default function App() {
   const [playerName, setPlayerName] = useState("");
