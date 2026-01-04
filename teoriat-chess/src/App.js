@@ -349,9 +349,12 @@ function Play({ playerName, playerColor, timeMode }) {
 
   /* sound */
   const moveSfxRef = useRef(null);
+  const captureSfxRef = useRef(null);
+  const checkSfxRef = useRef(null);
+  const mateSfxRef = useRef(null);
 
-  function playMoveSfx() {
-    const a = moveSfxRef.current;
+  function playSfx(ref) {
+    const a = ref.current;
     if (!a) return;
 
     try {
@@ -361,13 +364,60 @@ function Play({ playerName, playerColor, timeMode }) {
     } catch {}
   }
 
+  function playMoveSfx() {
+    playSfx(moveSfxRef);
+  }
+  function playCaptureSfx() {
+    playSfx(captureSfxRef);
+  }
+  function playCheckSfx() {
+    playSfx(checkSfxRef);
+  }
+  function playMateSfx() {
+    playSfx(mateSfxRef);
+  }
+
   useEffect(() => {
-    const a = moveSfxRef.current;
-    if (!a) return;
-    try {
-      a.load();
-    } catch {}
+    const audios = [moveSfxRef.current, captureSfxRef.current, checkSfxRef.current, mateSfxRef.current];
+    for (const a of audios) {
+      if (!a) continue;
+      try {
+        a.load();
+      } catch {}
+    }
   }, []);
+
+  // Decide end-of-game result correctly (checkmate vs draw reasons)
+  function getGameOverInfo(lastMoverColor) {
+    if (game.isCheckmate && game.isCheckmate()) {
+      const winner = lastMoverColor === "w" ? "White" : "Black";
+      return { over: true, winner, reason: "CHECKMATED", isDraw: false };
+    }
+
+    if (game.isGameOver && game.isGameOver()) {
+      // Any non-checkmate gameOver here is a draw (stalemate / repetition / 50-move / insufficient material)
+      return { over: true, winner: "Draw", reason: "DRAW", isDraw: true };
+    }
+
+    return { over: false };
+  }
+
+  function applyPostMoveSfx(moveObj) {
+    // Move vs capture
+    if (moveObj && moveObj.captured) playCaptureSfx();
+    else playMoveSfx();
+
+    // If mate, play mate SFX (not check SFX)
+    if (game.isCheckmate && game.isCheckmate()) {
+      playMateSfx();
+      return;
+    }
+
+    // Otherwise check sound
+    if (game.inCheck && game.inCheck()) {
+      playCheckSfx();
+    }
+  }
 
   const engineName = "TEORIAT";
   const topName = engineName;
@@ -456,6 +506,7 @@ function Play({ playerName, playerColor, timeMode }) {
   function reasonLine(reason) {
     if (reason === "RESIGNED") return "By resignation.";
     if (reason === "TIMEOUT") return "On time.";
+    if (reason === "DRAW") return "Draw.";
     return "By checkmate.";
   }
 
@@ -596,20 +647,15 @@ function Play({ playerName, playerColor, timeMode }) {
       recomputeCaptured();
 
       /* sound */
-      playMoveSfx();
+      applyPostMoveSfx(engineMove);
 
       const engineUci = `${from}${to}${engineMove.promotion || ""}`;
       setMoveHistory((prev) => [...prev, engineUci]);
 
-      if (game.isCheckmate && game.isCheckmate()) {
-        const w = engineColor === "w" ? "White" : "Black";
-        openResult(w, "CHECKMATED");
-        return;
-      }
-
-      if (game.isGameOver && game.isGameOver()) {
-        const w = engineColor === "w" ? "White" : "Black";
-        openResult(w, "CHECKMATED");
+      // Correct result handling
+      const info = getGameOverInfo(engineColor);
+      if (info.over) {
+        openResult(info.winner, info.reason);
         return;
       }
 
@@ -633,7 +679,6 @@ function Play({ playerName, playerColor, timeMode }) {
     const promotionRank = sourcePiece.color === "w" ? "8" : "1";
     const isPromotion = isPawn && targetSquare?.[1] === promotionRank;
 
-    // If this is a promotion, piece parameter will contain the selected piece (e.g., "wQ")
     const promotionPiece = isPromotion && piece ? piece[1].toLowerCase() : undefined;
 
     const moveObj = isPromotion
@@ -652,21 +697,16 @@ function Play({ playerName, playerColor, timeMode }) {
     recomputeCaptured();
 
     /* sound */
-    playMoveSfx();
+    applyPostMoveSfx(move);
 
     const playerUci = `${sourceSquare}${targetSquare}${move.promotion || ""}`;
     const nextHistory = [...moveHistory, playerUci];
     setMoveHistory(nextHistory);
 
-    if (game.isCheckmate && game.isCheckmate()) {
-      const w = playerColor === "w" ? "White" : "Black";
-      openResult(w, "CHECKMATED");
-      return true;
-    }
-
-    if (game.isGameOver && game.isGameOver()) {
-      const w = playerColor === "w" ? "White" : "Black";
-      openResult(w, "CHECKMATED");
+    // Correct result handling
+    const info = getGameOverInfo(playerColor);
+    if (info.over) {
+      openResult(info.winner, info.reason);
       return true;
     }
 
@@ -682,7 +722,6 @@ function Play({ playerName, playerColor, timeMode }) {
   useEffect(() => {
     if (playerColor === "b" && game.turn() === "w" && moveHistory.length === 0) {
       setActiveColor("w");
-      // Engine-first move may be blocked until user gesture on Safari/iOS; after first interaction it will work.
       askEngine([]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -697,6 +736,9 @@ function Play({ playerName, playerColor, timeMode }) {
     >
       {/* sound */}
       <audio ref={moveSfxRef} preload="auto" src={`${process.env.PUBLIC_URL}/peace_move.wav`} />
+      <audio ref={captureSfxRef} preload="auto" src={`${process.env.PUBLIC_URL}/capture.wav`} />
+      <audio ref={checkSfxRef} preload="auto" src={`${process.env.PUBLIC_URL}/check.mp3`} />
+      <audio ref={mateSfxRef} preload="auto" src={`${process.env.PUBLIC_URL}/checkmate.mp3`} />
 
       {resultOpen && <div className="gameOverDim" aria-hidden="true" />}
 
@@ -727,7 +769,7 @@ function Play({ playerName, playerColor, timeMode }) {
                 <div className="gameOverOnBoard" role="dialog" aria-modal="true" aria-label="Result">
                   <div className="gameOverPanelBoard">
                     <div className="resultKicker">Result</div>
-                    <div className="resultMain">{resultWinner} wins.</div>
+                    <div className="resultMain">{resultWinner === "Draw" ? "Draw." : `${resultWinner} wins.`}</div>
                     <div className="resultSub">{reasonLine(resultReason)}</div>
 
                     <div className="gameOverActions">
@@ -778,8 +820,6 @@ function Play({ playerName, playerColor, timeMode }) {
     </div>
   );
 }
-
-
 
 
 export default function App() {
