@@ -319,6 +319,9 @@ function Play({ playerName, playerColor, timeMode }) {
   const [moveHistory, setMoveHistory] = useState([]);
   const [busy, setBusy] = useState(false);
 
+  // NEW: bumps on rematch so engine-first logic re-runs
+  const [gameId, setGameId] = useState(0);
+
   const [boardWidth, setBoardWidth] = useState(() => Math.min(560, Math.floor(window.innerWidth * 0.92)));
 
   useEffect(() => {
@@ -534,6 +537,9 @@ function Play({ playerName, playerColor, timeMode }) {
     setResultReason("");
     setPendingPromotion(null);
     lastRef.current = performance.now();
+
+    // NEW: triggers engine-first useEffect after rematch
+    setGameId((x) => x + 1);
   }
 
   function resign() {
@@ -719,13 +725,19 @@ function Play({ playerName, playerColor, timeMode }) {
     return !busy && clockRunning && !resultOpen && game.turn() === playerColor && piece[0].toLowerCase() === playerColor;
   }
 
+  // FIXED: engine-first move runs after every rematch (gameId increments)
   useEffect(() => {
-    if (playerColor === "b" && game.turn() === "w" && moveHistory.length === 0) {
-      setActiveColor("w");
-      askEngine([]);
-    }
+    if (playerColor !== "b") return; // engine is white
+    if (resultOpen || !clockRunning || busy) return;
+
+    // On a fresh game it is white to move and no history
+    if (game.turn() !== "w") return;
+    if (moveHistory.length !== 0) return;
+
+    setActiveColor("w");
+    askEngine([]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [gameId, playerColor]);
 
   return (
     <div
@@ -820,7 +832,6 @@ function Play({ playerName, playerColor, timeMode }) {
     </div>
   );
 }
-
 
 export default function App() {
   const [playerName, setPlayerName] = useState("");
