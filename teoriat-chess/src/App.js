@@ -347,6 +347,28 @@ function Play({ playerName, playerColor, timeMode }) {
 
   const [pendingPromotion, setPendingPromotion] = useState(null);
 
+  /* sound */
+  const moveSfxRef = useRef(null);
+
+  function playMoveSfx() {
+    const a = moveSfxRef.current;
+    if (!a) return;
+
+    try {
+      a.currentTime = 0;
+      const p = a.play();
+      if (p && typeof p.catch === "function") p.catch(() => {});
+    } catch {}
+  }
+
+  useEffect(() => {
+    const a = moveSfxRef.current;
+    if (!a) return;
+    try {
+      a.load();
+    } catch {}
+  }, []);
+
   const engineName = "TEORIAT";
   const topName = engineName;
   const bottomName = playerName;
@@ -573,6 +595,9 @@ function Play({ playerName, playerColor, timeMode }) {
       setPosition(game.fen());
       recomputeCaptured();
 
+      /* sound */
+      playMoveSfx();
+
       const engineUci = `${from}${to}${engineMove.promotion || ""}`;
       setMoveHistory((prev) => [...prev, engineUci]);
 
@@ -626,6 +651,9 @@ function Play({ playerName, playerColor, timeMode }) {
     setPosition(game.fen());
     recomputeCaptured();
 
+    /* sound */
+    playMoveSfx();
+
     const playerUci = `${sourceSquare}${targetSquare}${move.promotion || ""}`;
     const nextHistory = [...moveHistory, playerUci];
     setMoveHistory(nextHistory);
@@ -654,6 +682,7 @@ function Play({ playerName, playerColor, timeMode }) {
   useEffect(() => {
     if (playerColor === "b" && game.turn() === "w" && moveHistory.length === 0) {
       setActiveColor("w");
+      // Engine-first move may be blocked until user gesture on Safari/iOS; after first interaction it will work.
       askEngine([]);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -666,6 +695,9 @@ function Play({ playerName, playerColor, timeMode }) {
         "--playBg": `url(${process.env.PUBLIC_URL}/The_Chess_Players_MET_DT1506.jpg)`,
       }}
     >
+      {/* sound */}
+      <audio ref={moveSfxRef} preload="auto" src={`${process.env.PUBLIC_URL}/peace_move.wav`} />
+
       {resultOpen && <div className="gameOverDim" aria-hidden="true" />}
 
       <div className="container playBox">
@@ -746,6 +778,9 @@ function Play({ playerName, playerColor, timeMode }) {
     </div>
   );
 }
+
+
+
 
 export default function App() {
   const [playerName, setPlayerName] = useState("");
