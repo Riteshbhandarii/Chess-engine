@@ -1,16 +1,20 @@
 /* Base */
 *{ margin: 0; padding: 0; box-sizing: border-box; }
 
+
 /* Play screen */
 .app{
   min-height: 100vh;
 
+
   /* will be overridden by inline style on Play (image bg) */
   background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+
 
   font-family: "Segoe UI", system-ui, sans-serif;
   position: relative;
   overflow: hidden;
+
 
   /* MATCH shell */
   display: grid;
@@ -18,12 +22,14 @@
   padding: 24px 16px;
 }
 
+
 /* Stars (harmless if not rendered) */
 .stars{
   position: fixed;
   inset: 0;
   pointer-events: none;
 }
+
 
 .stars::before,
 .stars::after{
@@ -44,6 +50,7 @@
 }
 
 
+
 .stars::after{
   width: 1px;
   height: 1px;
@@ -55,6 +62,7 @@
   animation: stars-move 150s linear infinite;
 }
 
+
 /* Play HUD: name left, clock right (chess.com-ish, but matches your glass style) */
 .playHudRow{
   width: 100%;
@@ -63,8 +71,10 @@
   justify-content: space-between;
   gap: 12px;
 
+
   margin: 8px 0;
 }
+
 
 .playHudName{
   color: rgba(255,255,255,0.85);
@@ -72,29 +82,36 @@
   letter-spacing: 0.08em;
 }
 
+
 .playHudClock{
   min-width: 110px;            /* makes both clocks the same size */
   text-align: right;
 
+
   color: rgba(255,255,255,0.92);
   font: 800 20px/1 "Segoe UI", system-ui, sans-serif;
 
+
   padding: 10px 12px;
   border-radius: 10px;
+
 
   background: rgba(0,0,0,0.30);
   border: 1px solid rgba(255,255,255,0.10);
   backdrop-filter: blur(10px);
 }
 
+
 /* Optional: tighter spacing around the board */
 .playHudSpacer{ height: 6px; }
+
 
 
 @keyframes stars-move{
   from { transform: translateY(0); }
   to { transform: translateY(-1000px); }
 }
+
 
 /* Main content box (Play screen) */
 /* Make the play box wrap the board (remove right empty space) */
@@ -104,11 +121,13 @@
   margin: 0 auto;               /* center the whole box */
 }
 
+
 /* Ensure inner sections don't force extra width */
 .topbar,
 .controls{
   width: 100%;
 }
+
 
 /* Center board inside the box */
 .boardTopLeft{
@@ -116,6 +135,7 @@
   display: flex;
   justify-content: center;
 }
+
 
 /* Title + typography */
 h1{
@@ -129,6 +149,7 @@ h1{
   text-shadow: 0 0 40px rgba(200, 220, 255, 0.3);
 }
 
+
 .controls{
   margin-top: 30px;
   display: flex;
@@ -136,6 +157,7 @@ h1{
   justify-content: space-between;
   gap: 20px;
 }
+
 
 /* Global button (default) */
 button{
@@ -152,13 +174,16 @@ button{
   text-transform: uppercase;
 }
 
+
 button:hover{
   background: linear-gradient(135deg, #5a6678 0%, #3d4758 100%);
   transform: translateY(-2px);
   box-shadow: 0 8px 25px rgba(100, 150, 255, 0.2);
 }
 
+
 button:active{ transform: translateY(0); }
+
 
 .status{
   color: #c7d2e0;
@@ -172,6 +197,7 @@ button:active{ transform: translateY(0); }
   font-weight: 400;
 }
 
+
 /* Mobile (Play screen) */
 @media (max-width: 768px){
   .container{
@@ -180,11 +206,13 @@ button:active{ transform: translateY(0); }
     margin-top: 18px;
   }
 
+
   h1{
     font-size: 1.8em;
     letter-spacing: 5px;
     margin-bottom: 16px;
   }
+
 
   .controls{
     flex-direction: column;
@@ -193,13 +221,16 @@ button:active{ transform: translateY(0); }
     margin-top: 16px;
   }
 
+
   button{ width: 100%; }
+
 
   .status{
     width: 100%;
     padding: 12px 14px;
   }
 }
+
 
 /* Landing */
 .landing{
@@ -210,6 +241,7 @@ button:active{ transform: translateY(0); }
   position: relative;
   background: var(--landingBg) center 60% / cover no-repeat;
 }
+
 
 .landing::before{
   content: "";
@@ -223,6 +255,7 @@ button:active{ transform: translateY(0); }
   );
   pointer-events: none;
 }
+
 
 .landingMenuBtn{
   position: fixed;
@@ -243,6 +276,7 @@ button:active{ transform: translateY(0); }
   mix-blend-mode: soft-light;
 }
 
+
 .landingMenuBtn:hover{
   color: rgba(255,255,255,0.92);
   background-color: rgba(0,0,0,0.18);
@@ -250,12 +284,14 @@ button:active{ transform: translateY(0); }
   transform: translateY(-1px);
 }
 
+
 .landingMenuBackdrop{
   position: fixed;
   inset: 0;
   z-index: 55;
   background: rgba(0,0,0,0.35);
 }
+
 
 .landingMenuPanel{
   position: fixed;
@@ -273,7 +309,9 @@ button:active{ transform: translateY(0); }
   transition: transform 220ms ease;
 }
 
+
 .landingMenuPanel.open{ transform: translateX(0); }
+
 
 .landingMenuItem{
   width: 100%;
@@ -297,6 +335,7 @@ button:active{ transform: translateY(0); }
   transition: 300ms;
 }
 
+
 .landingMenuItem:hover{
   color: rgba(245, 240, 232, 0.92);
   background: rgba(12, 10, 8, 0.12);
@@ -306,6 +345,7 @@ button:active{ transform: translateY(0); }
     inset 2px 2px 6px rgba(0,0,0,0.22),
     inset -2px -2px 6px rgba(255,255,255,0.05);
 }
+
 
 .landingHero{
   position: absolute;
@@ -318,10 +358,12 @@ button:active{ transform: translateY(0); }
   text-shadow: 0 10px 40px rgba(0,0,0,0.55);
 }
 
+
 .landingTitle{
   position: relative;
   padding-bottom: 14px;
 }
+
 
 .landingTitle::after{
   content: "";
@@ -333,11 +375,13 @@ button:active{ transform: translateY(0); }
   box-shadow: 0 8px 24px rgba(0,0,0,0.35);
 }
 
+
 .landingSubtitle{
   max-width: 46ch;
   margin-inline: auto;
   color: rgba(255,245,235,0.84);
 }
+
 
 .landingBox{
   position: absolute;
@@ -351,6 +395,7 @@ button:active{ transform: translateY(0); }
   border: 0;
   box-shadow: none;
 }
+
 
 .landingBegin{
   margin: 12px;
@@ -374,6 +419,7 @@ button:active{ transform: translateY(0); }
   transition: 500ms;
 }
 
+
 .landingBegin:hover{
   box-shadow:
     -5px -5px 15px #444,
@@ -383,6 +429,7 @@ button:active{ transform: translateY(0); }
   color: rgba(245, 240, 232, 0.92);
 }
 
+
 .landingMenuBtn:focus-visible,
 .landingMenuItem:focus-visible,
 .landingBegin:focus-visible{
@@ -390,8 +437,10 @@ button:active{ transform: translateY(0); }
   outline-offset: 3px;
 }
 
+
 @media (max-width: 480px){
   .landingBox{ bottom: 40px; }
+
 
   .landingMenuBtn{
     top: 14px;
@@ -400,6 +449,7 @@ button:active{ transform: translateY(0); }
     letter-spacing: 0.18em;
   }
 }
+
 
 /* Sign-in */
 .signin{
@@ -414,10 +464,12 @@ button:active{ transform: translateY(0); }
   animation: fadeIn 0.6s ease-out;
 }
 
+
 @keyframes fadeIn{
   from { opacity: 0; }
   to { opacity: 1; }
 }
+
 
 .signin::before{
   content: "";
@@ -428,6 +480,7 @@ button:active{ transform: translateY(0); }
     linear-gradient(to bottom, rgba(0,0,0,0.40) 0%, rgba(0,0,0,0.22) 45%, rgba(0,0,0,0.50) 100%);
   pointer-events: none;
 }
+
 
 .signinCard{
   position: relative;
@@ -444,6 +497,7 @@ button:active{ transform: translateY(0); }
   animation: none;
 }
 
+
 .signinTitle{
   font: inherit;
   font-size: clamp(30px, 6vw, 30px);
@@ -454,6 +508,7 @@ button:active{ transform: translateY(0); }
   text-shadow: inherit;
 }
 
+
 .signin .landingBegin{
   width: auto;
   min-width: 100px;
@@ -463,6 +518,7 @@ button:active{ transform: translateY(0); }
   justify-content: center;
 }
 
+
 .signinLabel{
   color: rgba(255,245,235,0.84);
   font: inherit;
@@ -471,6 +527,7 @@ button:active{ transform: translateY(0); }
   display: inline-block;
 }
 
+
 .signinHint{
   color: rgba(255,245,235,0.84);
   font: inherit;
@@ -478,6 +535,7 @@ button:active{ transform: translateY(0); }
   text-shadow: inherit;
   margin: 10px 0 18px;
 }
+
 
 .signinInput{
   appearance: none;
@@ -496,14 +554,17 @@ button:active{ transform: translateY(0); }
   box-shadow: none;
 }
 
+
 .signinInput::placeholder{
   color: rgba(255,255,255,0.40);
   transition: color 0.3s ease;
 }
 
+
 .signinInput:hover{
   border-bottom-color: rgba(255,255,255,0.75);
 }
+
 
 .signinInput:focus,
 .signinInput:focus-visible{
@@ -514,13 +575,16 @@ button:active{ transform: translateY(0); }
     0 2px 24px rgba(255,255,255,0.15);
 }
 
+
 .signinInput:focus::placeholder{ color: rgba(255,255,255,0.50); }
+
 
 .signinBackGlobal{
   opacity: 1 !important;
   color: rgba(255,255,255,1) !important;
   font-weight: 700;
 }
+
 
 /* Generic pages */
 .shell{
@@ -534,6 +598,7 @@ button:active{ transform: translateY(0); }
   position: relative;
 }
 
+
 /* Shell background image helper */
 .shell.shellBg{
   background-image: var(--shellBg);
@@ -541,6 +606,7 @@ button:active{ transform: translateY(0); }
   background-position: center 45%;
   background-repeat: no-repeat;
 }
+
 
 .shell.shellBg::before{
   content: "";
@@ -552,10 +618,12 @@ button:active{ transform: translateY(0); }
   pointer-events: none;
 }
 
+
 .shell.shellBg > .card{
   position: relative;
   z-index: 1;
 }
+
 
 .card{
   width: min(92vw, 720px);
@@ -567,6 +635,7 @@ button:active{ transform: translateY(0); }
   padding: 22px 22px 26px;
 }
 
+
 .topbar{
   display: flex;
   align-items: center;
@@ -574,6 +643,7 @@ button:active{ transform: translateY(0); }
   gap: 14px;
   margin-bottom: 14px;
 }
+
 
 .title{
   margin: 0;
@@ -584,6 +654,7 @@ button:active{ transform: translateY(0); }
   color: rgba(255,255,255,0.92);
   text-shadow: 0 0 30px rgba(200, 220, 255, 0.18);
 }
+
 
 .linkBtn{
   background: transparent;
@@ -599,11 +670,13 @@ button:active{ transform: translateY(0); }
   width: auto;
 }
 
+
 .linkBtn:hover{
   color: rgba(255,255,255,0.95);
   background-color: rgba(0,0,0,0.18);
   transform: translateY(-1px);
 }
+
 
 .text{
   color: rgba(255,245,235,0.84);
@@ -611,7 +684,9 @@ button:active{ transform: translateY(0); }
   font-size: 15px;
 }
 
+
 .text p{ margin: 10px 0; }
+
 
 /* SideSelect: board left, controls right */
 .sideLayout{
@@ -623,7 +698,9 @@ button:active{ transform: translateY(0); }
   backdrop-filter: blur(10px);
 }
 
+
 .sideMeta{ display: none; }
+
 
 .sideGrid{
   display: grid;
@@ -632,6 +709,7 @@ button:active{ transform: translateY(0); }
   align-items: start;
   margin-top: 0;
 }
+
 
 .sideLeft{
   display: flex;
@@ -642,6 +720,7 @@ button:active{ transform: translateY(0); }
   background: rgba(38, 36, 33, 0.45);
 }
 
+
 .sideRight{
   display: flex;
   justify-content: center;
@@ -651,6 +730,7 @@ button:active{ transform: translateY(0); }
   padding: 24px 20px;
 }
 
+
 .sidePanel{
   width: 100%;
   background: transparent;
@@ -658,6 +738,7 @@ button:active{ transform: translateY(0); }
   border-radius: 0;
   padding: 0;
 }
+
 
 .sideSectionTitle{
   font: 600 11px/1 "Segoe UI", system-ui, sans-serif;
@@ -667,11 +748,13 @@ button:active{ transform: translateY(0); }
   margin-bottom: 12px;
 }
 
+
 .sideToggle{
   display: grid;
   gap: 10px;
   margin-bottom: 24px;
 }
+
 
 .sideBtnWide{
   width: 100%;
@@ -696,10 +779,12 @@ button:active{ transform: translateY(0); }
   transition: 300ms;
 }
 
+
 .sideBtnWide:hover{
   color: rgba(245, 240, 232, 0.80);
   transform: translateY(0);
 }
+
 
 /* Play bg image */
 .app.appBg::before{
@@ -707,10 +792,12 @@ button:active{ transform: translateY(0); }
   position: absolute;
   inset: 0;
 
+
   background-image: var(--playBg);
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
+
 
   z-index: 0;
 }
@@ -719,13 +806,16 @@ button:active{ transform: translateY(0); }
   position: absolute;
   inset: 0;
 
+
   background-image: var(--playBg);
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
 
+
   z-index: 0;
 }
+
 
 /* 2x darker background */
 .app.appBg::after{
@@ -733,9 +823,11 @@ button:active{ transform: translateY(0); }
   position: absolute;
   inset: 0;
 
+
   background: rgba(0,0,0,0.60);
   z-index: 0;
 }
+
 
 .app.appBg > *{
   position: relative;
@@ -743,9 +835,11 @@ button:active{ transform: translateY(0); }
 }
 
 
+
 .boardTopLeft{
   border-radius: 0;
-  overflow: hidden;
+  overflow: visible;
+
 
   box-shadow:
     0 2px 0 rgba(255,255,255,0.08),
@@ -753,19 +847,23 @@ button:active{ transform: translateY(0); }
     0 34px 70px rgba(0,0,0,0.60),
     0 70px 160px rgba(0,0,0,0.85);
 
+
   transform: none;
 }
+
 
 
 .playBox{
   margin-top: 100px;
 }
 
+
 @media (max-width: 768px){
   .playBox{
     margin-top: 20px;
   }
 }
+
 
 .sideBtnWide.active{
   box-shadow:
@@ -776,6 +874,7 @@ button:active{ transform: translateY(0); }
   color: rgba(245, 240, 232, 0.92);
 }
 
+
 .playGrid{
   display: grid;
   grid-template-columns: 1fr 320px;
@@ -783,20 +882,24 @@ button:active{ transform: translateY(0); }
   align-items: start;
 }
 
+
 .playMain{
   width: fit-content;
 }
+
 
 .sidePanelPlay{
   width: 320px;
   max-height: calc(100vh - 180px);
   overflow: auto;
 
+
   padding: 12px;
   background: rgba(0,0,0,0.30);
   border: 1px solid rgba(255,255,255,0.10);
   backdrop-filter: blur(10px);
 }
+
 
 .sidePanelTitle{
   color: rgba(255,255,255,0.80);
@@ -806,10 +909,12 @@ button:active{ transform: translateY(0); }
   margin-bottom: 10px;
 }
 
+
 .sideMoves{
   display: grid;
   gap: 8px;
 }
+
 
 .sideMoveRow{
   display: grid;
@@ -817,17 +922,21 @@ button:active{ transform: translateY(0); }
   gap: 10px;
   align-items: baseline;
 
+
   color: rgba(255,255,255,0.90);
   font: 600 13px/1.2 "Segoe UI", system-ui, sans-serif;
 }
+
 
 .sideMoveNo{
   color: rgba(255,255,255,0.55);
   font-weight: 800;
 }
 
+
 .sideMoveW{ color: rgba(255,255,255,0.92); }
 .sideMoveB{ color: rgba(255,245,235,0.85); }
+
 
 .sideFen{
   color: rgba(255,255,255,0.75);
@@ -837,10 +946,12 @@ button:active{ transform: translateY(0); }
   border-top: 1px solid rgba(255,255,255,0.10);
 }
 
+
 .sideEmpty{
   color: rgba(255,255,255,0.55);
   font: 500 13px/1.2 "Segoe UI", system-ui, sans-serif;
 }
+
 
 /* Responsive: stack under board */
 @media (max-width: 980px){
@@ -853,6 +964,7 @@ button:active{ transform: translateY(0); }
   }
 }
 
+
 .capRow{
   width: 100%;
   max-width: 560px;
@@ -863,6 +975,7 @@ button:active{ transform: translateY(0); }
   backdrop-filter: blur(10px);
 }
 
+
 .capTitle{
   color: rgba(255,255,255,0.70);
   font: 700 11px/1 "Segoe UI", system-ui, sans-serif;
@@ -871,11 +984,13 @@ button:active{ transform: translateY(0); }
   margin-bottom: 8px;
 }
 
+
 .capPieces{
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
 }
+
 
 .capIcon{
   width: 28px;
@@ -889,13 +1004,16 @@ button:active{ transform: translateY(0); }
   line-height: 1;
 }
 
+
 .capIcon.w{ color: rgba(255,255,255,0.92); }
 .capIcon.b{ color: rgba(255,245,235,0.88); }
+
 
 .capEmpty{
   color: rgba(255,255,255,0.45);
   font: 600 13px/1.2 "Segoe UI", system-ui, sans-serif;
 }
+
 
 .sidePanelHeader{
   display: flex;
@@ -904,6 +1022,7 @@ button:active{ transform: translateY(0); }
   gap: 12px;
   margin-bottom: 10px;
 }
+
 
 .resignBtn{
   padding: 8px 10px;
@@ -914,13 +1033,16 @@ button:active{ transform: translateY(0); }
   font: 700 12px/1 "Segoe UI", system-ui, sans-serif;
 }
 
+
 .resignBtn:hover{
   background: rgba(255, 80, 80, 0.20);
 }
 
+
 .resignBtn:active{
   transform: translateY(1px);
 }
+
 
 /* Fullscreen dim layer */
 /* Fullscreen dim/blur */
@@ -932,11 +1054,13 @@ button:active{ transform: translateY(0); }
   backdrop-filter: blur(10px);
 }
 
+
 /* Board positioning context */
 .boardWrap{
   position: relative;
   width: fit-content;
 }
+
 
 /* Overlay sits ON the board */
 .gameOverOnBoard{
@@ -948,6 +1072,7 @@ button:active{ transform: translateY(0); }
   background: rgba(0,0,0,0.32);
 }
 
+
 /* Squared “tournament card” */
 .gameOverPanelBoard{
   width: min(520px, calc(100% - 24px));
@@ -958,6 +1083,7 @@ button:active{ transform: translateY(0); }
   box-shadow: 0 30px 90px rgba(0,0,0,0.65);
 }
 
+
 /* Elegant result text */
 .resultKicker{
   color: rgba(255,255,255,0.68);
@@ -966,6 +1092,7 @@ button:active{ transform: translateY(0); }
   text-transform: uppercase;
 }
 
+
 .resultMain{
   margin-top: 12px;
   color: rgba(255,255,255,0.98);
@@ -973,11 +1100,13 @@ button:active{ transform: translateY(0); }
   letter-spacing: 0.02em;
 }
 
+
 .resultSub{
   margin-top: 10px;
   color: rgba(255,255,255,0.78);
   font: 700 15px/1.2 "Segoe UI", system-ui, sans-serif;
 }
+
 
 /* Actions match your squared aesthetic here */
 .gameOverActions{
@@ -987,6 +1116,7 @@ button:active{ transform: translateY(0); }
   justify-content: flex-end;
   flex-wrap: wrap;
 }
+
 
 .gameOverBtnPrimary,
 .gameOverBtnGhost{
@@ -998,11 +1128,13 @@ button:active{ transform: translateY(0); }
   color: rgba(255,255,255,0.92);
 }
 
+
 .gameOverBtnPrimary{
   border: 1px solid rgba(255,255,255,0.18);
   background: rgba(255,255,255,0.12);
 }
 .gameOverBtnPrimary:hover{ background: rgba(255,255,255,0.16); }
+
 
 .gameOverBtnGhost{
   border: 1px solid rgba(255,255,255,0.12);
@@ -1010,6 +1142,7 @@ button:active{ transform: translateY(0); }
   color: rgba(255,255,255,0.85);
 }
 .gameOverBtnGhost:hover{ background: rgba(255,255,255,0.10); }
+
 
 /* Resign header (keep) */
 .sidePanelHeader{
@@ -1019,6 +1152,7 @@ button:active{ transform: translateY(0); }
   gap: 12px;
   margin-bottom: 10px;
 }
+
 
 .resignBtn{
   padding: 8px 10px;
@@ -1030,8 +1164,23 @@ button:active{ transform: translateY(0); }
 }
 .resignBtn:hover{ background: rgba(255, 80, 80, 0.20); }
 
+
 /* Responsive */
 @media (max-width: 980px){
   .sideGrid{ grid-template-columns: 1fr; }
   .sideRight{ border-left: 0; border-top: 1px solid rgba(0,0,0,0.45); }
+}
+
+
+/* promotion */
+.boardWrap{
+  isolation: isolate;
+}
+
+.boardWrap *[class*="promotion"],
+.boardWrap *[class*="Promotion"],
+.boardWrap *[class*="promote"],
+.boardWrap *[class*="Promote"]{
+  position: relative;
+  z-index: 100000;
 }
