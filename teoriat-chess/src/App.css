@@ -989,6 +989,16 @@ button:active{ transform: translateY(0); }
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
+
+  min-height: 28px;
+  align-items: center;
+}
+
+.capEmpty{
+
+  height: 28px;
+  display: flex;
+  align-items: center;
 }
 
 
