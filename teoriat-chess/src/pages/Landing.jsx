@@ -2,9 +2,6 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./LeaderBoard.css";
 
-
-
-
 export default function Landing({ playerName, setPlayerName }) {
   const nav = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -40,12 +37,7 @@ export default function Landing({ playerName, setPlayerName }) {
         <button type="button" className="landingMenuItem" role="menuitem" onClick={() => go("/about")}>
           About
         </button>
-        <button type="button" className="landingMenuItem" role="menuitem" onClick={() => go("/how")}>
-          How to play
-        </button>
-        <button type="button" className="landingMenuItem" role="menuitem" onClick={() => go("/feedback")}>
-          Feedback
-        </button>
+
         <button type="button" className="landingMenuItem" role="menuitem" onClick={() => go("/leaderboard")}>
           Leaderboard
         </button>
