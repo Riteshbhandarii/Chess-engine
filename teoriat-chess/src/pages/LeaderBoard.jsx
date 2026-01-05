@@ -1,14 +1,12 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const API_BASE = process.env.REACT_APP_API_BASE || "http://127.0.0.1:8000";
 
-function Table({ title, rows, loading, error }) {
+function BoardTable({ title, rows, loading, error }) {
   return (
     <div className="lbBlock">
-      <div className="lbBlockHeader">
-        <h2 className="lbTitle">{title}</h2>
-      </div>
+      <h2 className="lbTitle">{title}</h2>
 
       {loading && <div className="lbMeta">Loading…</div>}
       {error && <div className="lbError">{error}</div>}
@@ -66,17 +64,14 @@ export default function LeaderBoard() {
   async function fetchMode(mode, setRows, setLoading, setError) {
     setLoading(true);
     setError("");
-
     try {
       const res = await fetch(`${API_BASE}/leaderboard?mode=${mode}&limit=50`);
-      if (!res.ok) {
-        const txt = await res.text();
-        throw new Error(txt || `HTTP ${res.status}`);
-      }
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       setRows(Array.isArray(data) ? data : []);
     } catch (e) {
       setError(e.message || String(e));
+      setRows([]);
     } finally {
       setLoading(false);
     }
@@ -87,9 +82,6 @@ export default function LeaderBoard() {
     fetchMode("rapid", setRapidRows, setLoadingRapid, setErrorRapid);
   }, []);
 
-  const bulletSorted = useMemo(() => bulletRows, [bulletRows]);
-  const rapidSorted = useMemo(() => rapidRows, [rapidRows]);
-
   return (
     <div className="lbPage">
       <button className="lbBack" onClick={() => nav("/")}>
@@ -97,15 +89,15 @@ export default function LeaderBoard() {
       </button>
 
       <div className="lbContent">
-        <Table
+        <BoardTable
           title="Bullet vs TEORIAT"
-          rows={bulletSorted}
+          rows={bulletRows}
           loading={loadingBullet}
           error={errorBullet}
         />
-        <Table
+        <BoardTable
           title="Rapid vs TEORIAT"
-          rows={rapidSorted}
+          rows={rapidRows}
           loading={loadingRapid}
           error={errorRapid}
         />
