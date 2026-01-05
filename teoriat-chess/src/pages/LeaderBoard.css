@@ -1,4 +1,5 @@
 /* Leaderboard page shell */
+
 .lbPage{
   min-height: 100vh;
   position: relative;
@@ -8,21 +9,19 @@
 }
 
 /* Back button */
+
 .lbBack{
   position: fixed;
   top: 18px;
   left: 18px;
   z-index: 30;
-
   padding: 10px 14px;
   border-radius: 12px;
   border: 1px solid rgba(255,255,255,0.18);
   background: rgba(0,0,0,0.45);
   color: rgba(255,255,255,0.92);
-
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-
   cursor: pointer;
   transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
 }
@@ -33,36 +32,60 @@
   transform: translateY(-1px);
 }
 
+/* Refresh button */
+
+.lbRefresh{
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(0,0,0,0.45);
+  color: rgba(255,255,255,0.92);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  cursor: pointer;
+  transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
+  margin-left: 8px;
+}
+
+.lbRefresh:hover{
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.24);
+  transform: translateY(-1px);
+}
+
+/* Main content container */
+
 .lbContent{
   width: min(92vw, 1120px);
-  margin: 0;              /* IMPORTANT: not centered */
-  margin-left: 20px;      /* keep clear of BACK button */
-  margin-top: 6px;
-
+  margin: 6px auto 0;          /* centered */
   display: grid;
   gap: 16px;
   align-items: start;
 }
 
 /* Two cards side-by-side */
+
 .lbTwoCol{
+  display: grid;
   grid-template-columns: 1fr 1fr;
+  gap: 16px;
 }
 
+/* Card block */
 
 .lbBlock{
   background: rgba(0,0,0,0.46);
   border: 1px solid rgba(255,255,255,0.14);
   border-radius: 16px;
   padding: 16px;
-
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
-
   box-shadow:
     0 18px 40px rgba(0,0,0,0.35),
     inset 0 1px 0 rgba(255,255,255,0.06);
 }
+
+/* Header */
 
 .lbHeader{
   display: flex;
@@ -87,6 +110,8 @@
   font-size: 13px;
 }
 
+/* Error text */
+
 .lbError{
   color: #ffb3b3;
   white-space: pre-wrap;
@@ -94,6 +119,7 @@
   line-height: 1.35;
 }
 
+/* Table wrapper */
 
 .lbTableWrap{
   overflow-x: auto;
@@ -102,12 +128,14 @@
   background: rgba(0,0,0,0.20);
 }
 
+/* Table */
+
 .lbTable{
   width: 100%;
   border-collapse: collapse;
-  min-width: 520px;
+  min-width: 420px; /* allow smaller on phones */
   color: rgba(255,255,255,0.92);
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .lbTable th,
@@ -135,50 +163,60 @@
   font-weight: 850;
 }
 
+/* Empty state */
+
 .lbEmpty{
   text-align: center;
   padding: 16px 10px;
   color: rgba(255,255,255,0.70);
 }
 
+/* Responsive: tablet */
 
 @media (max-width: 900px){
   .lbContent{
-    width: min(94vw, 780px);
-    margin-left: 0;
+    width: 94vw;
+    margin: 6px auto 0;
   }
 
   .lbTwoCol{
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr;  /* stack bullet/rapid */
   }
 }
 
+/* Responsive: small phones */
+
 @media (max-width: 560px){
   .lbPage{
-    padding: 84px 14px 34px;
+    padding: 84px 10px 30px;
   }
 
   .lbBlock{
-    padding: 14px;
+    padding: 12px;
     border-radius: 14px;
   }
 
   .lbTitle{
-    font-size: 15px;
+    font-size: 14px;
     letter-spacing: 0.12em;
   }
 
   .lbTable{
-    min-width: 460px;
+    min-width: 380px;
   }
-}
-.lbRefresh{
-  padding: 10px 14px;
-  border-radius: 12px;
-  border: 1px solid rgba(255,255,255,0.18);
-  background: rgba(0,0,0,0.45);
-  color: rgba(255,255,255,0.92);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  cursor: pointer;
+
+  .lbTable th,
+  .lbTable td{
+    padding: 8px 8px;
+  }
+
+  .lbBack{
+    top: 14px;
+    left: 14px;
+  }
+
+  .lbRefresh{
+    padding: 9px 12px;
+    border-radius: 10px;
+  }
 }
