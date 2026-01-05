@@ -5,7 +5,6 @@ import { Chess } from "chess.js";
 import "./Generic.css";
 import "./Play.css";
 
-
 const API_BASE = process.env.REACT_APP_API_BASE || "http://127.0.0.1:8000";
 
 export default function Play({ playerName, playerColor, timeMode }) {
@@ -23,13 +22,20 @@ export default function Play({ playerName, playerColor, timeMode }) {
   );
 
   useEffect(() => {
-    const onResize = () => setBoardWidth(Math.min(560, Math.floor(window.innerWidth * 0.92)));
+    const onResize = () =>
+      setBoardWidth(Math.min(560, Math.floor(window.innerWidth * 0.92)));
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
 
-  const engineColor = useMemo(() => (playerColor === "w" ? "b" : "w"), [playerColor]);
-  const startSeconds = useMemo(() => (timeMode === "rapid" ? 10 * 60 : 60), [timeMode]);
+  const engineColor = useMemo(
+    () => (playerColor === "w" ? "b" : "w"),
+    [playerColor]
+  );
+  const startSeconds = useMemo(
+    () => (timeMode === "rapid" ? 10 * 60 : 60),
+    [timeMode]
+  );
 
   const [whiteMs, setWhiteMs] = useState(startSeconds * 1000);
   const [blackMs, setBlackMs] = useState(startSeconds * 1000);
@@ -48,7 +54,7 @@ export default function Play({ playerName, playerColor, timeMode }) {
 
   const [pendingPromotion, setPendingPromotion] = useState(null);
 
-  // NEW: prevent double POST (mate + timeout edge cases etc.)
+  // prevent double POST
   const postedRef = useRef(false);
 
   /* sound */
@@ -60,7 +66,6 @@ export default function Play({ playerName, playerColor, timeMode }) {
   function playSfx(ref) {
     const a = ref.current;
     if (!a) return;
-
     try {
       a.currentTime = 0;
       const p = a.play();
@@ -82,7 +87,12 @@ export default function Play({ playerName, playerColor, timeMode }) {
   }
 
   useEffect(() => {
-    const audios = [moveSfxRef.current, captureSfxRef.current, checkSfxRef.current, mateSfxRef.current];
+    const audios = [
+      moveSfxRef.current,
+      captureSfxRef.current,
+      checkSfxRef.current,
+      mateSfxRef.current,
+    ];
     for (const a of audios) {
       if (!a) continue;
       try {
@@ -91,7 +101,6 @@ export default function Play({ playerName, playerColor, timeMode }) {
     }
   }, []);
 
-  // Decide end-of-game result correctly (checkmate vs draw reasons)
   function getGameOverInfo(lastMoverColor) {
     if (game.isCheckmate && game.isCheckmate()) {
       const winner = lastMoverColor === "w" ? "White" : "Black";
@@ -99,7 +108,6 @@ export default function Play({ playerName, playerColor, timeMode }) {
     }
 
     if (game.isGameOver && game.isGameOver()) {
-      // Any non-checkmate gameOver here is a draw (stalemate / repetition / 50-move / insufficient material)
       return { over: true, winner: "Draw", reason: "DRAW", isDraw: true };
     }
 
@@ -107,17 +115,14 @@ export default function Play({ playerName, playerColor, timeMode }) {
   }
 
   function applyPostMoveSfx(moveObj) {
-    // Move vs capture
     if (moveObj && moveObj.captured) playCaptureSfx();
     else playMoveSfx();
 
-    // If mate, play mate SFX (not check SFX)
     if (game.isCheckmate && game.isCheckmate()) {
       playMateSfx();
       return;
     }
 
-    // Otherwise check sound
     if (game.inCheck && game.inCheck()) {
       playCheckSfx();
     }
@@ -152,12 +157,19 @@ export default function Play({ playerName, playerColor, timeMode }) {
     return out;
   }
 
-  const sanMoves = useMemo(() => uciToSanList(moveHistory), [moveHistory]);
+  const sanMoves = useMemo(
+    () => uciToSanList(moveHistory),
+    [moveHistory]
+  );
 
   const moveRows = useMemo(() => {
     const rows = [];
     for (let i = 0; i < sanMoves.length; i += 2) {
-      rows.push({ no: Math.floor(i / 2) + 1, w: sanMoves[i] || "", b: sanMoves[i + 1] || "" });
+      rows.push({
+        no: Math.floor(i / 2) + 1,
+        w: sanMoves[i] || "",
+        b: sanMoves[i + 1] || "",
+      });
     }
     return rows;
   }, [sanMoves]);
@@ -219,13 +231,13 @@ export default function Play({ playerName, playerColor, timeMode }) {
 
     const playerIsWhite = playerColor === "w";
     const winnerIsWhite = winner === "White";
-    const playerWon = (playerIsWhite && winnerIsWhite) || (!playerIsWhite && !winnerIsWhite);
+    const playerWon =
+      (playerIsWhite && winnerIsWhite) || (!playerIsWhite && !winnerIsWhite);
 
     return playerWon ? "win" : "loss";
   }
 
   async function postGameToLeaderboard(winner, reason) {
-    // only post once per game
     if (postedRef.current) return;
     postedRef.current = true;
 
@@ -236,7 +248,7 @@ export default function Play({ playerName, playerColor, timeMode }) {
         body: JSON.stringify({
           player_name: playerName,
           result: winnerToResult(winner),
-          mode: timeMode, // "rapid" or "bullet"
+          mode: timeMode,
           pgn: null,
         }),
       });
@@ -253,7 +265,6 @@ export default function Play({ playerName, playerColor, timeMode }) {
     setResultReason(reason);
     setResultOpen(true);
 
-    // save result to backend leaderboard
     postGameToLeaderboard(winner, reason);
   }
 
@@ -274,10 +285,7 @@ export default function Play({ playerName, playerColor, timeMode }) {
     setPendingPromotion(null);
     lastRef.current = performance.now();
 
-    // allow posting again for the new game
     postedRef.current = false;
-
-    // triggers engine-first useEffect after rematch
     setGameId((x) => x + 1);
   }
 
@@ -308,7 +316,6 @@ export default function Play({ playerName, playerColor, timeMode }) {
     setPendingPromotion(null);
 
     postedRef.current = false;
-
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startSeconds, playerColor]);
 
@@ -394,13 +401,11 @@ export default function Play({ playerName, playerColor, timeMode }) {
       setPosition(game.fen());
       recomputeCaptured();
 
-      /* sound */
       applyPostMoveSfx(engineMove);
 
       const engineUci = `${from}${to}${engineMove.promotion || ""}`;
       setMoveHistory((prev) => [...prev, engineUci]);
 
-      // Correct result handling
       const info = getGameOverInfo(engineColor);
       if (info.over) {
         openResult(info.winner, info.reason);
@@ -427,7 +432,8 @@ export default function Play({ playerName, playerColor, timeMode }) {
     const promotionRank = sourcePiece.color === "w" ? "8" : "1";
     const isPromotion = isPawn && targetSquare?.[1] === promotionRank;
 
-    const promotionPiece = isPromotion && piece ? piece[1].toLowerCase() : undefined;
+    const promotionPiece =
+      isPromotion && piece ? piece[1].toLowerCase() : undefined;
 
     const moveObj = isPromotion
       ? { from: sourceSquare, to: targetSquare, promotion: promotionPiece || "q" }
@@ -444,14 +450,12 @@ export default function Play({ playerName, playerColor, timeMode }) {
     setPosition(game.fen());
     recomputeCaptured();
 
-    /* sound */
     applyPostMoveSfx(move);
 
     const playerUci = `${sourceSquare}${targetSquare}${move.promotion || ""}`;
     const nextHistory = [...moveHistory, playerUci];
     setMoveHistory(nextHistory);
 
-    // Correct result handling
     const info = getGameOverInfo(playerColor);
     if (info.over) {
       openResult(info.winner, info.reason);
@@ -464,15 +468,19 @@ export default function Play({ playerName, playerColor, timeMode }) {
   }
 
   function isDraggablePiece({ piece }) {
-    return !busy && clockRunning && !resultOpen && game.turn() === playerColor && piece[0].toLowerCase() === playerColor;
+    return (
+      !busy &&
+      clockRunning &&
+      !resultOpen &&
+      game.turn() === playerColor &&
+      piece[0].toLowerCase() === playerColor
+    );
   }
 
-  // engine-first move runs after every rematch (gameId increments)
   useEffect(() => {
-    if (playerColor !== "b") return; // engine is white
+    if (playerColor !== "b") return;
     if (resultOpen || !clockRunning || busy) return;
 
-    // On a fresh game it is white to move and no history
     if (game.turn() !== "w") return;
     if (moveHistory.length !== 0) return;
 
@@ -489,10 +497,26 @@ export default function Play({ playerName, playerColor, timeMode }) {
       }}
     >
       {/* sound */}
-      <audio ref={moveSfxRef} preload="auto" src={`${process.env.PUBLIC_URL}/peace_move.wav`} />
-      <audio ref={captureSfxRef} preload="auto" src={`${process.env.PUBLIC_URL}/capture.wav`} />
-      <audio ref={checkSfxRef} preload="auto" src={`${process.env.PUBLIC_URL}/check.mp3`} />
-      <audio ref={mateSfxRef} preload="auto" src={`${process.env.PUBLIC_URL}/checkmate.mp3`} />
+      <audio
+        ref={moveSfxRef}
+        preload="auto"
+        src={`${process.env.PUBLIC_URL}/peace_move.wav`}
+      />
+      <audio
+        ref={captureSfxRef}
+        preload="auto"
+        src={`${process.env.PUBLIC_URL}/capture.wav`}
+      />
+      <audio
+        ref={checkSfxRef}
+        preload="auto"
+        src={`${process.env.PUBLIC_URL}/check.mp3`}
+      />
+      <audio
+        ref={mateSfxRef}
+        preload="auto"
+        src={`${process.env.PUBLIC_URL}/checkmate.mp3`}
+      />
 
       {resultOpen && <div className="gameOverDim" aria-hidden="true" />}
 
@@ -520,17 +544,36 @@ export default function Play({ playerName, playerColor, timeMode }) {
               </div>
 
               {resultOpen && (
-                <div className="gameOverOnBoard" role="dialog" aria-modal="true" aria-label="Result">
+                <div
+                  className="gameOverOnBoard"
+                  role="dialog"
+                  aria-modal="true"
+                  aria-label="Result"
+                >
                   <div className="gameOverPanelBoard">
                     <div className="resultKicker">Result</div>
-                    <div className="resultMain">{resultWinner === "Draw" ? "Draw." : `${resultWinner} wins.`}</div>
-                    <div className="resultSub">{reasonLine(resultReason)}</div>
+                    <div className="resultMain">
+                      {resultWinner === "Draw"
+                        ? "Draw."
+                        : `${resultWinner} wins.`}
+                    </div>
+                    <div className="resultSub">
+                      {reasonLine(resultReason)}
+                    </div>
 
                     <div className="gameOverActions">
-                      <button type="button" className="gameOverBtnPrimary" onClick={startNewGame}>
+                      <button
+                        type="button"
+                        className="gameOverBtnPrimary"
+                        onClick={startNewGame}
+                      >
                         REMATCH
                       </button>
-                      <button type="button" className="gameOverBtnGhost" onClick={leaderboard}>
+                      <button
+                        type="button"
+                        className="gameOverBtnGhost"
+                        onClick={leaderboard}
+                      >
                         LEADERBOARD
                       </button>
                     </div>
@@ -548,25 +591,27 @@ export default function Play({ playerName, playerColor, timeMode }) {
           </div>
 
           <aside className="sidePanelPlay" aria-label="Moves">
-            <div className="sidePanelHeader">
-              <div className="sidePanelTitle">Moves</div>
-              <button type="button" className="resignBtn" onClick={resign}>
-                Resign
-              </button>
-            </div>
+            <div className="capRow movesCard">
+              <div className="sidePanelHeader">
+                <div className="sidePanelTitle">Moves</div>
+                <button type="button" className="resignBtn" onClick={resign}>
+                  Resign
+                </button>
+              </div>
 
-            <div className="sideMoves">
-              {moveRows.length === 0 ? (
-                <div className="sideEmpty">No moves yet.</div>
-              ) : (
-                moveRows.map((r) => (
-                  <div key={r.no} className="sideMoveRow">
-                    <div className="sideMoveNo">{r.no}.</div>
-                    <div className="sideMoveW">{r.w}</div>
-                    <div className="sideMoveB">{r.b}</div>
-                  </div>
-                ))
-              )}
+              <div className="sideMoves">
+                {moveRows.length === 0 ? (
+                  <div className="sideEmpty">No moves yet.</div>
+                ) : (
+                  moveRows.map((r) => (
+                    <div key={r.no} className="sideMoveRow">
+                      <div className="sideMoveNo">{r.no}.</div>
+                      <div className="sideMoveW">{r.w}</div>
+                      <div className="sideMoveB">{r.b}</div>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           </aside>
         </div>

@@ -1,4 +1,5 @@
 /* Play */
+
 .app{
   min-height: 100vh;
   background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
@@ -34,6 +35,8 @@
   z-index: 1;
 }
 
+/* HUD */
+
 .playHudRow{
   width: 100%;
   display: flex;
@@ -63,6 +66,8 @@
 
 .playHudSpacer{ height: 6px; }
 
+/* Layout */
+
 .playBox{
   margin-top: 100px;
 }
@@ -77,6 +82,8 @@
 .playMain{
   width: fit-content;
 }
+
+/* Side panel */
 
 .sidePanelPlay{
   width: 320px;
@@ -94,6 +101,13 @@
   letter-spacing: 0.12em;
   text-transform: uppercase;
   margin-bottom: 10px;
+}
+
+/* MOVES list */
+
+.movesCard{
+  max-height: 220px;
+  overflow-y: auto;
 }
 
 .sideMoves{
@@ -130,6 +144,8 @@
   color: rgba(255,255,255,0.55);
   font: 500 13px/1.2 "Segoe UI", system-ui, sans-serif;
 }
+
+/* Captured pieces */
 
 .capRow{
   width: 100%;
@@ -180,6 +196,8 @@
 .capIcon.w{ color: rgba(255,255,255,0.92); }
 .capIcon.b{ color: rgba(255,245,235,0.88); }
 
+/* Side header / resign */
+
 .sidePanelHeader{
   display: flex;
   align-items: center;
@@ -197,7 +215,11 @@
   font: 800 12px/1 "Segoe UI", system-ui, sans-serif;
 }
 
-.resignBtn:hover{ background: rgba(255, 80, 80, 0.20); }
+.resignBtn:hover{
+  background: rgba(255, 80, 80, 0.20);
+}
+
+/* Game over overlay */
 
 .gameOverDim{
   position: fixed;
@@ -274,7 +296,9 @@
   background: rgba(255,255,255,0.12);
 }
 
-.gameOverBtnPrimary:hover{ background: rgba(255,255,255,0.16); }
+.gameOverBtnPrimary:hover{
+  background: rgba(255,255,255,0.16);
+}
 
 .gameOverBtnGhost{
   border: 1px solid rgba(255,255,255,0.12);
@@ -282,7 +306,11 @@
   color: rgba(255,255,255,0.85);
 }
 
-.gameOverBtnGhost:hover{ background: rgba(255,255,255,0.10); }
+.gameOverBtnGhost:hover{
+  background: rgba(255,255,255,0.10);
+}
+
+/* promotion overlays */
 
 .boardWrap *[class*="promotion"],
 .boardWrap *[class*="Promotion"],
@@ -292,20 +320,33 @@
   z-index: 100000;
 }
 
-/* Responsive */
+/* Responsive: mobile tweaks */
+
 @media (max-width: 768px){
   .playBox{
     margin-top: 20px;
   }
-}
 
-@media (max-width: 980px){
   .playGrid{
     grid-template-columns: 1fr;
+  }
+
+  .playMain{
+    width: fit-content;
+    margin-left: -12px; /* small nudge to visually center board */
   }
 
   .sidePanelPlay{
     width: 100%;
     max-height: 220px;
+  }
+
+  .movesCard{
+    max-height: 130px;   /* smaller MOVES card on phone */
+    overflow-y: auto;
+  }
+
+  .sideMoves{
+    max-height: none;
   }
 }
