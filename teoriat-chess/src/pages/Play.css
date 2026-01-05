@@ -233,6 +233,7 @@
   position: relative;
   width: fit-content;
   isolation: isolate;
+  margin: 0 -2.5%;
 }
 
 .gameOverOnBoard{
