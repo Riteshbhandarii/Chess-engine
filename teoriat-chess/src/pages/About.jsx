@@ -10,22 +10,20 @@ export default function About() {
       style={{
         backgroundImage: `
           linear-gradient(
-            to top,
-            rgba(0,0,0,0.00) 0%,
-            rgba(0,0,0,0.15) 35%,
-            rgba(0,0,0,0.85) 65%,
-            rgba(0,0,0,1.00) 100%
+            to right,
+            rgba(0,0,0,0.82) 0%,
+            rgba(0,0,0,0.72) 45%,
+            rgba(0,0,0,0.55) 70%,
+            rgba(0,0,0,0.35) 100%
           ),
-          url(${process.env.PUBLIC_URL}/menupages.png)
+          url(${process.env.PUBLIC_URL}/menupages.jpg)
         `,
+        backgroundSize: "cover",
+        backgroundRepeat: "no-repeat",
+        backgroundPosition: "85% center", // keeps queen visible on the right
       }}
     >
-      <button
-        className="linkBtn aboutBack"
-        type="button"
-        onClick={() => nav("/")}
-        aria-label="Back to home"
-      >
+      <button className="linkBtn aboutBack" type="button" onClick={() => nav("/")}>
         Back
       </button>
 

@@ -1,37 +1,27 @@
 .aboutPage{
   min-height: 100vh;
-  width: 100%;
   position: relative;
-
-  /* background set inline in JSX */
-  background-size: cover;
-  background-position: center 75%;
-  background-repeat: no-repeat;
 
   display: flex;
   align-items: flex-start;
-  justify-content: center;
+  justify-content: flex-start;
 
-  padding: 96px 20px 48px;
+  padding: 96px 24px 48px;
 }
 
 .aboutBack{
   position: absolute;
-  top: 22px;
-  left: 22px;
-  z-index: 5;
+  top: 20px;
+  left: 20px;
 }
 
-/* Smaller, readable card */
 .aboutContent{
   width: min(92vw, 720px);
-  padding: 28px 28px 22px;
+  padding: 26px 26px 18px;
 
-  background: rgba(10,10,12,0.72);
+  background: rgba(10,10,12,0.55);
   border: 1px solid rgba(255,255,255,0.10);
   border-radius: 16px;
-
-  /* subtle depth, not that “foggy” look */
   box-shadow: 0 18px 60px rgba(0,0,0,0.55);
 
   color: rgba(255,255,255,0.92);
@@ -49,7 +39,6 @@
   margin: 0 0 14px;
   font-size: 16px;
   line-height: 1.7;
-  color: rgba(255,255,255,0.92);
 }
 
 .aboutText{
