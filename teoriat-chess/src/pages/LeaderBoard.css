@@ -1,70 +1,105 @@
+/* Leaderboard page shell */
 .lbPage{
   min-height: 100vh;
   position: relative;
   overflow: hidden;
   padding: 92px 20px 44px;
+  background-color: #0b0f16; /* fallback if bg image doesn't load */
 }
 
-.lbContent{
-  width: min(92vw, 920px);
-  margin: 0 auto;
-  display: grid;
-  gap: 16px;
-}
-
+/* Back button */
 .lbBack{
   position: fixed;
   top: 18px;
   left: 18px;
-  z-index: 10;
+  z-index: 30;
 
   padding: 10px 14px;
   border-radius: 12px;
   border: 1px solid rgba(255,255,255,0.18);
-  background: rgba(0,0,0,0.40);
+  background: rgba(0,0,0,0.45);
   color: rgba(255,255,255,0.92);
-  backdrop-filter: blur(8px);
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
   cursor: pointer;
+  transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
 }
 
+.lbBack:hover{
+  background: rgba(255,255,255,0.08);
+  border-color: rgba(255,255,255,0.24);
+  transform: translateY(-1px);
+}
+
+.lbContent{
+  width: min(92vw, 1120px);
+  margin: 0;              /* IMPORTANT: not centered */
+  margin-left: 20px;      /* keep clear of BACK button */
+  margin-top: 6px;
+
+  display: grid;
+  gap: 16px;
+  align-items: start;
+}
+
+/* Two cards side-by-side */
+.lbTwoCol{
+  grid-template-columns: 1fr 1fr;
+}
+
+/* ===== Cards ===== */
 .lbBlock{
-  background: rgba(0,0,0,0.42);
+  background: rgba(0,0,0,0.46);
   border: 1px solid rgba(255,255,255,0.14);
   border-radius: 16px;
   padding: 16px;
-  backdrop-filter: blur(8px);
+
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+
+  box-shadow:
+    0 18px 40px rgba(0,0,0,0.35),
+    inset 0 1px 0 rgba(255,255,255,0.06);
 }
 
 .lbHeader{
   display: flex;
   align-items: baseline;
   justify-content: space-between;
+  gap: 10px;
   margin-bottom: 10px;
 }
 
 .lbTitle{
   margin: 0;
   color: rgba(255,255,255,0.94);
-  font-size: 18px;
-  letter-spacing: 0.16em;
+  font-size: 16px;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  font-weight: 800;
+  font-weight: 850;
+  line-height: 1.2;
 }
 
 .lbMeta{
-  color: rgba(255,255,255,0.75);
-  font-size: 14px;
+  color: rgba(255,255,255,0.72);
+  font-size: 13px;
 }
 
 .lbError{
   color: #ffb3b3;
   white-space: pre-wrap;
-  font-size: 14px;
+  font-size: 13px;
+  line-height: 1.35;
 }
 
+/* ===== Table ===== */
 .lbTableWrap{
   overflow-x: auto;
   border-radius: 12px;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(0,0,0,0.20);
 }
 
 .lbTable{
@@ -78,27 +113,44 @@
 .lbTable th,
 .lbTable td{
   padding: 11px 10px;
-  border-bottom: 1px solid rgba(255,255,255,0.12);
+  border-bottom: 1px solid rgba(255,255,255,0.10);
   text-align: left;
   white-space: nowrap;
 }
 
 .lbTable thead th{
   color: rgba(255,255,255,0.82);
-  font-weight: 700;
-  letter-spacing: 0.08em;
+  font-weight: 750;
+  letter-spacing: 0.10em;
   text-transform: uppercase;
   font-size: 12px;
+  background: rgba(255,255,255,0.04);
+}
+
+.lbTable tbody tr:hover td{
+  background: rgba(255,255,255,0.05);
 }
 
 .lbUser{
-  font-weight: 800;
+  font-weight: 850;
 }
 
 .lbEmpty{
   text-align: center;
   padding: 16px 10px;
   color: rgba(255,255,255,0.70);
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 900px){
+  .lbContent{
+    width: min(94vw, 780px);
+    margin-left: 0;
+  }
+
+  .lbTwoCol{
+    grid-template-columns: 1fr;
+  }
 }
 
 @media (max-width: 560px){
@@ -108,11 +160,12 @@
 
   .lbBlock{
     padding: 14px;
+    border-radius: 14px;
   }
 
   .lbTitle{
-    font-size: 16px;
-    letter-spacing: 0.14em;
+    font-size: 15px;
+    letter-spacing: 0.12em;
   }
 
   .lbTable{
