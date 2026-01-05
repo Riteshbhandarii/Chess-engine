@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import "./LeaderBoard.css";
+import "./Landing.css";
+
 
 export default function Landing({ playerName, setPlayerName }) {
   const nav = useNavigate();

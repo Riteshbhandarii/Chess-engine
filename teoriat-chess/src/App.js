@@ -9,10 +9,13 @@ import LeaderBoard from "./pages/LeaderBoard";
 import SideSelect from "./pages/sideselect";
 import Play from "./pages/Play";
 
+
+
 export default function App() {
   const [playerName, setPlayerName] = useState("");
   const [playerColor, setPlayerColor] = useState(null);
   const [timeMode, setTimeMode] = useState("rapid");
+
 
   return (
     <Routes>

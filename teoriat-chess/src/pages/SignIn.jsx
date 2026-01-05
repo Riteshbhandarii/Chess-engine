@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import "./Generic.css"; // or Generic.css (whatever you named it)
+import "./SignIn.css";
+
 
 export default function SignIn({ playerName, setPlayerName }) {
   const nav = useNavigate();

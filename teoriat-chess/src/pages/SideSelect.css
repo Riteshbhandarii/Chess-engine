@@ -1,0 +1,102 @@
+/* Side select */
+.sideLayout{
+  width: min(92vw, 1200px);
+  margin-top: 30px;
+  border-radius: 0;
+  background: rgba(20, 18, 16, 0.55);
+  border: 1px solid rgba(255,255,255,0.08);
+  backdrop-filter: blur(10px);
+}
+
+.sideMeta{ display: none; }
+
+.sideGrid{
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  gap: 0;
+  align-items: start;
+  margin-top: 0;
+}
+
+.sideLeft{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding: 24px;
+  background: rgba(38, 36, 33, 0.45);
+}
+
+.sideRight{
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  background: rgba(43, 41, 38, 0.55);
+  border-left: 1px solid rgba(0,0,0,0.45);
+  padding: 24px 20px;
+}
+
+.sidePanel{
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  padding: 0;
+}
+
+.sideSectionTitle{
+  font: 600 11px/1 "Segoe UI", system-ui, sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.50);
+  margin-bottom: 12px;
+}
+
+.sideToggle{
+  display: grid;
+  gap: 10px;
+  margin-bottom: 24px;
+}
+
+.sideBtnWide{
+  width: 100%;
+  height: 44px;
+  margin: 0;
+  padding: 0 16px;
+  border-radius: 6px;
+  background: #333;
+  box-shadow:
+    -3px -3px 8px #444,
+    3px 3px 8px #222,
+    inset 3px 3px 6px #444,
+    inset -3px -3px 6px #222;
+  font-family: "Segoe UI", system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  text-transform: none;
+  cursor: pointer;
+  border: none;
+  color: rgba(255,255,255,0.60);
+  transition: 300ms;
+}
+
+.sideBtnWide:hover{
+  color: rgba(245, 240, 232, 0.80);
+  transform: translateY(0);
+}
+
+.sideBtnWide.active{
+  box-shadow:
+    -3px -3px 8px #444,
+    3px 3px 8px #222,
+    inset 3px 3px 6px #222,
+    inset -3px -3px 6px #444;
+  color: rgba(245, 240, 232, 0.92);
+}
+
+/* Responsive */
+@media (max-width: 980px){
+  .sideGrid{ grid-template-columns: 1fr; }
+  .sideRight{ border-left: 0; border-top: 1px solid rgba(0,0,0,0.45); }
+}

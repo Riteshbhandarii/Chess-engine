@@ -1,0 +1,311 @@
+/* Play */
+.app{
+  min-height: 100vh;
+  background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+  font-family: "Segoe UI", system-ui, sans-serif;
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  place-items: start center;
+  padding: 24px 16px;
+}
+
+.app.appBg::before{
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: var(--playBg);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+  z-index: 0;
+}
+
+.app.appBg::after{
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(0,0,0,0.60);
+  z-index: 0;
+}
+
+.app.appBg > *{
+  position: relative;
+  z-index: 1;
+}
+
+.playHudRow{
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 8px 0;
+}
+
+.playHudName{
+  color: rgba(255,255,255,0.85);
+  font: 600 14px/1 "Segoe UI", system-ui, sans-serif;
+  letter-spacing: 0.08em;
+}
+
+.playHudClock{
+  min-width: 110px;
+  text-align: right;
+  color: rgba(255,255,255,0.92);
+  font: 800 20px/1 "Segoe UI", system-ui, sans-serif;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(0,0,0,0.30);
+  border: 1px solid rgba(255,255,255,0.10);
+  backdrop-filter: blur(10px);
+}
+
+.playHudSpacer{ height: 6px; }
+
+.playBox{
+  margin-top: 100px;
+}
+
+.playGrid{
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 14px;
+  align-items: start;
+}
+
+.playMain{
+  width: fit-content;
+}
+
+.sidePanelPlay{
+  width: 320px;
+  max-height: calc(100vh - 180px);
+  overflow: auto;
+  padding: 12px;
+  background: rgba(0,0,0,0.30);
+  border: 1px solid rgba(255,255,255,0.10);
+  backdrop-filter: blur(10px);
+}
+
+.sidePanelTitle{
+  color: rgba(255,255,255,0.80);
+  font: 700 12px/1 "Segoe UI", system-ui, sans-serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.sideMoves{
+  display: grid;
+  gap: 8px;
+}
+
+.sideMoveRow{
+  display: grid;
+  grid-template-columns: 34px 1fr 1fr;
+  gap: 10px;
+  align-items: baseline;
+  color: rgba(255,255,255,0.90);
+  font: 600 13px/1.2 "Segoe UI", system-ui, sans-serif;
+}
+
+.sideMoveNo{
+  color: rgba(255,255,255,0.55);
+  font-weight: 800;
+}
+
+.sideMoveW{ color: rgba(255,255,255,0.92); }
+.sideMoveB{ color: rgba(255,245,235,0.85); }
+
+.sideFen{
+  color: rgba(255,255,255,0.75);
+  font: 500 12px/1.35 ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  word-break: break-all;
+  padding-top: 8px;
+  border-top: 1px solid rgba(255,255,255,0.10);
+}
+
+.sideEmpty{
+  color: rgba(255,255,255,0.55);
+  font: 500 13px/1.2 "Segoe UI", system-ui, sans-serif;
+}
+
+.capRow{
+  width: 100%;
+  max-width: 560px;
+  margin: 8px 0;
+  padding: 10px 12px;
+  background: rgba(0,0,0,0.22);
+  border: 1px solid rgba(255,255,255,0.10);
+  backdrop-filter: blur(10px);
+}
+
+.capTitle{
+  color: rgba(255,255,255,0.70);
+  font: 700 11px/1 "Segoe UI", system-ui, sans-serif;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.capPieces{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  min-height: 28px;
+  align-items: center;
+}
+
+.capEmpty{
+  height: 28px;
+  display: flex;
+  align-items: center;
+  color: rgba(255,255,255,0.45);
+  font: 600 13px/1.2 "Segoe UI", system-ui, sans-serif;
+}
+
+.capIcon{
+  width: 28px;
+  height: 28px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(255,255,255,0.10);
+  background: rgba(255,255,255,0.06);
+  font-size: 18px;
+  line-height: 1;
+}
+
+.capIcon.w{ color: rgba(255,255,255,0.92); }
+.capIcon.b{ color: rgba(255,245,235,0.88); }
+
+.sidePanelHeader{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.resignBtn{
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(255, 80, 80, 0.14);
+  border: 1px solid rgba(255, 80, 80, 0.25);
+  color: rgba(255,255,255,0.90);
+  font: 800 12px/1 "Segoe UI", system-ui, sans-serif;
+}
+
+.resignBtn:hover{ background: rgba(255, 80, 80, 0.20); }
+
+.gameOverDim{
+  position: fixed;
+  inset: 0;
+  z-index: 99990;
+  background: rgba(0,0,0,0.68);
+  backdrop-filter: blur(10px);
+}
+
+.boardWrap{
+  position: relative;
+  width: fit-content;
+  isolation: isolate;
+}
+
+.gameOverOnBoard{
+  position: absolute;
+  inset: 0;
+  z-index: 99999;
+  display: grid;
+  place-items: center;
+  background: rgba(0,0,0,0.32);
+}
+
+.gameOverPanelBoard{
+  width: min(520px, calc(100% - 24px));
+  padding: 18px 16px;
+  border-radius: 0;
+  background: rgba(0,0,0,0.56);
+  border: 1px solid rgba(255,255,255,0.14);
+  box-shadow: 0 30px 90px rgba(0,0,0,0.65);
+}
+
+.resultKicker{
+  color: rgba(255,255,255,0.68);
+  font: 800 12px/1 "Segoe UI", system-ui, sans-serif;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.resultMain{
+  margin-top: 12px;
+  color: rgba(255,255,255,0.98);
+  font: 900 32px/1.05 "Segoe UI", system-ui, sans-serif;
+  letter-spacing: 0.02em;
+}
+
+.resultSub{
+  margin-top: 10px;
+  color: rgba(255,255,255,0.78);
+  font: 700 15px/1.2 "Segoe UI", system-ui, sans-serif;
+}
+
+.gameOverActions{
+  margin-top: 16px;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.gameOverBtnPrimary,
+.gameOverBtnGhost{
+  padding: 12px 14px;
+  border-radius: 0;
+  font: 900 12px/1 "Segoe UI", system-ui, sans-serif;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.92);
+}
+
+.gameOverBtnPrimary{
+  border: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.12);
+}
+
+.gameOverBtnPrimary:hover{ background: rgba(255,255,255,0.16); }
+
+.gameOverBtnGhost{
+  border: 1px solid rgba(255,255,255,0.12);
+  background: rgba(255,255,255,0.06);
+  color: rgba(255,255,255,0.85);
+}
+
+.gameOverBtnGhost:hover{ background: rgba(255,255,255,0.10); }
+
+.boardWrap *[class*="promotion"],
+.boardWrap *[class*="Promotion"],
+.boardWrap *[class*="promote"],
+.boardWrap *[class*="Promote"]{
+  position: relative;
+  z-index: 100000;
+}
+
+/* Responsive */
+@media (max-width: 768px){
+  .playBox{
+    margin-top: 20px;
+  }
+}
+
+@media (max-width: 980px){
+  .playGrid{
+    grid-template-columns: 1fr;
+  }
+
+  .sidePanelPlay{
+    width: 100%;
+    max-height: 220px;
+  }
+}

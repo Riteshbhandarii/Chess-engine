@@ -2,6 +2,9 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Chessboard } from "react-chessboard";
 
+import "./Generic.css";
+import "./SideSelect.css";
+
 export default function SideSelect({ playerName, playerColor, setPlayerColor, timeMode, setTimeMode }) {
   const nav = useNavigate();
 

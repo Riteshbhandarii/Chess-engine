@@ -1,0 +1,240 @@
+/* Landing */
+.landing{
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+  position: relative;
+  background: var(--landingBg) center 60% / cover no-repeat;
+}
+
+.landing::before{
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0,0,0,0.55) 0%,
+    rgba(0,0,0,0.35) 35%,
+    rgba(0,0,0,0.60) 100%
+  );
+  pointer-events: none;
+}
+
+.landingMenuBtn{
+  position: fixed;
+  top: 18px;
+  right: 18px;
+  z-index: 60;
+  background: transparent;
+  border: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font: 500 14px/1 "Segoe UI", system-ui, sans-serif;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.60);
+  text-shadow: 0 1px 12px rgba(0,0,0,0.45);
+  cursor: pointer;
+  transition: color 180ms ease, text-shadow 180ms ease, background-color 180ms ease, transform 180ms ease;
+  mix-blend-mode: soft-light;
+}
+
+.landingMenuBtn:hover{
+  color: rgba(255,255,255,0.92);
+  background-color: rgba(0,0,0,0.18);
+  text-shadow: 0 10px 30px rgba(0,0,0,0.55);
+  transform: translateY(-1px);
+}
+
+.landingMenuBackdrop{
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  background: rgba(0,0,0,0.35);
+}
+
+.landingMenuPanel{
+  position: fixed;
+  top: 0;
+  right: 0;
+  height: 100vh;
+  width: min(320px, 86vw);
+  padding: 76px 16px 16px;
+  z-index: 70;
+  background: rgba(18, 20, 26, 0.55);
+  border-left: 1px solid rgba(255,255,255,0.14);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  transform: translateX(100%);
+  transition: transform 220ms ease;
+}
+
+.landingMenuPanel.open{ transform: translateX(0); }
+
+.landingMenuItem{
+  width: 100%;
+  text-align: left;
+  margin-bottom: 10px;
+  background: rgba(12, 10, 8, 0.08);
+  border: 1px solid rgba(235, 228, 218, 0.16);
+  border-radius: 0;
+  font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.60);
+  box-shadow:
+    -5px -5px 15px rgba(255,255,255,0.05),
+    5px 5px 15px rgba(0,0,0,0.35),
+    inset 2px 2px 6px rgba(255,255,255,0.06),
+    inset -2px -2px 6px rgba(0,0,0,0.28);
+  cursor: pointer;
+  transition: 300ms;
+}
+
+.landingMenuItem:hover{
+  color: rgba(245, 240, 232, 0.92);
+  background: rgba(12, 10, 8, 0.12);
+  box-shadow:
+    -5px -5px 15px rgba(255,255,255,0.04),
+    5px 5px 15px rgba(0,0,0,0.40),
+    inset 2px 2px 6px rgba(0,0,0,0.22),
+    inset -2px -2px 6px rgba(255,255,255,0.05);
+}
+
+.landingHero{
+  position: absolute;
+  top: 110px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(92vw, 720px);
+  text-align: center;
+  color: rgba(255,255,255,0.92);
+  text-shadow: 0 10px 40px rgba(0,0,0,0.55);
+}
+
+.landingTitle{
+  position: relative;
+  padding-bottom: 14px;
+}
+
+.landingTitle::after{
+  content: "";
+  display: block;
+  width: 110px;
+  height: 1px;
+  margin: 12px auto 0;
+  background: rgba(255,255,255,0.22);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+}
+
+.landingSubtitle{
+  max-width: 46ch;
+  margin-inline: auto;
+  color: rgba(255,245,235,0.84);
+}
+
+.landingBox{
+  position: absolute;
+  left: 50%;
+  bottom: clamp(42px, 7vh, 90px);
+  transform: translateX(-50%);
+  z-index: 20;
+  width: auto;
+  padding: 0;
+  background: transparent;
+  border: 0;
+  box-shadow: none;
+}
+
+.landingBegin{
+  margin: 12px;
+  height: 50px;
+  width: 140px;
+  border-radius: 10px;
+  background: #333;
+  box-shadow:
+    -5px -5px 15px #444,
+    5px 5px 15px #222,
+    inset 5px 5px 10px #444,
+    inset -5px -5px 10px #222;
+  font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: none;
+  color: rgba(255,255,255,0.60);
+  transition: 500ms;
+}
+
+.landingBegin:hover{
+  box-shadow:
+    -5px -5px 15px #444,
+    5px 5px 15px #222,
+    inset 5px 5px 10px #222,
+    inset -5px -2px 6px #444;
+  color: rgba(245, 240, 232, 0.92);
+}
+
+.landingMenuBtn:focus-visible,
+.landingMenuItem:focus-visible,
+.landingBegin:focus-visible{
+  outline: 2px solid rgba(255,255,255,0.85);
+  outline-offset: 3px;
+}
+
+/* Stars */
+.stars{
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.stars::before,
+.stars::after{
+  content: "";
+  position: absolute;
+  width: 2px;
+  height: 2px;
+  background: #fff;
+  box-shadow:
+    100px 200px white, 300px 100px white, 500px 300px white,
+    700px 150px white, 900px 250px white, 200px 400px white, 600px 500px white,
+    800px 50px white, 400px 350px white, 150px 150px white, 650px 200px white,
+    350px 450px white, 1100px 300px white, 250px 100px white, 950px 400px white,
+    450px 200px white, 1000px 150px white, 550px 350px white, 50px 250px white,
+    850px 450px white, 1200px 100px white, 750px 300px white, 1300px 250px white,
+    1150px 450px white;
+  animation: stars-move 100s linear infinite;
+}
+
+.stars::after{
+  width: 1px;
+  height: 1px;
+  box-shadow:
+    1400px 350px white, 200px 500px white, 800px 150px white,
+    1100px 200px white, 500px 100px white, 300px 300px white, 1250px 450px white,
+    650px 250px white, 150px 350px white, 950px 100px white, 400px 450px white,
+    1350px 150px white;
+  animation: stars-move 150s linear infinite;
+}
+
+@keyframes stars-move{
+  from { transform: translateY(0); }
+  to { transform: translateY(-1000px); }
+}
+
+/* Responsive */
+@media (max-width: 480px){
+  .landingBox{ bottom: 40px; }
+  .landingMenuBtn{
+    top: 14px;
+    right: 14px;
+    padding: 10px;
+    letter-spacing: 0.18em;
+  }
+}

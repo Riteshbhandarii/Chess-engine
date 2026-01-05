@@ -1,0 +1,149 @@
+/* Layout */
+.container{
+  width: fit-content;
+  max-width: calc(100vw - 32px);
+  margin: 0 auto;
+}
+
+.topbar,
+.controls{
+  width: 100%;
+}
+
+.boardTopLeft{
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+.controls{
+  margin-top: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.status{
+  color: #c7d2e0;
+  font-size: 16px;
+  padding: 14px 24px;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 8px;
+  border-left: 3px solid #5a6678;
+  flex: 1;
+  text-align: center;
+  font-weight: 400;
+}
+
+/* Generic pages */
+.shell{
+  min-height: 100vh;
+  padding: 24px 16px;
+  display: grid;
+  place-items: start center;
+  background: radial-gradient(ellipse at bottom, #1b2735 0%, #090a0f 100%);
+  font-family: "Segoe UI", system-ui, sans-serif;
+  color: rgba(255,255,255,0.92);
+  position: relative;
+}
+
+.shell.shellBg{
+  background-image: var(--shellBg);
+  background-size: cover;
+  background-position: center 45%;
+  background-repeat: no-repeat;
+}
+
+.shell.shellBg::before{
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 50% 45%, rgba(0,0,0,0.10) 0%, rgba(0,0,0,0.55) 62%, rgba(0,0,0,0.72) 100%),
+    linear-gradient(to bottom, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.35) 45%, rgba(0,0,0,0.65) 100%);
+  pointer-events: none;
+}
+
+.shell.shellBg > .card{
+  position: relative;
+  z-index: 1;
+}
+
+.card{
+  width: min(92vw, 720px);
+  background: rgba(25, 30, 40, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  box-shadow: 0 25px 80px rgba(0, 0, 0, 0.7), 0 0 100px rgba(100, 150, 255, 0.1);
+  backdrop-filter: blur(15px);
+  padding: 22px 22px 26px;
+}
+
+.topbar{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+.title{
+  margin: 0;
+  font-size: 22px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 300;
+  color: rgba(255,255,255,0.92);
+  text-shadow: 0 0 30px rgba(200, 220, 255, 0.18);
+}
+
+.linkBtn{
+  background: transparent;
+  border: 0;
+  padding: 8px 10px;
+  border-radius: 10px;
+  font: 600 13px/1 "Segoe UI", system-ui, sans-serif;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.70);
+  cursor: pointer;
+  transition: color 180ms ease, background-color 180ms ease, transform 180ms ease;
+  width: auto;
+}
+
+.linkBtn:hover{
+  color: rgba(255,255,255,0.95);
+  background-color: rgba(0,0,0,0.18);
+  transform: translateY(-1px);
+}
+
+.text{
+  color: rgba(255,245,235,0.84);
+  line-height: 1.55;
+  font-size: 15px;
+}
+
+.text p{ margin: 10px 0; }
+
+/* Responsive */
+@media (max-width: 768px){
+  .container{
+    width: 94vw;
+    padding: 16px;
+    margin-top: 18px;
+  }
+
+  .controls{
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  .status{
+    width: 100%;
+    padding: 12px 14px;
+  }
+}
+
