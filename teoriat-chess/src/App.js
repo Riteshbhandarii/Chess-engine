@@ -5,7 +5,6 @@ import "./App.css";
 import Landing from "./pages/Landing";
 import SignIn from "./pages/SignIn";
 import About from "./pages/About";
-import HowToPlay from "./pages/HowToPlay";
 import LeaderBoard from "./pages/LeaderBoard"; 
 import SideSelect from "./pages/sideselect";
 import Play from "./pages/Play";
@@ -21,7 +20,6 @@ export default function App() {
       <Route path="/signin" element={<SignIn playerName={playerName} setPlayerName={setPlayerName} />} />
 
       <Route path="/about" element={<About />} />
-      <Route path="/how" element={<HowToPlay />} />
       <Route path="/leaderboard" element={<LeaderBoard />} />
 
       <Route
