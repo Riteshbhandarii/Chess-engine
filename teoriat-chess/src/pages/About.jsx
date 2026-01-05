@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import "./About.css";
 
-const GITHUB_URL = "https://github.com/YOUR_HANDLE"; // <-- change this
+const GITHUB_URL = "https://github.com/Riteshbhandarii"; 
 
 export default function About() {
   const nav = useNavigate();
