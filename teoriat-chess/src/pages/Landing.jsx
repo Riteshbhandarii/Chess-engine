@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
+
+
 export default function Landing({ playerName, setPlayerName }) {
   const nav = useNavigate();
   const [menuOpen, setMenuOpen] = useState(false);
