@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { Chessboard } from "react-chessboard";
 import { Chess } from "chess.js";
 
+const API_BASE = process.env.REACT_APP_API_BASE || "http://127.0.0.1:8000";
+
 export default function Play({ playerName, playerColor, timeMode }) {
   const [game] = useState(() => new Chess());
   const nav = useNavigate();
@@ -13,7 +15,9 @@ export default function Play({ playerName, playerColor, timeMode }) {
 
   const [gameId, setGameId] = useState(0);
 
-  const [boardWidth, setBoardWidth] = useState(() => Math.min(560, Math.floor(window.innerWidth * 0.92)));
+  const [boardWidth, setBoardWidth] = useState(() =>
+    Math.min(560, Math.floor(window.innerWidth * 0.92))
+  );
 
   useEffect(() => {
     const onResize = () => setBoardWidth(Math.min(560, Math.floor(window.innerWidth * 0.92)));
@@ -40,6 +44,9 @@ export default function Play({ playerName, playerColor, timeMode }) {
   const [resultReason, setResultReason] = useState("");
 
   const [pendingPromotion, setPendingPromotion] = useState(null);
+
+  // NEW: prevent double POST (mate + timeout edge cases etc.)
+  const postedRef = useRef(false);
 
   /* sound */
   const moveSfxRef = useRef(null);
@@ -204,12 +211,47 @@ export default function Play({ playerName, playerColor, timeMode }) {
     return "By checkmate.";
   }
 
+  function winnerToResult(winner) {
+    if (winner === "Draw") return "draw";
+
+    const playerIsWhite = playerColor === "w";
+    const winnerIsWhite = winner === "White";
+    const playerWon = (playerIsWhite && winnerIsWhite) || (!playerIsWhite && !winnerIsWhite);
+
+    return playerWon ? "win" : "loss";
+  }
+
+  async function postGameToLeaderboard(winner, reason) {
+    // only post once per game
+    if (postedRef.current) return;
+    postedRef.current = true;
+
+    try {
+      await fetch(`${API_BASE}/games`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          player_name: playerName,
+          result: winnerToResult(winner),
+          mode: timeMode, // "rapid" or "bullet"
+          pgn: null,
+        }),
+      });
+    } catch (e) {
+      console.error("Failed to save game:", e);
+    }
+  }
+
   function openResult(winner, reason) {
     setClockRunning(false);
     setBusy(false);
+
     setResultWinner(winner);
     setResultReason(reason);
     setResultOpen(true);
+
+    // save result to backend leaderboard
+    postGameToLeaderboard(winner, reason);
   }
 
   function startNewGame() {
@@ -229,7 +271,10 @@ export default function Play({ playerName, playerColor, timeMode }) {
     setPendingPromotion(null);
     lastRef.current = performance.now();
 
-    // NEW: triggers engine-first useEffect after rematch
+    // allow posting again for the new game
+    postedRef.current = false;
+
+    // triggers engine-first useEffect after rematch
     setGameId((x) => x + 1);
   }
 
@@ -258,6 +303,9 @@ export default function Play({ playerName, playerColor, timeMode }) {
     setResultWinner("");
     setResultReason("");
     setPendingPromotion(null);
+
+    postedRef.current = false;
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [startSeconds, playerColor]);
 
@@ -298,7 +346,7 @@ export default function Play({ playerName, playerColor, timeMode }) {
     setBusy(true);
 
     try {
-      const res = await fetch("http://localhost:8000/move", {
+      const res = await fetch(`${API_BASE}/move`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ moves: movesSoFar, mode: timeMode }),

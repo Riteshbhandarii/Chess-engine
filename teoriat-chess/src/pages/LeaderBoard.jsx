@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import "./LeaderBoard.css";
 
 const API_BASE = process.env.REACT_APP_API_BASE || "http://127.0.0.1:8000";
 const BG_URL = `${process.env.PUBLIC_URL}/menupages.jpg`;
@@ -64,26 +65,38 @@ export default function LeaderBoard() {
   const [errorBullet, setErrorBullet] = useState("");
   const [errorRapid, setErrorRapid] = useState("");
 
-  async function fetchMode(mode, setRows, setLoading, setError) {
+  const fetchMode = useCallback(async (mode, setRows, setLoading, setError) => {
     setLoading(true);
     setError("");
     try {
-      const res = await fetch(`${API_BASE}/leaderboard?mode=${mode}&limit=50`);
+      // Cache-bust so a hard refresh always shows latest
+      const url = `${API_BASE}/leaderboard?mode=${mode}&limit=50&t=${Date.now()}`;
+      const res = await fetch(url, {
+        cache: "no-store",
+        headers: { "Cache-Control": "no-cache" },
+      });
+
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
       setRows(Array.isArray(data) ? data : []);
     } catch (e) {
-      setError(e.message || String(e));
+      setError(e?.message || String(e));
       setRows([]);
     } finally {
       setLoading(false);
     }
-  }
+  }, []);
+
+  const refreshAll = useCallback(async () => {
+    await Promise.all([
+      fetchMode("bullet", setBulletRows, setLoadingBullet, setErrorBullet),
+      fetchMode("rapid", setRapidRows, setLoadingRapid, setErrorRapid),
+    ]);
+  }, [fetchMode]);
 
   useEffect(() => {
-    fetchMode("bullet", setBulletRows, setLoadingBullet, setErrorBullet);
-    fetchMode("rapid", setRapidRows, setLoadingRapid, setErrorRapid);
-  }, []);
+    refreshAll(); // fetch once when page opens (no polling)
+  }, [refreshAll]);
 
   return (
     <div
@@ -98,11 +111,20 @@ export default function LeaderBoard() {
           `url(${BG_URL})`,
         backgroundSize: "cover",
         backgroundRepeat: "no-repeat",
-        backgroundPosition: "85% center",
+        backgroundPosition: "98% center",
       }}
     >
       <button className="lbBack" onClick={() => nav("/")}>
         Back
+      </button>
+
+      {/* Optional manual refresh: updates only when clicked */}
+      <button
+        className="lbRefresh"
+        onClick={refreshAll}
+        style={{ position: "fixed", top: 18, left: 96, zIndex: 30 }}
+      >
+        Refresh
       </button>
 
       <main className="lbContent lbTwoCol">
