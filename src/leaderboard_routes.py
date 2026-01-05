@@ -5,24 +5,25 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlmodel import Session, select, func, case
 
-from .db import get_session
+from .db import getsession
 from .models import Game
-
 
 router = APIRouter(tags=["leaderboard"])
 
 Result = Literal["win", "loss", "draw"]
+Mode = Literal["bullet", "rapid"]
 
 
 class GameCreate(BaseModel):
-    player_name: str
+    playername: str
     result: Result
-    mode: str | None = None
+    mode: Mode
     pgn: str | None = None
 
 
 class LeaderboardRow(BaseModel):
-    player_name: str
+    playername: str
+    mode: Mode
     games: int
     wins: int
     losses: int
@@ -31,17 +32,17 @@ class LeaderboardRow(BaseModel):
 
 
 @router.post("/games")
-def create_game(payload: GameCreate, session: Session = Depends(get_session)):
-    name = payload.player_name.strip()
+def create_game(payload: GameCreate, session: Session = Depends(getsession)):
+    name = payload.playername.strip()
     if len(name) < 2 or len(name) > 20:
-        raise HTTPException(status_code=400, detail="player_name must be 2-20 chars")
+        raise HTTPException(status_code=400, detail="playername must be 2-20 chars")
 
     game = Game(
-        player_name=name,
+        playername=name,
         result=payload.result,
         mode=payload.mode,
         pgn=payload.pgn,
-        played_at=datetime.now(timezone.utc),
+        playedat=datetime.now(timezone.utc),
     )
     session.add(game)
     session.commit()
@@ -50,7 +51,11 @@ def create_game(payload: GameCreate, session: Session = Depends(get_session)):
 
 
 @router.get("/leaderboard", response_model=list[LeaderboardRow])
-def get_leaderboard(limit: int = 50, session: Session = Depends(get_session)):
+def get_leaderboard(
+    mode: Mode,
+    limit: int = 50,
+    session: Session = Depends(getsession),
+):
     wins = func.sum(case((Game.result == "win", 1), else_=0))
     losses = func.sum(case((Game.result == "loss", 1), else_=0))
     draws = func.sum(case((Game.result == "draw", 1), else_=0))
@@ -60,14 +65,16 @@ def get_leaderboard(limit: int = 50, session: Session = Depends(get_session)):
 
     stmt = (
         select(
-            Game.player_name,
+            Game.playername,
+            Game.mode,
             func.count(Game.id).label("games"),
             wins.label("wins"),
             losses.label("losses"),
             draws.label("draws"),
             points.label("points"),
         )
-        .group_by(Game.player_name)
+        .where(Game.mode == mode)
+        .group_by(Game.playername, Game.mode)
         .order_by(points.desc(), wins.desc(), func.count(Game.id).desc())
         .limit(limit)
     )
@@ -75,12 +82,13 @@ def get_leaderboard(limit: int = 50, session: Session = Depends(get_session)):
     rows = session.exec(stmt).all()
     return [
         LeaderboardRow(
-            player_name=r[0],
-            games=int(r[1]),
-            wins=int(r[2] or 0),
-            losses=int(r[3] or 0),
-            draws=int(r[4] or 0),
-            points=float(r[5] or 0.0),
+            playername=r[0],
+            mode=r[1],
+            games=int(r[2] or 0),
+            wins=int(r[3] or 0),
+            losses=int(r[4] or 0),
+            draws=int(r[5] or 0),
+            points=float(r[6] or 0.0),
         )
         for r in rows
     ]
