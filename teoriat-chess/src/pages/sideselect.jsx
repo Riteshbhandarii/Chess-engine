@@ -95,9 +95,6 @@ export default function SideSelect({ playerName, playerColor, setPlayerColor, ti
                 </button>
               </div>
 
-              <div className="text" style={{ marginTop: 12, opacity: 0.85 }}>
-                Selected: {timeMode === "rapid" ? "10:00" : "1:00"} • {playerColor === "b" ? "Black" : "White"}
-              </div>
             </div>
           </div>
         </div>
