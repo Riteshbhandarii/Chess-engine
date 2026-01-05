@@ -961,3 +961,5 @@ button:active{ transform: translateY(0); }
   .sideGrid{ grid-template-columns: 1fr; }
   .sideRight{ border-left: 0; border-top: 1px solid rgba(0,0,0,0.45); }
 }
+
+

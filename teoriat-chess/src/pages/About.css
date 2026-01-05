@@ -1,0 +1,60 @@
+.aboutPage{
+  min-height: 100vh;
+  width: 100%;
+  position: relative;
+
+  /* background set inline in JSX */
+  background-size: cover;
+  background-position: center 75%;
+  background-repeat: no-repeat;
+
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+
+  padding: 96px 20px 48px;
+}
+
+.aboutBack{
+  position: absolute;
+  top: 22px;
+  left: 22px;
+  z-index: 5;
+}
+
+/* Smaller, readable card */
+.aboutContent{
+  width: min(92vw, 720px);
+  padding: 28px 28px 22px;
+
+  background: rgba(10,10,12,0.72);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 16px;
+
+  /* subtle depth, not that “foggy” look */
+  box-shadow: 0 18px 60px rgba(0,0,0,0.55);
+
+  color: rgba(255,255,255,0.92);
+}
+
+.aboutTitle{
+  margin: 0 0 14px;
+  font-size: 18px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.aboutLead{
+  margin: 0 0 14px;
+  font-size: 16px;
+  line-height: 1.7;
+  color: rgba(255,255,255,0.92);
+}
+
+.aboutText{
+  margin: 0 0 12px;
+  font-size: 14.5px;
+  line-height: 1.8;
+  color: rgba(255,255,255,0.82);
+}
