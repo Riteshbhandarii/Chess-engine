@@ -1,17 +1,13 @@
 from datetime import datetime, timezone
-from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlmodel import Session, select, func, case
 
 from .db import get_session
-from .models import Game
+from .models import Game, Result, Mode
 
 router = APIRouter(tags=["leaderboard"])
-
-Result = Literal["win", "loss", "draw"]
-Mode = Literal["bullet", "rapid"]
 
 
 class GameCreate(BaseModel):
@@ -56,9 +52,9 @@ def get_leaderboard(
     limit: int = 50,
     session: Session = Depends(get_session),
 ):
-    wins = func.sum(case((Game.result == "win", 1), else_=0))
-    losses = func.sum(case((Game.result == "loss", 1), else_=0))
-    draws = func.sum(case((Game.result == "draw", 1), else_=0))
+    wins = func.sum(case((Game.result == Result.win, 1), else_=0))
+    losses = func.sum(case((Game.result == Result.loss, 1), else_=0))
+    draws = func.sum(case((Game.result == Result.draw, 1), else_=0))
 
     points = wins * 1.0 + draws * 0.5
 
