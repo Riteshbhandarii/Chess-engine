@@ -11,7 +11,19 @@ import chess
 import chess.polyglot
 import torch
 
+
+from .db import create_db_and_tables
+from .leaderboard_routes import router as leaderboard_router
+from . import models
+
+
 app = FastAPI(title="TEORIAT Chess Engine API")
+
+@app.on_event("startup")
+def on_startup():
+    create_db_and_tables()
+
+app.include_router(leaderboard_router)
 
 app.add_middleware(
     CORSMiddleware,
