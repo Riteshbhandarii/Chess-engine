@@ -88,9 +88,9 @@ export default function About() {
               title="LinkedIn"
             >
               <span className="sign" aria-hidden="true">
-                <svg viewBox="0 0 24 24">
-                  <path d="M6.94 6.5A2.22 2.22 0 1 1 6.94 2a2.22 2.22 0 0 1 0 4.5ZM4.75 22h4.38V8.25H4.75V22ZM13.1 8.25H9.36V22h4.38v-7.2c0-1.9.36-3.75 2.7-3.75 2.3 0 2.33 2.15 2.33 3.87V22H23v-7.96c0-3.91-.84-6.91-5.41-6.91-2.2 0-3.67 1.2-4.27 2.34h-.22V8.25Z" />
-                </svg>
+               <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path d="M6.94 6.5A2.22 2.22 0 1 1 6.94 2a2.22 2.22 0 0 1 0 4.5ZM4.75 22h4.38V8.25H4.75V22ZM13.1 8.25H9.36V22h4.38v-7.2c0-1.9.36-3.75 2.7-3.75 2.3 0 2.33 2.15 2.33 3.87V22H23v-7.96c0-3.91-.84-6.91-5.41-6.91-2.2 0-3.67 1.2-4.27 2.34h-.22V8.25Z" />
+              </svg>
               </span>
               <span className="text">LinkedIn</span>
             </a>
