@@ -11,19 +11,21 @@ import chess
 import chess.polyglot
 import torch
 
-
 from .db import create_db_and_tables
-from .leaderboard_routes import router as leaderboard_router
+from .leaderboard_routes import router as leaderboardrouter
 from . import models
 
-
 app = FastAPI(title="TEORIAT Chess Engine API")
+
 
 @app.on_event("startup")
 def on_startup():
     create_db_and_tables()
 
-app.include_router(leaderboard_router)
+
+# IMPORTANT: use the same name you imported (leaderboardrouter)
+app.include_router(leaderboardrouter)
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -240,7 +242,6 @@ def capture_score(board: chess.Board, mv: chess.Move) -> float:
 
 
 def hang_penalty_simple(board_after: chess.Board, mv: chess.Move) -> float:
-    """Your original attacked/defended heuristic (kept, but no longer the only safety net)."""
     sq = mv.to_square
     piece = board_after.piece_at(sq)
     if not piece:
@@ -261,11 +262,6 @@ def hang_penalty_simple(board_after: chess.Board, mv: chess.Move) -> float:
 
 
 def moved_piece_net_loss(board_after: chess.Board, mv: chess.Move) -> float:
-    """
-    NEW: after we play mv (so board_after.turn is opponent),
-    check if opponent can capture the moved piece on mv.to_square and win material.
-    Very simple 1-ply net loss estimate: loss = movedPieceValue - bestRecaptureValue.
-    """
     sq = mv.to_square
     moved_piece = board_after.piece_at(sq)
     if not moved_piece:
@@ -275,28 +271,24 @@ def moved_piece_net_loss(board_after: chess.Board, mv: chess.Move) -> float:
     if moved_v == 0:
         return 0.0
 
-    # opponent to move now
     opp_capture_values = []
     for reply in board_after.legal_moves:
         if reply.to_square != sq:
             continue
         if not board_after.is_capture(reply):
             continue
-        # opponent captures our moved piece
         opp_capture_values.append(moved_v)
 
     if not opp_capture_values:
         return 0.0
 
-    # Estimate our best immediate recapture value (after opponent captures on sq)
     best_recapture = 0.0
     for reply in board_after.legal_moves:
         if reply.to_square != sq or not board_after.is_capture(reply):
             continue
         tmp = board_after.copy(stack=False)
-        tmp.push(reply)  # opponent captures our moved piece
+        tmp.push(reply)
 
-        # now our turn: can we recapture on sq?
         rec_best = 0.0
         for rec in tmp.legal_moves:
             if rec.to_square != sq:
@@ -344,10 +336,6 @@ def sample_index(scores: list[float], temperature: float) -> int:
 
 
 def tactical_moves(board: chess.Board) -> list[chess.Move]:
-    """
-    NEW: always consider forcing moves even if model doesn't propose them:
-    captures, checks, promotions.
-    """
     out = []
     for mv in board.legal_moves:
         if mv.promotion is not None:
@@ -366,16 +354,11 @@ def pick_legal_move(board: chess.Board, logits: torch.Tensor, topk: int = TOPK) 
     log_probs = torch.log_softmax(logits[0], dim=0)
     _, top_idx = torch.topk(logits[0], k=min(topk, logits.shape[-1]))
 
-    # Build candidate set:
-    # - always forcing/tactical moves
-    # - plus model top-k moves (style)
-    cand_map: dict[chess.Move, float] = {}  # move -> best model_term (if multiple ways produce it)
+    cand_map: dict[chess.Move, float] = {}
 
-    # 1) tactical injection (model term 0)
     for mv in tactical_moves(board):
         cand_map[mv] = 0.0
 
-    # 2) model top-k (model term from logprob)
     for idx in top_idx.tolist():
         san = number_to_move.get(int(idx))
         if not san:
@@ -387,7 +370,6 @@ def pick_legal_move(board: chess.Board, logits: torch.Tensor, topk: int = TOPK) 
         if mv not in board.legal_moves:
             continue
         model_term = float(log_probs[int(idx)].item()) * MODEL_LOGPROB_WEIGHT
-        # keep the highest model term if move appears multiple times
         if mv not in cand_map or model_term > cand_map[mv]:
             cand_map[mv] = model_term
 
@@ -399,7 +381,6 @@ def pick_legal_move(board: chess.Board, logits: torch.Tensor, topk: int = TOPK) 
 
     scored: list[tuple[chess.Move, float]] = []
 
-    # Pre-pass: if any candidate is mate-in-1, play it immediately (consistency)
     for mv in cand_map.keys():
         board.push(mv)
         is_mate = board.is_checkmate()
@@ -407,7 +388,6 @@ def pick_legal_move(board: chess.Board, logits: torch.Tensor, topk: int = TOPK) 
         if is_mate:
             return mv
 
-    # Main scoring
     for mv, model_term in cand_map.items():
         h = 0.0
         h += W_CAPTURE * capture_score(board, mv)
@@ -416,7 +396,6 @@ def pick_legal_move(board: chess.Board, logits: torch.Tensor, topk: int = TOPK) 
 
         board.push(mv)
 
-        # Safety penalties (now stronger & more relevant)
         h -= hang_penalty_simple(board, mv)
         h -= moved_piece_net_loss(board, mv)
         h -= W_WORST_REPLY * worst_reply_capture_loss(board)
@@ -429,7 +408,6 @@ def pick_legal_move(board: chess.Board, logits: torch.Tensor, topk: int = TOPK) 
 
     scored.sort(key=lambda x: x[1], reverse=True)
 
-    # sample among top STYLE_SAMPLE_K for variety, but now "tactics" are always inside candidates
     keep = scored[: min(STYLE_SAMPLE_K, len(scored))]
     moves = [m for m, _ in keep]
     scores = [s for _, s in keep]
