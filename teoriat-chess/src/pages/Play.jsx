@@ -63,14 +63,26 @@ export default function Play({ playerName, playerColor, timeMode }) {
   const checkSfxRef = useRef(null);
   const mateSfxRef = useRef(null);
 
+  // FIXED: Improved sound playback - always plays immediately
   function playSfx(ref) {
-    const a = ref.current;
-    if (!a) return;
+    const audio = ref.current;
+    if (!audio) return;
+
     try {
-      a.currentTime = 0;
-      const p = a.play();
-      if (p && typeof p.catch === "function") p.catch(() => {});
-    } catch {}
+      // Clone the audio element for overlapping sounds
+      const clone = audio.cloneNode();
+      clone.volume = audio.volume;
+      clone.currentTime = 0;
+      
+      const playPromise = clone.play();
+      if (playPromise !== undefined) {
+        playPromise.catch((err) => {
+          console.log('Audio play failed:', err);
+        });
+      }
+    } catch (err) {
+      console.log('Audio error:', err);
+    }
   }
 
   function playMoveSfx() {
@@ -86,6 +98,7 @@ export default function Play({ playerName, playerColor, timeMode }) {
     playSfx(mateSfxRef);
   }
 
+  // Load and prepare audio on mount
   useEffect(() => {
     const audios = [
       moveSfxRef.current,
@@ -93,12 +106,44 @@ export default function Play({ playerName, playerColor, timeMode }) {
       checkSfxRef.current,
       mateSfxRef.current,
     ];
-    for (const a of audios) {
-      if (!a) continue;
+    
+    audios.forEach((audio) => {
+      if (!audio) return;
       try {
-        a.load();
-      } catch {}
-    }
+        audio.load();
+        audio.volume = 0.7; // Set volume to 70%
+        // Preload audio data
+        audio.preload = "auto";
+      } catch (err) {
+        console.log('Audio load error:', err);
+      }
+    });
+
+    // Try to unlock audio on user interaction
+    const unlockAudio = () => {
+      audios.forEach((audio) => {
+        if (!audio) return;
+        try {
+          const playPromise = audio.play();
+          if (playPromise !== undefined) {
+            playPromise.then(() => {
+              audio.pause();
+              audio.currentTime = 0;
+            }).catch(() => {});
+          }
+        } catch {}
+      });
+      document.removeEventListener('click', unlockAudio);
+      document.removeEventListener('touchstart', unlockAudio);
+    };
+
+    document.addEventListener('click', unlockAudio);
+    document.addEventListener('touchstart', unlockAudio);
+
+    return () => {
+      document.removeEventListener('click', unlockAudio);
+      document.removeEventListener('touchstart', unlockAudio);
+    };
   }, []);
 
   function getGameOverInfo(lastMoverColor) {
@@ -115,9 +160,7 @@ export default function Play({ playerName, playerColor, timeMode }) {
   }
 
   function applyPostMoveSfx(moveObj) {
-    if (moveObj && moveObj.captured) playCaptureSfx();
-    else playMoveSfx();
-
+    // Play sounds immediately and check game state
     if (game.isCheckmate && game.isCheckmate()) {
       playMateSfx();
       return;
@@ -125,6 +168,14 @@ export default function Play({ playerName, playerColor, timeMode }) {
 
     if (game.inCheck && game.inCheck()) {
       playCheckSfx();
+      return;
+    }
+
+    // Normal move or capture
+    if (moveObj && moveObj.captured) {
+      playCaptureSfx();
+    } else {
+      playMoveSfx();
     }
   }
 
@@ -401,6 +452,7 @@ export default function Play({ playerName, playerColor, timeMode }) {
       setPosition(game.fen());
       recomputeCaptured();
 
+      // Play sound immediately after move
       applyPostMoveSfx(engineMove);
 
       const engineUci = `${from}${to}${engineMove.promotion || ""}`;
@@ -450,6 +502,7 @@ export default function Play({ playerName, playerColor, timeMode }) {
     setPosition(game.fen());
     recomputeCaptured();
 
+    // Play sound immediately after move
     applyPostMoveSfx(move);
 
     const playerUci = `${sourceSquare}${targetSquare}${move.promotion || ""}`;
