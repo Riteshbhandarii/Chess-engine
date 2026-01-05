@@ -49,7 +49,7 @@
   grid-template-columns: 1fr 1fr;
 }
 
-/* ===== Cards ===== */
+
 .lbBlock{
   background: rgba(0,0,0,0.46);
   border: 1px solid rgba(255,255,255,0.14);
@@ -94,7 +94,7 @@
   line-height: 1.35;
 }
 
-/* ===== Table ===== */
+
 .lbTableWrap{
   overflow-x: auto;
   border-radius: 12px;
@@ -141,7 +141,7 @@
   color: rgba(255,255,255,0.70);
 }
 
-/* ===== Responsive ===== */
+
 @media (max-width: 900px){
   .lbContent{
     width: min(94vw, 780px);
