@@ -103,10 +103,10 @@
   margin-bottom: 10px;
 }
 
-/* MOVES list */
+/* MOVES list card */
 
 .movesCard{
-  max-height: 220px;
+  height: 130px;          /* fixed height: always scrolls inside */
   overflow-y: auto;
 }
 
@@ -320,7 +320,7 @@
   z-index: 100000;
 }
 
-/* Responsive: mobile tweaks */
+/* Responsive */
 
 @media (max-width: 768px){
   .playBox{
@@ -333,7 +333,7 @@
 
   .playMain{
     width: fit-content;
-    margin-left: -12px; /* small nudge to visually center board */
+    margin-left: -12px; /* nudge to visually center board on phone */
   }
 
   .sidePanelPlay{
@@ -342,7 +342,7 @@
   }
 
   .movesCard{
-    max-height: 130px;   /* smaller MOVES card on phone */
+    height: 130px;
     overflow-y: auto;
   }
 
