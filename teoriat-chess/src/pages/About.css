@@ -1,49 +1,174 @@
+/* Page layout */
 .aboutPage{
   min-height: 100vh;
   position: relative;
-
+  overflow: hidden;
   display: flex;
   align-items: flex-start;
   justify-content: flex-start;
-
-  padding: 96px 24px 48px;
+  padding: 88px 28px 48px;
 }
 
+/* Back button placement */
 .aboutBack{
   position: absolute;
-  top: 20px;
-  left: 20px;
+  top: 18px;
+  left: 18px;
+  z-index: 5;
 }
 
+/* Content wrapper (no giant box) */
 .aboutContent{
-  width: min(92vw, 720px);
-  padding: 26px 26px 18px;
-
-  background: rgba(10,10,12,0.55);
-  border: 1px solid rgba(255,255,255,0.10);
-  border-radius: 16px;
-  box-shadow: 0 18px 60px rgba(0,0,0,0.55);
-
-  color: rgba(255,255,255,0.92);
+  width: min(92vw, 760px);
+  position: relative;
+  z-index: 2;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: rgba(255,255,255,0.80);
 }
 
+/* Title */
 .aboutTitle{
   margin: 0 0 14px;
-  font-size: 18px;
-  letter-spacing: 0.22em;
+  font-size: 16px;
+  letter-spacing: 0.20em;
   text-transform: uppercase;
   font-weight: 700;
+  color: rgba(255,255,255,0.78);
 }
 
+/* Paragraph grid */
+.aboutBlocks{
+  display: grid;
+  gap: 12px;
+}
+
+/* Each paragraph = its own squarer frosted card */
+.aboutBlock{
+  margin: 0;
+  padding: 14px 16px;
+  background: rgba(255,255,255,0.055);
+  border: 1px solid rgba(255,255,255,0.10);
+  border-radius: 6px;
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+  box-shadow:
+    0 14px 40px rgba(0,0,0,0.30),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+  font-size: 15px;
+  line-height: 1.75;
+  color: rgba(255,255,255,0.72);
+  position: relative;
+  overflow: hidden;
+}
+
+/* First paragraph slightly more emphasis */
 .aboutLead{
-  margin: 0 0 14px;
   font-size: 16px;
-  line-height: 1.7;
+  line-height: 1.85;
+  color: rgba(255,255,255,0.80);
 }
 
-.aboutText{
-  margin: 0 0 12px;
-  font-size: 14.5px;
-  line-height: 1.8;
-  color: rgba(255,255,255,0.82);
+/* Subtle accent line (also less bright) */
+.aboutBlock::before{
+  content: "";
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  bottom: 10px;
+  width: 3px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.16);
+}
+
+/* Hover */
+.aboutBlock:hover{
+  background: rgba(255,255,255,0.070);
+  border-color: rgba(255,255,255,0.14);
+}
+
+/* Bottom CTA row (under last text block) */
+.aboutCtas{
+  margin-top: 4px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+}
+
+/* Expanding GitHub button style */
+.Btn{
+  border: none;
+  border-radius: 50%;
+  width: 45px;
+  height: 45px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition-duration: .4s;
+  cursor: pointer;
+  position: relative;
+  background-color: rgb(31, 31, 31);
+  overflow: hidden;
+
+  /* because your Btn is an <a> */
+  text-decoration: none;
+}
+
+.svgIcon{
+  transition-duration: .3s;
+}
+
+.svgIcon path{
+  fill: white;
+}
+
+.text{
+  position: absolute;
+  color: rgb(255, 255, 255);
+  width: 120px;
+  font-weight: 600;
+  opacity: 0;
+  transition-duration: .4s;
+  text-align: center;
+  pointer-events: none;
+}
+
+.Btn:hover{
+  width: 110px;
+  transition-duration: .4s;
+  border-radius: 30px;
+}
+
+.Btn:hover .text{
+  opacity: 1;
+  transition-duration: .4s;
+}
+
+.Btn:hover .svgIcon{
+  opacity: 0;
+  transition-duration: .3s;
+}
+
+.Btn:focus-visible{
+  outline: 2px solid rgba(255,255,255,0.6);
+  outline-offset: 3px;
+}
+
+/* Mobile tweaks */
+@media (max-width: 560px){
+  .aboutPage{
+    padding: 78px 16px 36px;
+  }
+
+  .aboutContent{
+    width: 100%;
+  }
+
+  .aboutBlock{
+    padding: 13px 14px;
+    font-size: 14.5px;
+  }
+
+  .aboutLead{
+    font-size: 15.5px;
+  }
 }
