@@ -1,102 +1,273 @@
-# TEORIAT Chess Engine
+TEORIAT Chess Engine
+TEORIAT is a personalized chess engine that learns to play like a specific player using their Chess.com game history. It focuses on predicting your move sequences, not perfect engine play, and is deployed as a full web app (frontend on Vercel, backend on Render).
+​
 
-TEORIAT is a personalized chess engine that learns to play like you using your Chess.com game history. Instead of striving for perfect play, it captures **your unique playing style** using recurrent neural networks (RNNs).
+Demo
+Frontend: https://chess-engine-...vercel.app
 
----
+Backend API: https://<your-render-service>.onrender.com/api
 
-## Features
+Screenshots
+Place these images inside a docs/ folder in the repo and adjust filenames if needed.
 
-- Fetches all your Chess.com games  
-- Analyzes move sequences and patterns  
-- Trains an RNN to learn your move sequences  
-- Predicts your next move based on historical gameplay  
-- Stores all data in PostgreSQL for fast analysis  
+Landing page / quote screen
+![Landing page](docs/landing.jpg)
 
----
+Username & sign‑in dialog
+![Username dialog](docs/username.jpg)
 
-## Neural Network Approach
+Game settings (time control, side selection)
+![Game settings](docs/settings.jpg)
 
-### Goal: Sequential Move Prediction
+In‑game view with clocks, move list and captured pieces
+![Game view](docs/game.jpg)
 
-The engine focuses on predicting the next move based on previous sequences, rather than evaluating positions perfectly. It learns patterns such as *“after e4 and e5, I usually play Nf3.”*
+Leaderboard views for rapid and bullet vs TEORIAT
+![Leaderboard](docs/leaderboard.jpg)
 
-### Data Format
+Features
+Fetches and stores all Chess.com games for a given user into PostgreSQL.
 
-- **Input per move**:  
-  - `color` (0 = White, 1 = Black)  
-  - `move_id` (0–1926; 1927 unique moves)  
-  - `theoriat_move` (0 = opponent, 1 = TEORIAT)  
+Cleans and aggregates moves into per‑game sequences with metadata (color, move id, TEORIAT or opponent).
+​
 
-- **Output**: Probability distribution over 1927 possible moves  
-- **Dataset**: 166,277 moves from 5,821 games, organized in sequences  
+Trains a recurrent neural network that predicts the next TEORIAT move given the full move history of the game so far.
+​
 
-### How It Works
+Exposes the trained model behind a FastAPI backend for online play and result storage.
 
-1. **Move Embedding**  
-   - Each move ID is converted into a 32-dimensional vector  
-   - Embedding captures similarities between moves  
+Frontend React app with:
 
-2. **Sequence Processing**  
-   - LSTM processes sequences of moves with metadata (`color` + `theoriat_move`)  
-   - Captures opening preferences, tactics, and endgame style  
+Themed landing page and username selection
 
-3. **Move Prediction**  
-   - Output layer: 1927 neurons with softmax activation  
-   - Predicts the probability of the next move by TEORIAT  
+Time controls (rapid / bullet) and side selection
 
-### Why RNN/LSTM?
+Live board, clocks, sound effects and move list
 
-- Learns temporal patterns, not just board positions  
-- Captures personalized opening repertoire  
-- Efficient input representation compared to full board encoding  
+Persistent leaderboard split by mode (bullet vs TEORIAT, rapid vs TEORIAT).
+​
 
----
+Data & Preprocessing
+All raw data is stored in PostgreSQL and analyzed via notebooks in Analysis.ipynb.
+​
 
-## Neural Network Architecture
+Tables
 
-- **Embedding Layer:** 1927 moves → 32-dimensional vectors  
-- **Additional Features:** color (1), theoriat_move (1)  
-- **Input per timestep:** 34 features (32 + 1 + 1)  
-- **LSTM Layers:** 128 → 64 hidden units  
-- **Output Layer:** 1927 neurons (softmax)  
-- **Performance:** 72.4% Top-1 accuracy, 91.8% Top-5 accuracy on unseen games  
+chess_games: per‑game metadata (IDs, time control, result, timestamps).
 
----
+game_moves: every move with:
 
-## Database Structure
+player_color
 
-- **`chess_games`** – Metadata for all games (5,821 games)  
-- **`game_moves`** – Every move from every game (166,277 moves)  
-- **`opening_patterns`** – Learned opening repertoire (2,357 patterns)  
+move_san
 
----
+is_teoriat_move (whether this move was played by TEORIAT)
 
-## Data Splitting Strategy
+teoriat_color (color TEORIAT had in the game).
+​
 
-- Split by complete games to prevent leakage  
-- TimeSeriesSplit ensures generalization to future/unseen games  
+opening_patterns: mined opening sequences (SAN strings, frequency and basic stats).
+​
 
----
+Move sequences
 
-## Tech Stack
+Moves are grouped per game_id and converted into ordered lists:
 
-- **Python** – Data processing and analysis  
-- **PyTorch** – Neural network framework (RNN/LSTM)  
-- **PostgreSQL** – Data storage for games and moves  
-- **Jupyter Notebook** – Development and analysis  
-- **Chess.com API** – Game data source  
-- **python-chess** – PGN parsing and chess logic  
+(color, san, is_teoriat_move) for analysis.
 
----
+(color_id, move_id, theoriat_flag) for model training.
+​
 
-## Future Improvements
+color_id: 1 for white, 0 for black.
 
-- Implement 5-fold cross-validation for robust performance metrics  
-- Explore transformer-based architectures for sequence prediction  
-- Expand move embeddings to include contextual board state  
+move_id: integer index for the unique SAN move in the global move vocabulary.
 
----
+theoriat_flag: 1 if TEORIAT played the move, 0 otherwise.
+​
 
-## License
+Train / validation split
 
+Splitting is done at the game level using TimeSeriesSplit so that later games are evaluated as “future” data and there is no move leakage between train and validation sets.
+​
+
+Neural Network
+Problem formulation
+
+Given a sequence of moves in a game, the model predicts the next move played by TEORIAT (conditional on the game history so far). The targets are the move_id values for positions where is_teoriat_move == 1.
+​
+
+Input encoding
+
+For each move in a game sequence:
+
+color_id ∈ {0, 1} (black / white).
+
+move_id ∈ [0, vocab_size) where vocab_size = number of unique SAN moves.
+
+theoriat_flag ∈ {0, 1} to distinguish TEORIAT moves vs opponent moves.
+​
+
+The pipeline:
+
+move_id is passed through an embedding layer of size 32.
+
+color_id and theoriat_flag are concatenated as extra scalar features.
+
+Final per‑timestep feature vector has dimension 32 + 2 = 34.
+​
+
+Architecture
+
+Defined in RNN_model.ipynb as a stacked LSTM classifier:
+​
+
+Embedding layer: vocab_size → 32.
+
+LSTM layers:
+
+First LSTM: 128 hidden units.
+
+Second LSTM (stacked): 64 hidden units, with dropout between layers.
+
+Fully connected head:
+
+Linear → ReLU → Linear → output logits of size vocab_size.
+
+Loss: cross‑entropy on the predicted move_id for TEORIAT moves.
+
+Optimizer: Adam or SGD with OneCycleLR learning rate schedule.
+
+Training setup
+
+Batches are sequences of full games, padded and masked where necessary.
+
+TimeSeriesSplit over games: earlier games for training, later ones for validation.
+​
+
+Metrics tracked:
+
+Top‑1 accuracy on TEORIAT move prediction.
+
+Top‑k accuracy (e.g. k = 5) to measure how often TEORIAT’s move is in the top candidate list.
+
+(You can update exact numbers here once you fix on the final trained model.)
+
+Backend
+The backend is a FastAPI service located under src/ and deployed to Render.
+
+Key components
+
+app.py: FastAPI app, CORS config, and router mounting for the leaderboard and engine endpoints.
+
+models.py / db.py: SQLModel models and session management for PostgreSQL.
+
+leaderboard_routes.py: endpoints for:
+
+Registering finished games (mode, result, timestamps).
+
+Aggregated stats per user and per mode (wins, losses, draws, total games).
+​
+
+tables.py: scripts for fetching Chess.com games, converting PGNs, and populating the database with games and moves.
+​
+
+Representative endpoints
+
+POST /api/play/move – send current move list / FEN, get TEORIAT’s reply (via the trained model).
+
+POST /api/leaderboard/game – submit a finished game result.
+
+GET /api/leaderboard – fetch bullet and rapid leaderboards.
+
+(Adjust endpoint names here to match your actual FastAPI routes.)
+
+Frontend
+The frontend is a React single‑page app located in teoriat-chess/ and deployed to Vercel.
+​
+
+Routing
+
+SignIn page – choose username (stored client‑side and used for leaderboard records).
+​
+
+Main menu / quote screen – entry point with background artwork and “BEGIN” CTA.
+
+Play page – the core chess UI with:
+
+react-chessboard for board rendering and move interaction.
+
+Time control selection (10 min rapid, 1 min bullet).
+
+Side selection (play white or black).
+
+Custom clocks, move list, captured piece display and result modal.
+​
+
+LeaderBoard page – shows separate tables:
+
+Bullet vs TEORIAT.
+
+Rapid vs TEORIAT, including wins, losses, draws and total games per user.
+​
+
+API integration
+
+Both Play.jsx and LeaderBoard.jsx use an API_BASE constant:
+
+js
+const API_BASE = process.env.REACT_APP_API_BASE || "http://127.0.0.1:8000";
+In production, REACT_APP_API_BASE is set in Vercel to the Render backend URL, so all requests go through /api/... on your Render service.
+​
+
+UI / UX
+
+Custom CSS for a dark, cinematic feel using background art and subtle gradients.
+
+Responsive layout: board size adapts to viewport width, clocks and panels reposition gracefully on smaller screens.
+​
+
+Local Development
+Backend
+
+bash
+# from repo root
+cd src
+python -m venv .venv
+source .venv/bin/activate  # or .venv\Scripts\activate on Windows
+
+pip install -r ../requirements.txt
+
+uvicorn src.app:app --reload
+Backend will run at http://127.0.0.1:8000.
+
+Frontend
+
+bash
+cd teoriat-chess
+npm install
+npm start
+Frontend will run at http://localhost:3000 and talk to http://127.0.0.1:8000 by default.
+
+Deployment
+Backend: Render Web Service
+
+Start command:
+
+bash
+uvicorn src.app:app --host 0.0.0.0 --port 8000
+Environment variables: Postgres credentials, model path, etc.
+
+Frontend: Vercel
+
+Root directory: teoriat-chess
+
+Build command: npm run build
+
+Output directory: build
+
+Env var:
+
+REACT_APP_API_BASE=https://<your-render-service>.onrender.com
+
+License
 This project is licensed under the MIT License.
