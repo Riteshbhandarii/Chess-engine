@@ -91,14 +91,13 @@ Aggregated stats per user and per time control (bullet / rapid vs TEORIAT), back
 
 Create a `docs/` directory in the repository and place your exported images there, then wire them up as below:
 
-
 ## Screenshots
 
-![Landing page](docs/landing-teoriat.jpg)
-![Username selection](docs/username-teoriat.jpg)
-![Game settings](docs/settings-teoriat.jpg)
-![In-game view](docs/game-teoriat.jpg)
-![Leaderboard](docs/leaderboard-teoriat.jpg)
+![Landing page](docs/landing-teoriat.png)
+![Username selection](docs/username-teoriat.png)
+![Game settings](docs/settings-teoriat.png)
+![In‑game view](docs/game-teoriat.png)
+![Leaderboard](docs/leaderboard-teoriat.png)
 
 
 
