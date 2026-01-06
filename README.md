@@ -1,273 +1,354 @@
-TEORIAT Chess Engine
-TEORIAT is a personalized chess engine that learns to play like a specific player using their Chess.com game history. It focuses on predicting your move sequences, not perfect engine play, and is deployed as a full web app (frontend on Vercel, backend on Render).
-​
+Below is a **clean, GitHub-ready `README.md`** version of your content.
+You can **copy-paste this directly** into your repository’s README.
 
-Demo
-Frontend: https://chess-engine-...vercel.app
+---
 
-Backend API: https://<your-render-service>.onrender.com/api
+# TEORIAT Chess Engine
 
-Screenshots
-Place these images inside a docs/ folder in the repo and adjust filenames if needed.
+**TEORIAT** is a personalized chess engine that learns to imitate a specific player’s style from their Chess.com game history.
+Rather than aiming for perfect play, it models how *you* actually play and serves that behavior through a production-ready web application.
 
-Landing page / quote screen
+---
+
+## Table of Contents
+
+* [Overview](#overview)
+* [Architecture](#architecture)
+* [Core Features](#core-features)
+* [Modeling Approach](#modeling-approach)
+* [Data Pipeline](#data-pipeline)
+* [Web Application](#web-application)
+* [Local Development](#local-development)
+* [Deployment](#deployment)
+* [Roadmap](#roadmap)
+* [License](#license)
+
+---
+
+## Overview
+
+TEORIAT consumes complete Chess.com game histories, stores them in PostgreSQL, and trains a recurrent neural network to predict the next move TEORIAT would play given the current game history.
+
+The trained model is exposed behind a **FastAPI** backend, while a **React** frontend provides a polished playing experience with timers, move lists, and a persistent leaderboard.
+
+---
+
+## Architecture
+
+High-level components:
+
+### Data Layer
+
+* PostgreSQL database for games, moves, and mined opening patterns
+* Python scripts and notebooks for extraction, cleaning, and exploratory analysis
+
+### Modeling Layer
+
+* PyTorch LSTM-based model for sequential move prediction
+* Time-series-aware train/validation splitting and evaluation
+
+### Backend
+
+* FastAPI application providing REST endpoints for:
+
+  * Online play (move generation via TEORIAT)
+  * Leaderboard aggregation and persistence
+  * Internal utilities for data loading and health checks
+
+### Frontend
+
+* React single-page application (SPA) deployed on Vercel
+* Uses `react-chessboard` for interactive play
+* Communicates with the backend via a configurable API base URL
+
+---
+
+## Core Features
+
+### ♟ Personalized Engine Behavior
+
+Learns statistical patterns from your own games and reproduces them over the board.
+
+### 📥 Full Game Ingestion from Chess.com
+
+Scripts for fetching, parsing, and storing complete game histories in PostgreSQL.
+
+### 🧠 Neural Move Prediction
+
+Sequence-to-distribution model that outputs probabilities over the move vocabulary at each TEORIAT decision point.
+
+### 🌐 Production-Ready Web UI
+
+Landing page, username selection, game configuration, and live play in a cohesive visual style.
+
+### 🏆 Persistent Leaderboard
+
+Aggregated stats per user and per time control (bullet / rapid vs TEORIAT), backed by the same database as the engine data.
+
+---
+
+## Screenshots
+
+Create a `docs/` directory in the repository and place your exported images there, then wire them up as below:
+
+```text
 ![Landing page](docs/landing.jpg)
-
-Username & sign‑in dialog
-![Username dialog](docs/username.jpg)
-
-Game settings (time control, side selection)
+![Username selection](docs/username.jpg)
 ![Game settings](docs/settings.jpg)
-
-In‑game view with clocks, move list and captured pieces
-![Game view](docs/game.jpg)
-
-Leaderboard views for rapid and bullet vs TEORIAT
+![In-game view](docs/game.jpg)
 ![Leaderboard](docs/leaderboard.jpg)
+```
 
-Features
-Fetches and stores all Chess.com games for a given user into PostgreSQL.
+---
 
-Cleans and aggregates moves into per‑game sequences with metadata (color, move id, TEORIAT or opponent).
-​
+## Modeling Approach
 
-Trains a recurrent neural network that predicts the next TEORIAT move given the full move history of the game so far.
-​
+### Problem Definition
 
-Exposes the trained model behind a FastAPI backend for online play and result storage.
+Given a game’s move history up to the current ply, predict the next move TEORIAT will play **if it is TEORIAT’s turn**.
 
-Frontend React app with:
+The model is not asked to evaluate positions or compute best moves—it is trained purely to imitate historical behavior.
 
-Themed landing page and username selection
+---
 
-Time controls (rapid / bullet) and side selection
+### Input Representation
 
-Live board, clocks, sound effects and move list
+Each move is converted into a compact tuple:
 
-Persistent leaderboard split by mode (bullet vs TEORIAT, rapid vs TEORIAT).
-​
+* `color_id` — `1` for white, `0` for black
+* `move_id` — integer index for the SAN move in the global vocabulary
+* `teoriat_flag` — `1` if the move was played by TEORIAT, `0` otherwise
 
-Data & Preprocessing
-All raw data is stored in PostgreSQL and analyzed via notebooks in Analysis.ipynb.
-​
+For each timestep:
 
-Tables
+* `move_id` → embedding layer (dimension `32`)
+* `color_id` and `teoriat_flag` concatenated as scalar features
 
-chess_games: per‑game metadata (IDs, time control, result, timestamps).
+**Resulting feature vector:** `34` dimensions per move
 
-game_moves: every move with:
+Target labels at TEORIAT decision points are the corresponding `move_id` values.
 
-player_color
+---
 
-move_san
+### Network Architecture
 
-is_teoriat_move (whether this move was played by TEORIAT)
+Implemented in PyTorch as a stacked LSTM classifier:
 
-teoriat_color (color TEORIAT had in the game).
-​
+* **Embedding**
 
-opening_patterns: mined opening sequences (SAN strings, frequency and basic stats).
-​
+  * `vocab_size → 32`
 
-Move sequences
+* **Recurrent Stack**
 
-Moves are grouped per game_id and converted into ordered lists:
+  * LSTM layer with `128` hidden units
+  * LSTM layer with `64` hidden units
+  * Optional dropout between layers
 
-(color, san, is_teoriat_move) for analysis.
+* **Classification Head**
 
-(color_id, move_id, theoriat_flag) for model training.
-​
+  * Fully connected layer with non-linearity
+  * Output layer with `vocab_size` logits for softmax
 
-color_id: 1 for white, 0 for black.
+Training details:
 
-move_id: integer index for the unique SAN move in the global move vocabulary.
+* Loss: Cross-entropy
+* Optimizer: Adam
+* Optional One-Cycle learning-rate schedule
 
-theoriat_flag: 1 if TEORIAT played the move, 0 otherwise.
-​
+---
 
-Train / validation split
+## Data Pipeline
 
-Splitting is done at the game level using TimeSeriesSplit so that later games are evaluated as “future” data and there is no move leakage between train and validation sets.
-​
+The data pipeline is designed for reproducibility and clean separation of concerns.
 
-Neural Network
-Problem formulation
+---
 
-Given a sequence of moves in a game, the model predicts the next move played by TEORIAT (conditional on the game history so far). The targets are the move_id values for positions where is_teoriat_move == 1.
-​
+### Database Schema
 
-Input encoding
+**`chess_games`**
 
-For each move in a game sequence:
+* Per-game metadata (IDs, timestamps, results, time controls, etc.)
 
-color_id ∈ {0, 1} (black / white).
+**`game_moves`**
 
-move_id ∈ [0, vocab_size) where vocab_size = number of unique SAN moves.
+* One row per move:
 
-theoriat_flag ∈ {0, 1} to distinguish TEORIAT moves vs opponent moves.
-​
+  * `game_id`
+  * `move_number`, `ply_number`
+  * `player_color`
+  * `move_san`
+  * `is_teoriat_move`
+  * `teoriat_color`
 
-The pipeline:
+**`opening_patterns`**
 
-move_id is passed through an embedding layer of size 32.
+* Aggregated opening sequences
+* Frequencies and basic performance statistics
 
-color_id and theoriat_flag are concatenated as extra scalar features.
+---
 
-Final per‑timestep feature vector has dimension 32 + 2 = 34.
-​
+### Extraction and Cleaning
 
-Architecture
+* Connects to PostgreSQL via SQLAlchemy
+* Loads moves per game and aggregates ordered sequences
+* Converts SAN moves into `(color_id, move_id, teoriat_flag)` encodings
+* Uses time-series-aware splitting (e.g. `TimeSeriesSplit` at game level) to prevent data leakage
 
-Defined in RNN_model.ipynb as a stacked LSTM classifier:
-​
+---
 
-Embedding layer: vocab_size → 32.
+## Web Application
 
-LSTM layers:
+### Backend (FastAPI)
 
-First LSTM: 128 hidden units.
+Located under `src/`.
 
-Second LSTM (stacked): 64 hidden units, with dropout between layers.
+Responsibilities:
 
-Fully connected head:
+* Load trained PyTorch model at startup
+* Accept move history and return TEORIAT’s next move
+* Persist completed games and results
+* Serve aggregated leaderboard data
 
-Linear → ReLU → Linear → output logits of size vocab_size.
+Runs with **Uvicorn** and is designed for deployment on **Render**.
 
-Loss: cross‑entropy on the predicted move_id for TEORIAT moves.
+---
 
-Optimizer: Adam or SGD with OneCycleLR learning rate schedule.
+### Frontend (React)
 
-Training setup
+Located under `teoriat-chess/`.
 
-Batches are sequences of full games, padded and masked where necessary.
+Key screens:
 
-TimeSeriesSplit over games: earlier games for training, later ones for validation.
-​
+* **Landing / Hero**
+* **Username / Sign-In**
+* **Game Setup**
 
-Metrics tracked:
+  * Time controls (bullet / rapid)
+  * Side selection (white or black)
+* **Game View**
 
-Top‑1 accuracy on TEORIAT move prediction.
+  * Interactive board
+  * Move history
+  * Captured pieces
+  * Dual clocks
+  * Result dialog
+* **Leaderboard**
 
-Top‑k accuracy (e.g. k = 5) to measure how often TEORIAT’s move is in the top candidate list.
+  * Separate bullet and rapid tables
+  * Per-user win/loss/draw stats vs TEORIAT
 
-(You can update exact numbers here once you fix on the final trained model.)
+**Configuration**
 
-Backend
-The backend is a FastAPI service located under src/ and deployed to Render.
+* Environment variable:
 
-Key components
+  ```
+  REACT_APP_API_BASE
+  ```
+* Defaults to `http://127.0.0.1:8000` in development
+* Set to Render backend URL in production
 
-app.py: FastAPI app, CORS config, and router mounting for the leaderboard and engine endpoints.
+---
 
-models.py / db.py: SQLModel models and session management for PostgreSQL.
+## Local Development
 
-leaderboard_routes.py: endpoints for:
+### Prerequisites
 
-Registering finished games (mode, result, timestamps).
+* Python 3.10+
+* Node.js & npm
+* PostgreSQL instance
 
-Aggregated stats per user and per mode (wins, losses, draws, total games).
-​
+---
 
-tables.py: scripts for fetching Chess.com games, converting PGNs, and populating the database with games and moves.
-​
+### Backend
 
-Representative endpoints
-
-POST /api/play/move – send current move list / FEN, get TEORIAT’s reply (via the trained model).
-
-POST /api/leaderboard/game – submit a finished game result.
-
-GET /api/leaderboard – fetch bullet and rapid leaderboards.
-
-(Adjust endpoint names here to match your actual FastAPI routes.)
-
-Frontend
-The frontend is a React single‑page app located in teoriat-chess/ and deployed to Vercel.
-​
-
-Routing
-
-SignIn page – choose username (stored client‑side and used for leaderboard records).
-​
-
-Main menu / quote screen – entry point with background artwork and “BEGIN” CTA.
-
-Play page – the core chess UI with:
-
-react-chessboard for board rendering and move interaction.
-
-Time control selection (10 min rapid, 1 min bullet).
-
-Side selection (play white or black).
-
-Custom clocks, move list, captured piece display and result modal.
-​
-
-LeaderBoard page – shows separate tables:
-
-Bullet vs TEORIAT.
-
-Rapid vs TEORIAT, including wins, losses, draws and total games per user.
-​
-
-API integration
-
-Both Play.jsx and LeaderBoard.jsx use an API_BASE constant:
-
-js
-const API_BASE = process.env.REACT_APP_API_BASE || "http://127.0.0.1:8000";
-In production, REACT_APP_API_BASE is set in Vercel to the Render backend URL, so all requests go through /api/... on your Render service.
-​
-
-UI / UX
-
-Custom CSS for a dark, cinematic feel using background art and subtle gradients.
-
-Responsive layout: board size adapts to viewport width, clocks and panels reposition gracefully on smaller screens.
-​
-
-Local Development
-Backend
-
-bash
-# from repo root
+```bash
+# from repository root
 cd src
+
 python -m venv .venv
-source .venv/bin/activate  # or .venv\Scripts\activate on Windows
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
 
 pip install -r ../requirements.txt
 
+# set database and model environment variables
 uvicorn src.app:app --reload
-Backend will run at http://127.0.0.1:8000.
+```
 
-Frontend
+Backend runs at:
+`http://127.0.0.1:8000`
 
-bash
+---
+
+### Frontend
+
+```bash
 cd teoriat-chess
 npm install
 npm start
-Frontend will run at http://localhost:3000 and talk to http://127.0.0.1:8000 by default.
+```
 
-Deployment
-Backend: Render Web Service
+Frontend runs at:
+`http://localhost:3000`
 
-Start command:
+---
 
-bash
-uvicorn src.app:app --host 0.0.0.0 --port 8000
-Environment variables: Postgres credentials, model path, etc.
+## Deployment
 
-Frontend: Vercel
+### Backend (Render)
 
-Root directory: teoriat-chess
+1. Create a new **Web Service** from the repository
+2. Root directory: repository root
+3. Start command:
 
-Build command: npm run build
+   ```bash
+   uvicorn src.app:app --host 0.0.0.0 --port 8000
+   ```
+4. Configure environment variables:
 
-Output directory: build
+   * Database URL
+   * Model paths
+   * Secret keys (if any)
 
-Env var:
+---
 
-REACT_APP_API_BASE=https://<your-render-service>.onrender.com
+### Frontend (Vercel)
 
-License
-This project is licensed under the MIT License.
+1. Import repository into Vercel
+2. Project root: `teoriat-chess`
+3. Build command:
+
+   ```bash
+   npm run build
+   ```
+4. Output directory:
+
+   ```
+   build
+   ```
+5. Environment variable:
+
+   ```
+   REACT_APP_API_BASE=https://<your-render-service>.onrender.com
+   ```
+
+Vercel will auto-deploy on each push.
+
+---
+
+## Roadmap
+
+* Replace LSTM with transformer-based architectures
+* Add lightweight board-state features
+* Implement k-fold cross-validation and richer evaluation
+* Public player profiles and game browser
+* Online learning / continual fine-tuning from new games
+
+---
+
+## License
+
+This project is released under the **MIT License**.
+See the `LICENSE` file for details.
+
+---
+
