@@ -1,7 +1,3 @@
-Below is a **clean, GitHub-ready `README.md`** version of your content.
-You can **copy-paste this directly** into your repository’s README.
-
----
 
 # TEORIAT Chess Engine
 
