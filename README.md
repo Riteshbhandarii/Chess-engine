@@ -86,9 +86,9 @@ Aggregated stats per user and per time control (bullet / rapid vs TEORIAT), back
 
 ## Screenshots
 
-![Landing page with the Teoriat Chess title over a painting of chess players](docs/landing-teoriat.webp)
+![Landing page with the tagline "The art of thinking ahead" and a Begin button](docs/landing-teoriat.webp)
 ![Username selection screen](docs/username-teoriat.webp)
-![Game settings: choose colour and time control](docs/settings-teoriat.webp)
+![Game settings screen with a board preview, time control and side choice](docs/settings-teoriat.webp)
 ![In-game view with board, clocks, captured pieces and move list](docs/game-teoriat.webp)
 ![Leaderboard table of players and results](docs/leaderboard-teoriat.webp)
 
