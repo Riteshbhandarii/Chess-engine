@@ -17,7 +17,6 @@ Rather than aiming for perfect play, it models how *you* actually play and serve
 * [Local Development](#local-development)
 * [Deployment](#deployment)
 * [Roadmap](#roadmap)
-* [License](#license)
 
 ---
 
@@ -40,7 +39,7 @@ High-level components:
 
 ### Modeling Layer
 
-* PyTorch LSTM-based model for sequential move prediction
+* PyTorch GRU-based model for sequential move prediction, blended with chess heuristics at inference
 * Time-series-aware train/validation splitting and evaluation
 
 ### Backend
@@ -108,47 +107,39 @@ The model is not asked to evaluate positions or compute best moves—it is train
 
 ### Input Representation
 
-Each move is converted into a compact tuple:
+The model sees the last `6` plies of the game (`MAX_SEQ_LEN`), left-padded with a pad token when the game is shorter. Each ply has three features:
 
-* `color_id` — `1` for white, `0` for black
-* `move_id` — integer index for the SAN move in the global vocabulary
-* `teoriat_flag` — `1` if the move was played by TEORIAT, `0` otherwise
+* `move_id` — integer index of the SAN move in the move vocabulary (`1928` entries including padding)
+* `color_id` — `1` if white played the move, `0` if black
+* `theory_flag` — currently always `0` at inference
 
 For each timestep:
 
-* `move_id` → embedding layer (dimension `32`)
-* `color_id` and `teoriat_flag` concatenated as scalar features
+* `move_id` → embedding layer (dimension `128`)
+* `color_id` → embedding layer (dimension `32`)
+* `theory_flag` → embedding layer (dimension `32`)
 
-**Resulting feature vector:** `34` dimensions per move
-
-Target labels at TEORIAT decision points are the corresponding `move_id` values.
+The three embeddings are concatenated into a `192`-dimensional vector and passed through layer normalisation.
 
 ---
 
 ### Network Architecture
 
-Implemented in PyTorch as a stacked LSTM classifier:
-
-* **Embedding**
-
-  * `vocab_size → 32`
+Implemented in PyTorch (`ChessRNN` in `src/app.py`):
 
 * **Recurrent Stack**
 
-  * LSTM layer with `128` hidden units
-  * LSTM layer with `64` hidden units
-  * Optional dropout between layers
+  * 2-layer GRU with `256` hidden units
+  * Dropout `0.3` between layers
 
 * **Classification Head**
 
-  * Fully connected layer with non-linearity
-  * Output layer with `vocab_size` logits for softmax
+  * Dropout, then a fully connected layer (`256 → 256`) with ReLU
+  * Dropout, then an output layer with `vocab_size` logits
 
-Training details:
+At inference the top `120` model candidates are re-scored with simple heuristics (captures, checks, hanging pieces, repetition) and the final move is sampled from the best few (temperature `0.9`). An opening book (`src/book.bin`) is used when present.
 
-* Loss: Cross-entropy
-* Optimizer: Adam
-* Optional One-Cycle learning-rate schedule
+Training uses cross-entropy loss; see `src/notebooks/RNN_model.ipynb` for the training code.
 
 ---
 
@@ -188,6 +179,8 @@ The data pipeline is designed for reproducibility and clean separation of concer
 * Loads moves per game and aggregates ordered sequences
 * Converts SAN moves into `(color_id, move_id, teoriat_flag)` encodings
 * Uses time-series-aware splitting (e.g. `TimeSeriesSplit` at game level) to prevent data leakage
+
+The notebooks and `src/tables.py` need extra packages that the API does not: install them with `pip install -r requirements-dev.txt`.
 
 ---
 
@@ -332,18 +325,8 @@ Vercel will auto-deploy on each push.
 
 ## Roadmap
 
-* Replace LSTM with transformer-based architectures
+* Replace the GRU with transformer-based architectures
 * Add lightweight board-state features
 * Implement k-fold cross-validation and richer evaluation
 * Public player profiles and game browser
 * Online learning / continual fine-tuning from new games
-
----
-
-## License
-
-This project is released under the **MIT License**.
-See the `LICENSE` file for details.
-
----
-

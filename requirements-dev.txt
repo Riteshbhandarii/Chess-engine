@@ -1,0 +1,12 @@
+# Extra dependencies for notebooks, data ingestion (src/tables.py) and tests
+-r requirements.txt
+pandas>=1.5.0
+scikit-learn>=1.1.0
+psycopg2-binary>=2.9.0
+requests>=2.28.0
+tabulate>=0.9.0
+matplotlib>=3.6.0
+seaborn>=0.12.0
+jupyter>=1.0.0
+pytest>=7.0.0
+httpx>=0.24.0
