@@ -180,7 +180,7 @@ The data pipeline is designed for reproducibility and clean separation of concer
 * Converts SAN moves into `(color_id, move_id, teoriat_flag)` encodings
 * Uses time-series-aware splitting (e.g. `TimeSeriesSplit` at game level) to prevent data leakage
 
-The notebooks and `src/tables.py` need extra packages that the API does not: install them with `pip install -r requirements-dev.txt`.
+The notebooks and `src/tables.py` need extra packages that the API does not: install them with `pip install -r requirements-dev.txt`. They connect to Postgres using the standard `PGHOST`, `PGDATABASE`, `PGUSER` and `PGPASSWORD` environment variables (set `PGPASSWORD` yourself; there is no default).
 
 ---
 
