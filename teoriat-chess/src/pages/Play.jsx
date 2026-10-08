@@ -583,8 +583,6 @@ export default function Play({ playerName, playerColor, timeMode }) {
         src={`${process.env.PUBLIC_URL}/checkmate.mp3`}
       />
 
-      {resultOpen && <div className="gameOverDim" aria-hidden="true" />}
-
       <div className="container playBox">
         <div className="playGrid" style={{ "--boardW": `${boardWidth}px` }}>
           <div className="playMain">
@@ -594,6 +592,8 @@ export default function Play({ playerName, playerColor, timeMode }) {
             </div>
 
             <div className="boardWrap">
+              {resultOpen && <div className="gameOverDim" aria-hidden="true" />}
+
               <div className="boardTopLeft">
                 <Chessboard
                   position={position}
