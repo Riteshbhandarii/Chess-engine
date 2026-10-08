@@ -243,7 +243,7 @@ Key screens:
 
 * Python 3.10+
 * Node.js & npm
-* PostgreSQL instance
+* PostgreSQL instance only for historical-game ingestion and training; the playable API uses SQLite
 
 ---
 
@@ -251,14 +251,12 @@ Key screens:
 
 ```bash
 # from repository root
-cd src
-
 python -m venv .venv
 source .venv/bin/activate  # Windows: .venv\Scripts\activate
 
-pip install -r ../requirements.txt
+pip install -r requirements.txt
 
-# set database and model environment variables
+# the trained model and move vocabulary are included under src/
 uvicorn src.app:app --reload
 ```
 
@@ -289,13 +287,13 @@ Frontend runs at:
 3. Start command:
 
    ```bash
-   uvicorn src.app:app --host 0.0.0.0 --port 8000
+   uvicorn src.app:app --host 0.0.0.0 --port ${PORT:-8000}
    ```
-4. Configure environment variables:
+4. Select the **Free** instance type and use `/` as the health check path. The included Dockerfile also supports the host's `PORT` variable.
 
-   * Database URL
-   * Model paths
-   * Secret keys (if any)
+The current API is `https://chess-engine-9ogx.onrender.com`. Free Render services sleep after 15 minutes without traffic and take about a minute to wake. Game settings checks the API before opening the board, so the game clock does not run during startup. If startup fails or takes longer than two minutes, choose a side again to retry.
+
+The leaderboard uses local SQLite. On free Render hosting, results are lost when the service sleeps, restarts, or redeploys because the filesystem is ephemeral. See [Render's free hosting limits](https://render.com/docs/free).
 
 ---
 

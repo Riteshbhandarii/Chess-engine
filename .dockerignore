@@ -1,6 +1,8 @@
 __pycache__
 *.pyc
 .git
+.venv
 notebooks
 teoriat-chess
+tests
 .env
