@@ -17,7 +17,7 @@ export default function Landing({ playerName, setPlayerName }) {
     <div
       className="landing"
       style={{
-        "--landingBg": `url(${process.env.PUBLIC_URL}/design-01kdh2xh6d-1766878817.png)`,
+        "--landingBg": `url(${process.env.PUBLIC_URL}/landing-bg.webp)`,
       }}
     >
       <button
