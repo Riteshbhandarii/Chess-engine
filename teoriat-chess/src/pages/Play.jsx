@@ -64,7 +64,7 @@ export default function Play({ playerName, playerColor, timeMode }) {
   const [resultWinner, setResultWinner] = useState("");
   const [resultReason, setResultReason] = useState("");
 
-  const [pendingPromotion, setPendingPromotion] = useState(null);
+  const [, setPendingPromotion] = useState(null);
 
   // prevent double POST
   const postedRef = useRef(false);
