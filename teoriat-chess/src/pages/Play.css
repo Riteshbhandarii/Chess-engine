@@ -254,6 +254,26 @@
   box-shadow: 0 30px 90px rgba(0,0,0,0.65);
 }
 
+.engineError{
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: rgba(255,255,255,0.92);
+  font: 700 13px/1.3 "Segoe UI", system-ui, sans-serif;
+}
+
+.engineError{
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 8px;
+  z-index: 5;
+  padding: 10px 12px;
+  background: rgba(60, 10, 10, 0.88);
+  border: 1px solid rgba(255, 80, 80, 0.35);
+}
+
 .resultKicker{
   color: rgba(255,255,255,0.68);
   font: 800 12px/1 "Segoe UI", system-ui, sans-serif;
