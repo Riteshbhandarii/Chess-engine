@@ -115,6 +115,12 @@
   margin: 10px 0 18px;
 }
 
+.signinError{
+  color: #ff9a9a;
+  font: inherit;
+  margin: -6px 0 14px;
+}
+
 /* continue button inside sign-in */
 
 .signin .landingBegin{
