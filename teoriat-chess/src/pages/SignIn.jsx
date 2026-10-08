@@ -20,7 +20,7 @@ export default function SignIn({ playerName, setPlayerName }) {
     <div
       className="signin"
       style={{
-        "--landingBg": `url(${process.env.PUBLIC_URL}/Honoré_Daumier_032.jpg)`,
+        "--landingBg": `url(${process.env.PUBLIC_URL}/honore-daumier-032.jpg)`,
       }}
     >
       <button className="landingMenuBtn signinBackGlobal" type="button" onClick={() => nav("/")}>
