@@ -69,6 +69,10 @@ export default function Play({ playerName, playerColor, timeMode }) {
   // prevent double POST
   const postedRef = useRef(false);
 
+  // id of the engine request whose reply may still be applied
+  const engineReqRef = useRef(0);
+  const [engineError, setEngineError] = useState(null);
+
   /* sound */
   const moveSfxRef = useRef(null);
   const captureSfxRef = useRef(null);
@@ -321,6 +325,8 @@ export default function Play({ playerName, playerColor, timeMode }) {
   }
 
   function openResult(winner, reason) {
+    engineReqRef.current += 1; // ignore any engine reply still in flight
+    setEngineError(null);
     setClockRunning(false);
     setBusy(false);
 
@@ -332,6 +338,8 @@ export default function Play({ playerName, playerColor, timeMode }) {
   }
 
   function startNewGame() {
+    engineReqRef.current += 1;
+    setEngineError(null);
     game.reset();
     setPosition("start");
     setMoveHistory([]);
@@ -362,6 +370,9 @@ export default function Play({ playerName, playerColor, timeMode }) {
   }
 
   useEffect(() => {
+    engineReqRef.current += 1;
+    setEngineError(null);
+    setBusy(false);
     setWhiteMs(startSeconds * 1000);
     setBlackMs(startSeconds * 1000);
     setClockRunning(true);
@@ -415,7 +426,16 @@ export default function Play({ playerName, playerColor, timeMode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [whiteMs, blackMs]);
 
+  function engineFailed(movesSoFar) {
+    // keep the engine's turn, stop the clocks, let the player retry
+    setBusy(false);
+    setClockRunning(false);
+    setEngineError({ moves: movesSoFar });
+  }
+
   async function askEngine(movesSoFar) {
+    const reqId = ++engineReqRef.current;
+    setEngineError(null);
     setBusy(true);
 
     try {
@@ -425,22 +445,20 @@ export default function Play({ playerName, playerColor, timeMode }) {
         body: JSON.stringify({ moves: movesSoFar, mode: timeMode }),
       });
 
+      if (reqId !== engineReqRef.current) return;
+
       if (!res.ok) {
-        setBusy(false);
-        setActiveColor(playerColor);
+        engineFailed(movesSoFar);
         return;
       }
 
       const data = await res.json();
+      if (reqId !== engineReqRef.current) return;
+
       const uci = data.move;
       const from = uci.slice(0, 2);
       const to = uci.slice(2, 4);
       const promotion = uci.length > 4 ? uci[4] : undefined;
-
-      if (!clockRunning || resultOpen) {
-        setBusy(false);
-        return;
-      }
 
       if (game.turn() !== engineColor) {
         setBusy(false);
@@ -456,8 +474,7 @@ export default function Play({ playerName, playerColor, timeMode }) {
       }
 
       if (!engineMove) {
-        setBusy(false);
-        setActiveColor(playerColor);
+        engineFailed(movesSoFar);
         return;
       }
 
@@ -479,9 +496,16 @@ export default function Play({ playerName, playerColor, timeMode }) {
       setActiveColor(playerColor);
       setBusy(false);
     } catch {
-      setBusy(false);
-      setActiveColor(playerColor);
+      if (reqId !== engineReqRef.current) return;
+      engineFailed(movesSoFar);
     }
+  }
+
+  function retryEngine() {
+    if (!engineError) return;
+    const moves = engineError.moves;
+    setClockRunning(true);
+    askEngine(moves);
   }
 
   function onPieceDrop(sourceSquare, targetSquare, piece) {
@@ -605,6 +629,19 @@ export default function Play({ playerName, playerColor, timeMode }) {
                   customLightSquareStyle={{ backgroundColor: "#f0d9b5" }}
                 />
               </div>
+
+              {engineError && !resultOpen && (
+                <div className="engineError" role="alert">
+                  <span>The engine did not answer.</span>
+                  <button
+                    type="button"
+                    className="gameOverBtnPrimary"
+                    onClick={retryEngine}
+                  >
+                    Retry
+                  </button>
+                </div>
+              )}
 
               {resultOpen && (
                 <div
