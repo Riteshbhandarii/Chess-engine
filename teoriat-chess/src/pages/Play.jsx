@@ -7,6 +7,21 @@ import "./Play.css";
 
 const API_BASE = process.env.REACT_APP_API_BASE || "http://127.0.0.1:8000";
 
+const STACK_BREAKPOINT = 930; // keep in sync with the media query in Play.css
+const SIDE_PANEL_SPACE = 320 + 14; // panel width + grid gap
+const PAGE_GUTTER = 32;
+const VERTICAL_OVERHEAD = 170; // page padding + the two clock rows
+const MIN_BOARD = 240;
+
+function computeBoardWidth() {
+  const w = window.innerWidth;
+  const h = window.innerHeight;
+  const stacked = w <= STACK_BREAKPOINT;
+  const availW = w - PAGE_GUTTER - (stacked ? 0 : SIDE_PANEL_SPACE);
+  const availH = Math.max(h - VERTICAL_OVERHEAD, 320);
+  return Math.max(MIN_BOARD, Math.floor(Math.min(availW, availH)));
+}
+
 export default function Play({ playerName, playerColor, timeMode }) {
   const [game] = useState(() => new Chess());
   const nav = useNavigate();
@@ -17,13 +32,10 @@ export default function Play({ playerName, playerColor, timeMode }) {
 
   const [gameId, setGameId] = useState(0);
 
-  const [boardWidth, setBoardWidth] = useState(() =>
-    Math.min(560, Math.floor(window.innerWidth * 0.92))
-  );
+  const [boardWidth, setBoardWidth] = useState(computeBoardWidth);
 
   useEffect(() => {
-    const onResize = () =>
-      setBoardWidth(Math.min(560, Math.floor(window.innerWidth * 0.92)));
+    const onResize = () => setBoardWidth(computeBoardWidth());
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
   }, []);
@@ -574,14 +586,12 @@ export default function Play({ playerName, playerColor, timeMode }) {
       {resultOpen && <div className="gameOverDim" aria-hidden="true" />}
 
       <div className="container playBox">
-        <div className="playGrid">
+        <div className="playGrid" style={{ "--boardW": `${boardWidth}px` }}>
           <div className="playMain">
             <div className="playHudRow">
               <div className="playHudName">{topName}</div>
               <div className="playHudClock">{topClock}</div>
             </div>
-
-            <CapturedRow title="Captured (White)" items={captured.w} color="w" />
 
             <div className="boardWrap">
               <div className="boardTopLeft">
@@ -635,8 +645,6 @@ export default function Play({ playerName, playerColor, timeMode }) {
               )}
             </div>
 
-            <CapturedRow title="Captured (Black)" items={captured.b} color="b" />
-
             <div className="playHudRow">
               <div className="playHudName">{bottomName}</div>
               <div className="playHudClock">{bottomClock}</div>
@@ -666,6 +674,9 @@ export default function Play({ playerName, playerColor, timeMode }) {
                 )}
               </div>
             </div>
+
+            <CapturedRow title="Captured (White)" items={captured.w} color="w" />
+            <CapturedRow title="Captured (Black)" items={captured.b} color="b" />
           </aside>
         </div>
       </div>
