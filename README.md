@@ -1,8 +1,10 @@
 
 # TEORIAT Chess Engine
 
-**TEORIAT** is a personalized chess engine that learns to imitate a specific player’s style from their Chess.com game history.
-Rather than aiming for perfect play, it models how *you* actually play and serves that behavior through a production-ready web application.
+**TEORIAT** is a chess bot trained to imitate one player: the Chess.com account `teoriat`.
+It does not try to play the best move. A small recurrent network predicts the move that player would likely make, a set of chess heuristics filters out the worst blunders, and the result is served through a web app you can play against.
+
+Live app: https://chess-engine-two.vercel.app
 
 ---
 
@@ -10,11 +12,13 @@ Rather than aiming for perfect play, it models how *you* actually play and serve
 
 * [Overview](#overview)
 * [Architecture](#architecture)
-* [Core Features](#core-features)
+* [Screenshots](#screenshots)
 * [Modeling Approach](#modeling-approach)
+* [Evaluation](#evaluation)
 * [Data Pipeline](#data-pipeline)
 * [Web Application](#web-application)
 * [Local Development](#local-development)
+* [Tests](#tests)
 * [Deployment](#deployment)
 * [Roadmap](#roadmap)
 
@@ -22,76 +26,50 @@ Rather than aiming for perfect play, it models how *you* actually play and serve
 
 ## Overview
 
-TEORIAT consumes complete Chess.com game histories, stores them in PostgreSQL, and trains a recurrent neural network to predict the next move TEORIAT would play given the current game history.
+`src/tables.py` downloads the `teoriat` game archives from the Chess.com public API (January 2023 to August 2025) into PostgreSQL. The training set exported from that database, `cleaned_data.csv`, holds **1,000 games** and **60,600 move-prediction examples**.
 
-The trained model is exposed behind a **FastAPI** backend, while a **React** frontend provides a polished playing experience with timers, move lists, and a persistent leaderboard.
+A PyTorch GRU is trained on those games to predict the next move from the last six plies. At play time a **FastAPI** backend combines the network's candidates with simple tactical checks and picks a move. A **React** frontend provides the board, clocks, move list and a leaderboard.
 
 ---
 
 ## Architecture
 
-High-level components:
-
 ### Data Layer
 
-* PostgreSQL database for games, moves, and mined opening patterns
-* Python scripts and notebooks for extraction, cleaning, and exploratory analysis
+* PostgreSQL database for raw games, per-move rows and mined opening patterns (training only)
+* Python scripts and notebooks for extraction, cleaning and analysis
 
 ### Modeling Layer
 
-* PyTorch GRU-based model for sequential move prediction, blended with chess heuristics at inference
-* Time-series-aware train/validation splitting and evaluation
+* PyTorch GRU model for next-move prediction (`src/notebooks/RNN_model.ipynb`)
+* Heuristic re-scoring and sampling at inference (`src/app.py`)
 
 ### Backend
 
-* FastAPI application providing REST endpoints for:
+* FastAPI app serving the trained model, plus a small SQLite leaderboard
+* Endpoints:
 
-  * Online play (move generation via TEORIAT)
-  * Leaderboard aggregation and persistence
-  * Internal utilities for data loading and health checks
+  * `GET /` health check
+  * `POST /move` TEORIAT's next move for a list of UCI moves
+  * `GET /legal_moves` legal moves for a position
+  * `POST /games` save a finished game result
+  * `GET /leaderboard` per-player results by time control
 
 ### Frontend
 
-* React single-page application (SPA) deployed on Vercel
-* Uses `react-chessboard` for interactive play
-* Communicates with the backend via a configurable API base URL
+* React single-page app (Create React App) deployed on Vercel
+* `react-chessboard` for the board and `chess.js` for rules
+* Talks to the backend through `REACT_APP_API_BASE`
 
 ---
-
-## Core Features
-
-### ♟ Personalized Engine Behavior
-
-Learns statistical patterns from your own games and reproduces them over the board.
-
-### 📥 Full Game Ingestion from Chess.com
-
-Scripts for fetching, parsing, and storing complete game histories in PostgreSQL.
-
-### 🧠 Neural Move Prediction
-
-Sequence-to-distribution model that outputs probabilities over the move vocabulary at each TEORIAT decision point.
-
-### 🌐 Production-Ready Web UI
-
-Landing page, username selection, game configuration, and live play in a cohesive visual style.
-
-### 🏆 Persistent Leaderboard
-
-Aggregated stats per user and per time control (bullet / rapid vs TEORIAT), backed by the same database as the engine data.
-
----
-
 
 ## Screenshots
 
 ![Landing page with the tagline "The art of thinking ahead" and a Begin button](docs/landing-teoriat.webp)
 ![Username selection screen](docs/username-teoriat.webp)
 ![Game settings screen with a board preview, time control and side choice](docs/settings-teoriat.webp)
-![In-game view with board, clocks, captured pieces and move list](docs/game-teoriat.webp)
-![Leaderboard table of players and results](docs/leaderboard-teoriat.webp)
-
-
+![In-game view with the board, clocks, move list and captured pieces](docs/game-teoriat.webp)
+![Leaderboard tables for bullet and rapid games against TEORIAT](docs/leaderboard-teoriat.webp)
 
 ---
 
@@ -99,61 +77,78 @@ Aggregated stats per user and per time control (bullet / rapid vs TEORIAT), back
 
 ### Problem Definition
 
-Given a game’s move history up to the current ply, predict the next move TEORIAT will play **if it is TEORIAT’s turn**.
+Given the last six plies of a game, predict the next move as a class over the move vocabulary.
 
-The model is not asked to evaluate positions or compute best moves—it is trained purely to imitate historical behavior.
+Training examples are built from **every** move in each game, both TEORIAT's and the opponent's. The network is only asked for a move when it is TEORIAT's turn. The model never sees the board itself, only the recent move sequence.
 
 ---
 
 ### Input Representation
 
-The model sees the last `6` plies of the game (`MAX_SEQ_LEN`), left-padded with a pad token when the game is shorter. Each ply has three features:
+Each example is the last `6` plies (`MAX_SEQ_LEN`), left-padded with a pad token when the game is shorter. Each ply has three features:
 
-* `move_id` — integer index of the SAN move in the move vocabulary (`1928` entries including padding)
-* `color_id` — `1` if white played the move, `0` if black
-* `theory_flag` — currently always `0` at inference
+* `move_id`: index of the SAN move string in the vocabulary (`1,927` distinct moves plus one pad token = `1,928`)
+* `color_id`: `1` if white played the move, `0` if black
+* `teoriat_flag`: during training, `1` if TEORIAT played that move. The backend always sends `0` at inference (named `theory` in the code)
 
-For each timestep:
-
-* `move_id` → embedding layer (dimension `128`)
-* `color_id` → embedding layer (dimension `32`)
-* `theory_flag` → embedding layer (dimension `32`)
-
-The three embeddings are concatenated into a `192`-dimensional vector and passed through layer normalisation.
+Each feature has its own embedding (`128`, `32` and `32` dimensions). They are concatenated into a `192`-dimensional vector and layer-normalised.
 
 ---
 
 ### Network Architecture
 
-Implemented in PyTorch (`ChessRNN` in `src/app.py`):
+`ChessRNN` in `src/app.py` (`chessRNN` in the notebook):
 
-* **Recurrent Stack**
+* 2-layer GRU, `256` hidden units, dropout `0.3` between layers
+* Dropout, fully connected `256 → 256` with ReLU, dropout, output layer with `1,928` logits
 
-  * 2-layer GRU with `256` hidden units
-  * Dropout `0.3` between layers
+Training: cross-entropy loss, AdamW (learning rate `3e-4`, weight decay `0.01`), OneCycle schedule with max learning rate `1e-3`, batch size `64`, `25` epochs, gradient clipping at `1.0`.
 
-* **Classification Head**
+---
 
-  * Dropout, then a fully connected layer (`256 → 256`) with ReLU
-  * Dropout, then an output layer with `vocab_size` logits
+### Move Selection at Inference
 
-At inference the top `120` model candidates are re-scored with simple heuristics (captures, checks, hanging pieces, repetition) and the final move is sampled from the best few (temperature `0.9`). An opening book (`src/book.bin`) is used when present.
+The network output is not played directly. For each request the backend:
 
-Training uses cross-entropy loss; see `src/notebooks/RNN_model.ipynb` for the training code.
+1. Uses an opening book if `src/book.bin` exists. No book is included in this repository, so this step is skipped by default.
+2. Takes the network's top `120` candidates that are legal in the current position, plus every legal capture, check and promotion.
+3. Plays a checkmate immediately if one of the candidates gives mate.
+4. Adds a heuristic score to each candidate: material won by captures, a bonus for checks, and penalties for leaving the moved piece hanging, for the opponent's best capture reply, and for repetition. The heuristic score is weighted `0.35` against the model's log-probability.
+5. Samples the final move from the best `8` candidates with temperature `0.9`, so play is not fully deterministic.
+6. Waits a minimum "think" time (`0.2 s` bullet, `0.6 s` rapid) before replying.
+
+---
+
+## Evaluation
+
+The positions are split with `TimeSeriesSplit(n_splits=5)` in file order. Games in `cleaned_data.csv` are sorted by Chess.com game id, which is roughly chronological. The shipped checkpoint `src/best_chess_model.pth` was trained on the first 30,300 positions.
+
+Accuracy of the raw network (before the heuristics and sampling above), measured with the shipped checkpoint:
+
+| Positions | Role | Top-1 | Top-5 |
+|---|---|---|---|
+| 0 to 30,299 | training | 71.2% | 91.0% |
+| 30,300 to 40,399 | validation | 11.1% | 23.7% |
+| 40,400 to 50,499 | test | 12.0% | 24.9% |
+| 50,500 to 60,599 | never used | 9.4% | 21.3% |
+
+* On the test block, counting only TEORIAT's own moves: **12.8% top-1, 24.8% top-5**.
+* With the flag set to `0` as the backend does: 11.5% top-1 on the test block.
+* Baseline for comparison: always predicting the most common reply to the previous move (learned from the training block) gets **9.4% top-1** on the test block (10.2% on TEORIAT's moves).
+
+So the network fits the training games closely but generalises only a little better than a simple lookup on unseen games.
+
+**About the notebook's 72.4% / 91.8% "test accuracy":** that number is not a held-out result. The validation and test loaders use `SequentialSampler(val_indices)` and `SequentialSampler(test_indices)`. `SequentialSampler` iterates `0 … len-1` instead of the given indices, so both loaders scored positions 0 to 10,099, which are training data. Re-scoring those positions with the shipped checkpoint gives 71.3% / 91.5%. The same bug means the "best" checkpoint was chosen on training positions. Using `SubsetRandomSampler` or `Subset(dataset, indices)` for evaluation fixes it.
 
 ---
 
 ## Data Pipeline
 
-The data pipeline is designed for reproducibility and clean separation of concerns.
-
----
-
-### Database Schema
+### Database Schema (PostgreSQL, training only)
 
 **`chess_games`**
 
-* Per-game metadata (IDs, timestamps, results, time controls, etc.)
+* One row per game: players, ratings, PGN, end time, time class and control, rated flag, result and URL
 
 **`game_moves`**
 
@@ -168,17 +163,15 @@ The data pipeline is designed for reproducibility and clean separation of concer
 
 **`opening_patterns`**
 
-* Aggregated opening sequences
-* Frequencies and basic performance statistics
+* Opening move sequences with how often they occur
 
 ---
 
 ### Extraction and Cleaning
 
-* Connects to PostgreSQL via SQLAlchemy
-* Loads moves per game and aggregates ordered sequences
-* Converts SAN moves into `(color_id, move_id, teoriat_flag)` encodings
-* Uses time-series-aware splitting (e.g. `TimeSeriesSplit` at game level) to prevent data leakage
+* `src/tables.py` creates the tables, downloads the monthly archives and fills `chess_games`, `game_moves` and `opening_patterns`
+* `src/notebooks/Analysis.ipynb` reads the tables with SQLAlchemy, explores the data and writes `cleaned_data.csv`: `game_id`, `moves` as a list of `(color, SAN, is_teoriat_move)` tuples, `num_moves` and `first_move`
+* `src/notebooks/RNN_model.ipynb` encodes the moves, builds the six-ply examples, trains the model and writes `best_chess_model.pth`
 
 The notebooks and `src/tables.py` need extra packages that the API does not: install them with `pip install -r requirements-dev.txt`. They connect to Postgres using the standard `PGHOST`, `PGDATABASE`, `PGUSER` and `PGPASSWORD` environment variables (set `PGPASSWORD` yourself; there is no default).
 
@@ -190,14 +183,12 @@ The notebooks and `src/tables.py` need extra packages that the API does not: ins
 
 Located under `src/`.
 
-Responsibilities:
+* Loads the model and move vocabulary at startup (`best_chess_model.pth`, `move_to_number.json`)
+* Returns TEORIAT's next move for a move history
+* Saves finished games and serves the leaderboard from a local SQLite file (`src/leaderboard.db`)
+* `POST /games` is rate limited to 10 requests per minute per IP. Player names are trimmed and grouped case-insensitively. Nothing verifies that a submitted game was actually played
 
-* Load trained PyTorch model at startup
-* Accept move history and return TEORIAT’s next move
-* Persist completed games and results
-* Serve aggregated leaderboard data
-
-Runs with **Uvicorn** and is designed for deployment on **Render**.
+Runs with **Uvicorn** on **Render** (free instance) using the included Dockerfile.
 
 ---
 
@@ -207,23 +198,25 @@ Located under `teoriat-chess/`.
 
 Key screens:
 
-* **Landing / Hero**
-* **Username / Sign-In**
-* **Game Setup**
+* **Landing**
+* **Username**: 2 to 20 characters, shown on the leaderboard
+* **Game settings**
 
-  * Time controls (bullet / rapid)
-  * Side selection (white or black)
-* **Game View**
+  * Time control: 10 min rapid or 1 min bullet
+  * Side: white or black
+  * Checks that the backend is awake before the game starts, so the clock does not run during a cold start
 
-  * Interactive board
-  * Move history
-  * Captured pieces
-  * Dual clocks
-  * Result dialog
+* **Game**
+
+  * Board sized to the window
+  * Clocks for both sides, move list, captured pieces and a resign button
+  * Error message with retry if the engine request fails
+  * Result dialog with rematch, and a retry if saving the result fails
+
 * **Leaderboard**
 
   * Separate bullet and rapid tables
-  * Per-user win/loss/draw stats vs TEORIAT
+  * Wins, losses, draws and games per player against TEORIAT
 
 **Configuration**
 
@@ -232,8 +225,8 @@ Key screens:
   ```
   REACT_APP_API_BASE
   ```
-* Defaults to `http://127.0.0.1:8000` in development
-* Set to Render backend URL in production
+* `teoriat-chess/.env.development` sets `http://127.0.0.1:8000` for `npm start`
+* `teoriat-chess/.env` holds the production Render URL used by `npm run build`
 
 ---
 
@@ -243,7 +236,7 @@ Key screens:
 
 * Python 3.10+
 * Node.js & npm
-* PostgreSQL instance only for historical-game ingestion and training; the playable API uses SQLite
+* PostgreSQL only for historical-game ingestion and training; the playable API uses SQLite
 
 ---
 
@@ -275,6 +268,21 @@ npm start
 
 Frontend runs at:
 `http://localhost:3000`
+
+---
+
+## Tests
+
+```bash
+# backend, from repository root (27 tests)
+python -m pytest
+
+# frontend (15 tests)
+cd teoriat-chess
+CI=true npm test -- --watchAll=false
+```
+
+Vercel builds with `CI=true`, so any ESLint warning fails the deploy. Run `CI=true npm run build` before pushing.
 
 ---
 
@@ -323,8 +331,8 @@ Vercel will auto-deploy on each push.
 
 ## Roadmap
 
-* Replace the GRU with transformer-based architectures
-* Add lightweight board-state features
-* Implement k-fold cross-validation and richer evaluation
-* Public player profiles and game browser
-* Online learning / continual fine-tuning from new games
+* Fix the evaluation sampler in the training notebook and select the checkpoint on real validation data
+* Train only on TEORIAT's own moves, or weight them higher
+* Add board-state features so the model sees the position, not just the last six moves
+* Compare against a human-move baseline such as Maia and estimate playing strength against Stockfish levels
+* Persistent leaderboard storage
