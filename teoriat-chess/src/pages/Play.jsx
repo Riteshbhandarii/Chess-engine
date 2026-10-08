@@ -68,6 +68,7 @@ export default function Play({ playerName, playerColor, timeMode }) {
 
   // prevent double POST
   const postedRef = useRef(false);
+  const [saveError, setSaveError] = useState("");
 
   // id of the engine request whose reply may still be applied
   const engineReqRef = useRef(0);
@@ -308,8 +309,9 @@ export default function Play({ playerName, playerColor, timeMode }) {
     if (postedRef.current) return;
     postedRef.current = true;
 
+    setSaveError("");
     try {
-      await fetch(`${API_BASE}/games`, {
+      const res = await fetch(`${API_BASE}/games`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -319,8 +321,11 @@ export default function Play({ playerName, playerColor, timeMode }) {
           pgn: null,
         }),
       });
+      if (!res.ok) throw new Error(`Server answered ${res.status}`);
     } catch (e) {
       console.error("Failed to save game:", e);
+      postedRef.current = false;
+      setSaveError("Your result was not saved to the leaderboard.");
     }
   }
 
@@ -340,6 +345,7 @@ export default function Play({ playerName, playerColor, timeMode }) {
   function startNewGame() {
     engineReqRef.current += 1;
     setEngineError(null);
+    setSaveError("");
     game.reset();
     setPosition("start");
     setMoveHistory([]);
@@ -372,6 +378,7 @@ export default function Play({ playerName, playerColor, timeMode }) {
   useEffect(() => {
     engineReqRef.current += 1;
     setEngineError(null);
+    setSaveError("");
     setBusy(false);
     setWhiteMs(startSeconds * 1000);
     setBlackMs(startSeconds * 1000);
@@ -660,6 +667,21 @@ export default function Play({ playerName, playerColor, timeMode }) {
                     <div className="resultSub">
                       {reasonLine(resultReason)}
                     </div>
+
+                    {saveError && (
+                      <div className="saveError" role="alert">
+                        <span>{saveError}</span>
+                        <button
+                          type="button"
+                          className="gameOverBtnGhost"
+                          onClick={() =>
+                            postGameToLeaderboard(resultWinner, resultReason)
+                          }
+                        >
+                          Try again
+                        </button>
+                      </div>
+                    )}
 
                     <div className="gameOverActions">
                       <button
