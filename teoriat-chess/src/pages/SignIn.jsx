@@ -7,11 +7,15 @@ import "./SignIn.css";
 export default function SignIn({ playerName, setPlayerName }) {
   const nav = useNavigate();
   const [name, setName] = useState(playerName || "");
+  const [error, setError] = useState("");
 
   function submit(e) {
     e.preventDefault();
     const v = name.trim();
-    if (!v) return;
+    if (v.length < 2 || v.length > 20) {
+      setError("Username must be 2 to 20 characters.");
+      return;
+    }
     setPlayerName(v);
     nav("/side");
   }
@@ -39,13 +43,22 @@ export default function SignIn({ playerName, setPlayerName }) {
             id="username"
             className="signinInput"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => {
+              setName(e.target.value);
+              setError("");
+            }}
             placeholder="  No personal info Needed.."
             autoComplete="username"
             maxLength={20}
           />
 
           <div className="signinHint">This name will be shown on the leaderboard.</div>
+
+          {error && (
+            <div className="signinError" role="alert">
+              {error}
+            </div>
+          )}
 
           <button className="landingBegin" type="submit">
             Continue

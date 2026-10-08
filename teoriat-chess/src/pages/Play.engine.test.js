@@ -80,3 +80,26 @@ test('a late engine reply after resigning is ignored', async () => {
   expect(screen.getByText('Black wins.')).toBeInTheDocument();
   expect(screen.getByLabelText('Moves')).not.toHaveTextContent('e5');
 });
+
+test('a rejected result save shows a message and can be retried', async () => {
+  global.fetch = jest
+    .fn()
+    .mockResolvedValueOnce({ ok: false, status: 400, json: async () => ({}) })
+    .mockResolvedValueOnce({ ok: true, status: 200, json: async () => ({}) });
+  renderPlay();
+
+  fireEvent.click(screen.getByRole('button', { name: /resign/i }));
+  expect(await screen.findByRole('alert')).toHaveTextContent(/not saved/i);
+
+  fireEvent.click(screen.getByRole('button', { name: /try again/i }));
+  await waitFor(() => expect(screen.queryByRole('alert')).toBeNull());
+  expect(global.fetch).toHaveBeenCalledTimes(2);
+});
+
+test('a network error while saving the result also shows the message', async () => {
+  global.fetch = jest.fn().mockRejectedValue(new Error('offline'));
+  renderPlay();
+
+  fireEvent.click(screen.getByRole('button', { name: /resign/i }));
+  expect(await screen.findByRole('alert')).toHaveTextContent(/not saved/i);
+});
