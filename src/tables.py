@@ -1,5 +1,7 @@
 """Complete database operations for chess games and moves"""
 
+import os
+
 import requests
 import psycopg2
 from datetime import datetime
@@ -16,12 +18,14 @@ archives = [
     if not (year == 2025 and month > 8)  # Only up to August 2025
 ]
 
-# Database config
+# Database config, read from the standard Postgres environment variables.
+# Set PGPASSWORD yourself (for example `export PGPASSWORD=...`); there is no
+# default password in the code. The other values default to a local dev setup.
 DB_CONFIG = {
-    'host': 'localhost',
-    'database': 'chess_data', 
-    'user': 'postgres',
-    'password': 'chess_engine'
+    'host': os.environ.get('PGHOST', 'localhost'),
+    'database': os.environ.get('PGDATABASE', 'chess_data'),
+    'user': os.environ.get('PGUSER', 'postgres'),
+    'password': os.environ.get('PGPASSWORD'),
 }
 
 HEADERS = {'User-Agent': 'TeoriatEngine/1.0'}
